@@ -2,19 +2,21 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 *.egg-info/
 dist/
 build/
 *.egg
+MANIFEST
 
 # Virtual Environment
 .venv/
 venv/
 env/
+ENV/
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb_metadata
 
 # IDE
 .vscode/
@@ -26,6 +28,13 @@ env/
 .DS_Store
 Thumbs.db
 
+# Testing / Coverage
+.tox/
+.nox/
+.coverage
+htmlcov/
+.pytest_cache/
+
 # Data (raw data not tracked, too large)
 data/raw/*.csv
 data/processed/*.csv
@@ -34,11 +43,18 @@ data/processed/*.csv
 data/results/*.json
 data/results/*.png
 
-# Environment
+# Environment / Secrets
 .env
+.envrc
 
 # Binary/Office files
 *.doc
 *.docx
 *.pdf
 *.pptx
+
+# mypy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
