@@ -35,14 +35,10 @@ microsat-anomaly-analysis/
 │   │   ├── metrics.py            # F1, AUC_ROC, per-channel F1
 │   │   └── feature_importance.py # 特征贡献度分析
 │   ├── rag/                # RAG 解释模块 (Week2+)
-│   │   ├── knowledge_base.py     # 知识库构建 (手册解析+向量化)
-│   │   ├── retriever.py          # 语义检索
-│   │   └── explainer.py          # LLM 异常解释生成
 │   └── utils/
 │       ├── data_loader.py        # 数据加载工具
 │       └── visualization.py      # 可视化工具
 ├── notebooks/              # Jupyter 实验笔记本
-│   └── 01_iforest_baseline.ipynb
 ├── docs/                   # 文档
 └── tests/                  # 单元测试
 ```
@@ -58,12 +54,12 @@ microsat-anomaly-analysis/
 
 ```bash
 # 进入项目目录
-cd F:\微小卫星项目\microsat-anomaly-analysis
+cd microsat-anomaly-analysis
 
 # 激活虚拟环境
 .venv\Scripts\activate
 
-# 安装依赖 (已通过 poetry 安装)
+# 安装依赖
 poetry install
 
 # 复制原始数据到 data/raw/
