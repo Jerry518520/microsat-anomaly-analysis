@@ -1,0 +1,52 @@
+# microsat-anomaly-analysis 全局配置
+
+# 数据路径
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  results_dir: "data/results"
+  segments_file: "segments.csv"
+  features_file: "dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv"
+
+# 模型参数
+model:
+  iforest:
+    n_estimators: 100
+    max_samples: "auto"
+    contamination: 0.2
+    random_state: 42
+  adaboost:
+    n_estimators: 100
+    random_state: 42
+
+# 滑动窗口参数
+sliding_window:
+  window_size: 50       # 窗口长度（采样点数）
+  step_size: 10         # 步长
+  statistics:           # 每个窗口提取的统计特征
+    - mean
+    - std
+    - min
+    - max
+    - median
+    - skew
+    - kurtosis
+    - iqr
+
+# 评估参数
+evaluation:
+  metrics:
+    - f1
+    - auc_roc
+    - accuracy
+    - precision
+    - recall
+  per_channel: true     # 是否分通道计算指标
+
+# RAG 参数 (Week2+)
+rag:
+  embedding_model: "BAAI/bge-large-zh-v1.5"
+  vector_db: "faiss"
+  chunk_size: 512
+  chunk_overlap: 50
+  top_k: 5

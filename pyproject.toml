@@ -1,0 +1,26 @@
+[project]
+name = "microsat-anomaly-analysis"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Jerry518520",email = "jerrylbj@foxmail.com"}
+]
+readme = "README.md"
+requires-python = "^3.11"
+dependencies = [
+    "pyod (>=3.2.1,<4.0.0)",
+    "scikit-learn (>=1.8.0,<2.0.0)",
+    "xgboost (>=3.2.0,<4.0.0)",
+    "pandas (>=3.0.2,<4.0.0)",
+    "numpy (>=2.4.4,<3.0.0)",
+    "matplotlib (>=3.10.9,<4.0.0)",
+    "seaborn (>=0.13.2,<0.14.0)",
+    "jupyter (>=1.1.1,<2.0.0)",
+    "jupytext (>=1.19.1,<2.0.0)",
+    "pyyaml (>=6.0.3,<7.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

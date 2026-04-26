@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_metadata
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (raw data not tracked, too large)
+data/raw/*.csv
+data/processed/*.csv
+
+# Results (generated)
+data/results/*.json
+data/results/*.png
+
+# Environment
+.env
+
+# Binary/Office files
+*.doc
+*.docx
+*.pdf
+*.pptx
