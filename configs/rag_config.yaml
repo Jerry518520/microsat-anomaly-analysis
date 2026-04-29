@@ -1,0 +1,170 @@
+# RAG 系统配置
+# 用于卫星异常知识库问答系统
+
+# ========== 嵌入模型配置 ==========
+embedding:
+  # 模型配置
+  model_name: "F:/微小卫星项目/microsat-anomaly-analysis/models/Xorbits/bge-m3"  # 本地ModelScope下载
+  device: "auto"  # 自动检测: CUDA优先, 否则CPU
+  batch_size: 32  # 批处理大小（GPU 优化）
+  
+  # 模型参数
+  normalize_embeddings: true  # 归一化嵌入向量
+  show_progress_bar: true     # 显示进度条
+  max_length: 512            # 最大输入长度
+  
+  # 缓存配置
+  cache_dir: "data/embeddings_cache"  # 嵌入向量缓存目录
+  use_cache: true                     # 是否使用缓存
+
+# ========== 向量数据库配置 ==========
+vectorstore:
+  # FAISS 配置
+  type: "faiss"              # 向量数据库类型
+  index_type: "Flat"         # 索引类型：Flat（精确搜索），可选 IVFxxx
+  metric: "cosine"           # 相似度度量：cosine / l2
+  
+  # 持久化配置
+  persist_directory: "data/vectorstore"  # 向量库持久化目录
+  auto_save: true                       # 自动保存
+  
+  # GPU 加速
+  use_gpu: false            # 先CPU跑通, GPU后面优化
+  gpu_id: 0                 # GPU ID
+
+# ========== 文档处理配置 ==========
+document:
+  # PDF 处理
+  pdf_processor: "pypdf2"   # PDF 解析库
+  
+  # 文本切分策略
+  chunking:
+    strategy: "recursive"   # 递归切分策略
+    chunk_size: 512         # 块大小（字符数）
+    chunk_overlap: 50       # 块重叠（字符数）
+    
+  # 元数据提取（用于页码溯源）
+  metadata:
+    extract_page_numbers: true      # 提取页码
+    extract_section_titles: true    # 提取章节标题
+    extract_document_info: true     # 提取文档信息
+    
+  # 知识库文档（带优先级）
+  knowledge_base:
+    - name: "NASA SOA 2024"
+      file_path: "docs/knowledge_base/NASA_SOA_2024.pdf"
+      priority: 1           # 最高优先级
+      language: "en"        # 英文
+      
+    - name: "Ruszczak OPS-SAT AD 2025"
+      file_path: "docs/papers/！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf"
+      priority: 2           # 核心一手资料(ESA工程师标注)
+      language: "en"        # 英文
+      
+    - name: "MAXWELL Mission Handbook"
+      file_path: "docs/knowledge_base/MAXWELL_Mission_Handbook.pdf"
+      priority: 3           # 补充(另一颗星)
+      language: "en"        # 英文
+      
+    - name: "ITU Small Satellite Handbook CN"
+      file_path: "docs/knowledge_base/ITU_Small_Satellite_Handbook_R-HDB-65-2023_CN.pdf"
+      priority: 4           # 补充
+      language: "zh"        # 中文
+      
+    - name: "ITU Small Satellite Handbook EN"
+      file_path: "docs/knowledge_base/ITU_Small_Satellite_Handbook_R-HDB-65-2023_EN.pdf"
+      priority: 5           # 补充
+      language: "en"        # 英文
+      
+    - name: "Experiment Knowledge Base"
+      file_path: "docs/knowledge_base/experiment_knowledge.md"
+      priority: 0           # 最高优先级(项目实验发现)
+      language: "zh"        # 中文
+
+# ========== 检索配置 ==========
+retrieval:
+  # 检索参数
+  top_k: 5                  # 返回 top-k 相关文档块
+  score_threshold: 0.7      # 相似度阈值（低于此值不返回）
+  max_tokens: 2000          # 检索内容最大 token 数
+  
+  # 混合检索策略
+  hybrid_search: true       # 是否启用混合检索（关键词+向量）
+  keyword_weight: 0.3       # 关键词检索权重
+  vector_weight: 0.7        # 向量检索权重
+
+# ========== LLM API 配置 ==========
+llm:
+  # 火山引擎 Ark 平台配置
+  provider: "volcengine"
+  api_base: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+  model: "deepseek-v3-2-251201"
+  
+  # API 认证（从环境变量读取）
+  api_key_env: "VOLCENGINE_API_KEY"  # 环境变量名
+  
+  # 请求参数
+  temperature: 0.1          # 温度（低值保证确定性）
+  max_tokens: 1024          # 最大生成 token 数
+  top_p: 0.9                # 核采样
+  
+  # 超时设置
+  timeout: 60               # API 调用超时（秒）
+  max_retries: 3            # 最大重试次数
+
+# ========== Prompt 模板配置 ==========
+prompt:
+  # 系统提示词
+  system_prompt: |
+    你是一个卫星异常诊断专家，专门分析遥测数据异常。
+    请基于提供的卫星领域知识，给出专业、准确的异常原因分析。
+    
+    回答要求：
+    1. 必须基于提供的知识片段进行分析
+    2. 明确标注知识来源（文档名 + 页码）
+    3. 如果知识片段不足，请说明"现有知识库信息不足"
+    4. 使用中文回答，保持专业性和可读性
+  
+  # 用户提示词模板
+  user_template: |
+    请分析以下卫星遥测通道异常的可能原因：
+    
+    通道ID: {channel_id}
+    异常类型: {anomaly_type}
+    异常描述: {anomaly_description}
+    
+    参考知识：
+    {context}
+    
+    请给出分析结果，并标注知识来源。
+  
+  # 来源标注格式
+  citation_format: "【来源：{document_name} 第 {page_number} 页】"
+
+# ========== 日志与监控配置 ==========
+logging:
+  level: "INFO"            # 日志级别
+  file: "logs/rag_system.log"  # 日志文件
+  rotation: "10 MB"        # 日志轮转大小
+  
+  # 性能监控
+  enable_monitoring: true
+  monitor_metrics:
+    - "retrieval_latency"
+    - "embedding_time"
+    - "llm_response_time"
+
+# ========== 系统配置 ==========
+system:
+  # 工作目录
+  workspace: "data/rag_workspace"
+  
+  # 缓存配置
+  enable_cache: true
+  cache_ttl: 3600  # 缓存过期时间（秒）
+  
+  # 并行处理
+  max_workers: 4   # 最大工作线程数
+  
+  # 调试模式
+  debug: false

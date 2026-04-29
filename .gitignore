@@ -53,6 +53,16 @@ data/results/*.png
 *.pdf
 *.pptx
 
+# Models (too large for git)
+models/
+
+# FAISS index (large binary)
+faiss_store/
+data/vectorstore/
+
+# Embeddings cache
+data/embeddings_cache/
+
 # mypy
 .mypy_cache/
 

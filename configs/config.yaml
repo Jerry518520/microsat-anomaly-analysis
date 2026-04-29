@@ -45,8 +45,10 @@ evaluation:
 
 # RAG 参数 (Week2+)
 rag:
-  embedding_model: "BAAI/bge-large-zh-v1.5"
+  embedding_model: "BAAI/bge-m3"  # 支持中英文跨语言检索
   vector_db: "faiss"
   chunk_size: 512
   chunk_overlap: 50
   top_k: 5
+  use_gpu: true  # 启用 GPU 加速
+  gpu_id: 0
