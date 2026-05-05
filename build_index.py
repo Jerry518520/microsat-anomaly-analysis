@@ -1,4 +1,4 @@
-"""Build FAISS index from knowledge base PDFs and test retrieval."""
+"""Build FAISS index from knowledge base PDFs/MDs and test retrieval."""
 import os, sys, yaml, pickle
 import faiss, numpy as np
 
@@ -13,28 +13,43 @@ with open('configs/rag_config.yaml', 'r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
 print('Config loaded')
 
-# 2. Load PDFs
-from langchain_community.document_loaders import PyPDFLoader
+# 2. Load PDFs and MDs
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 
 all_docs = []
 kb_list = config['document']['knowledge_base']
 chunk_cfg = config['document']['chunking']
 
 for kb in kb_list:
-    pdf_path = kb['file_path']
-    if not os.path.isabs(pdf_path):
-        pdf_path = os.path.join(os.getcwd(), pdf_path)
-    if not os.path.exists(pdf_path):
-        print(f'SKIP: {kb["name"]} - not found: {pdf_path}')
+    file_path = kb['file_path']
+    if not os.path.isabs(file_path):
+        file_path = os.path.join(os.getcwd(), file_path)
+    if not os.path.exists(file_path):
+        print(f'SKIP: {kb["name"]} - not found: {file_path}')
         continue
-    print(f'Loading: {kb["name"]} ({os.path.getsize(pdf_path)/1e6:.1f}MB)')
-    loader = PyPDFLoader(pdf_path)
-    docs = loader.load()
+    file_size = os.path.getsize(file_path)/1e6
+    print(f'Loading: {kb["name"]} ({file_size:.1f}MB)')
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == '.pdf':
+        loader = PyPDFLoader(file_path)
+        docs = loader.load()
+    elif ext == '.md':
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        docs = [Document(
+            page_content=content,
+            metadata={'source': file_path, 'page': 0, 'page_label': '1', 'total_pages': 1}
+        )]
+    else:
+        print(f'  SKIP unsupported format: {ext}')
+        continue
     for d in docs:
         d.metadata['source_name'] = kb['name']
         d.metadata['priority'] = kb['priority']
         d.metadata['language'] = kb['language']
+        d.metadata['filename'] = os.path.basename(file_path)
     all_docs.extend(docs)
     print(f'  -> {len(docs)} pages')
 

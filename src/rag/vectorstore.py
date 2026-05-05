@@ -357,8 +357,9 @@ class FAISSVectorStore:
             # 编码查询
             query_embedding = self.embedder.encode(query)
             
-            # 检索
-            scores, indices = self.index.search(query_embedding, top_k)
+            # 检索更多结果以支持源多样性
+            search_k = max(top_k * 3, 15)  # 检索3倍或至少15个
+            scores, indices = self.index.search(query_embedding, search_k)
             
             # 处理结果
             results = []
@@ -370,15 +371,49 @@ class FAISSVectorStore:
                 if score < score_threshold:
                     continue
                 
-                # 获取文档
+                # 获取文档（兼容LangChain Document对象和纯字符串）
                 doc = self.documents[idx]
                 metadata = self.document_metadata[idx] if idx < len(self.document_metadata) else {}
                 
+                # 提取内容：Document对象用page_content，字符串直接用
+                if hasattr(doc, 'page_content'):
+                    content = doc.page_content
+                elif isinstance(doc, str):
+                    content = doc
+                else:
+                    content = str(doc)
+                
                 results.append({
-                    "content": doc.page_content,
+                    "content": content,
                     "score": float(score),
                     "metadata": metadata
                 })
+            
+            # 源多样性过滤：确保不同来源的文档都有机会被选中
+            if len(results) > top_k:
+                from collections import defaultdict
+                by_source = defaultdict(list)
+                for r in results:
+                    src = r["metadata"].get("source_name", "unknown")
+                    by_source[src].append(r)
+                
+                # 轮询选取：每个来源最多取 ceil(top_k/num_sources)+1 个
+                diverse_results = []
+                num_sources = len(by_source)
+                max_per_source = max(2, (top_k // num_sources) + 1)
+                
+                # 先按分数全局排序，然后限制每源数量
+                sorted_results = sorted(results, key=lambda x: x["score"], reverse=True)
+                source_count = defaultdict(int)
+                for r in sorted_results:
+                    src = r["metadata"].get("source_name", "unknown")
+                    if source_count[src] < max_per_source:
+                        diverse_results.append(r)
+                        source_count[src] += 1
+                    if len(diverse_results) >= top_k:
+                        break
+                
+                results = diverse_results
             
             logger.info(f"检索完成，查询：{query[:50]}...，返回 {len(results)} 个结果")
             return results
@@ -419,8 +454,11 @@ class FAISSVectorStore:
             content = result["content"]
             metadata = result["metadata"]
             
-            # 简单的 token 估算（1个中文字符约等于2个token）
-            estimated_tokens = len(content) * 2
+            # Token 估算：中文字符约2token，英文字符约0.25token
+            # 知识库以英文PDF为主，用混合估算更准确
+            chinese_chars = sum(1 for c in content if '\u4e00' <= c <= '\u9fff')
+            other_chars = len(content) - chinese_chars
+            estimated_tokens = chinese_chars * 2 + other_chars * 0.25
             
             if current_tokens + estimated_tokens > max_tokens:
                 break
@@ -509,8 +547,18 @@ class FAISSVectorStore:
             if os.path.exists(metadata_path):
                 with open(metadata_path, "rb") as f:
                     data = pickle.load(f)
-                    self.documents = data.get("documents", [])
-                    self.document_metadata = data.get("metadata", [])
+                    # 兼容两种序列化格式：
+                    # 格式1: List[Dict] (build_index.py直接序列化Document列表)
+                    # 格式2: Dict (vectorstore.save()方法)
+                    if isinstance(data, list):
+                        self.documents = [item.get("content", "") for item in data]
+                        self.document_metadata = [item.get("metadata", {}) for item in data]
+                    elif isinstance(data, dict):
+                        self.documents = data.get("documents", [])
+                        self.document_metadata = data.get("metadata", [])
+                    else:
+                        logger.error(f"不支持的元数据格式：{type(data)}")
+                        return False
                 
                 logger.info(f"文档元数据已加载：{metadata_path}")
             else:
