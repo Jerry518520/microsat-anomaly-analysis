@@ -1,0 +1,75 @@
+{
+  "project_name": "microsat-anomaly-analysis",
+  "project_root": "F:\\微小卫星项目\\microsat-anomaly-analysis",
+  "description": "微小卫星遥测智能异常检测与RAG解释辅助系统 - 运行脚本配置",
+  "scripts": {
+    "web_app": {
+      "command": "streamlit run src/ui/app.py",
+      "description": "启动 Streamlit Web 应用",
+      "port": 8501,
+      "browser": true,
+      "requires": ["poetry shell", "数据文件已放置在 data/raw/"]
+    },
+    "rebuild_index": {
+      "command": "python rebuild_index.py",
+      "description": "重建 FAISS 向量索引 (支持 PDF + Markdown)",
+      "config": "configs/rag_config.yaml",
+      "output": "data/vectorstore/"
+    },
+    "build_index": {
+      "command": "python build_index.py",
+      "description": "从知识库 PDF/MD 构建 FAISS 索引并测试检索",
+      "config": "configs/rag_config.yaml",
+      "output": "data/vectorstore/"
+    },
+    "test_rag_e2e": {
+      "command": "python test_rag_e2e.py",
+      "description": "RAG 端到端测试 (检索 + LLM 生成)"
+    },
+    "test_rag_full": {
+      "command": "python test_rag_full.py",
+      "description": "完整 RAG 流程测试"
+    },
+    "test_rag_simple": {
+      "command": "python test_rag_simple.py",
+      "description": "简化版 RAG 测试"
+    },
+    "test_rag_optimized": {
+      "command": "python test_rag_optimized.py",
+      "description": "优化版 RAG 测试"
+    },
+    "test_deepseek": {
+      "command": "python test_deepseek.py",
+      "description": "DeepSeek API 测试"
+    },
+    "test_volcengine": {
+      "command": "python test_volcengine.py",
+      "description": "火山引擎 API 测试"
+    },
+    "check_rag_json": {
+      "command": "python check_rag_json.py",
+      "description": "检查 RAG JSON 数据"
+    }
+  },
+  "environment": {
+    "python_version": "3.11+",
+    "package_manager": "poetry",
+    "virtual_env": ".venv\\Scripts\\activate"
+  },
+  "data_requirements": {
+    "raw_data": [
+      "data/raw/segments.csv",
+      "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv"
+    ],
+    "knowledge_base": [
+      "docs/papers/",
+      "docs/knowledge_base/",
+      "docs/*.md"
+    ]
+  },
+  "notes": [
+    "首次运行需先执行 poetry install 安装依赖",
+    "RAG 功能需要配置 LLM API (DeepSeek/火山引擎)",
+    "向量索引构建前需确保知识库文件存在"
+  ]
+}

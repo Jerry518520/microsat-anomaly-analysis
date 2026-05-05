@@ -1,0 +1,65 @@
+{
+  "n_queries": 21,
+  "avg_results_per_query": 5.0,
+  "avg_top_score": 0.6399632749103364,
+  "avg_score": 0.5737867111251467,
+  "avg_retrieval_time_ms": 110.53043320065453,
+  "total_retrieval_time_s": 2.321139097213745,
+  "source_diversity": {
+    "experiment_knowledge.md": 21,
+    "NASA_SOA_2024.pdf": 17,
+    "！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf": 17,
+    "ITU_Small_Satellite_Handbook_R-HDB-65-2023_EN.pdf": 13,
+    "ITU_Small_Satellite_Handbook_R-HDB-65-2023_CN.pdf": 5
+  },
+  "per_channel": {
+    "CADC0872": {
+      "n": 3,
+      "avg_top_score": 0.6250240206718445,
+      "avg_results": 5.0,
+      "avg_time_ms": 104.43345705668132
+    },
+    "CADC0873": {
+      "n": 3,
+      "avg_top_score": 0.6547437906265259,
+      "avg_results": 5.0,
+      "avg_time_ms": 133.07770093282065
+    },
+    "CADC0874": {
+      "n": 3,
+      "avg_top_score": 0.6432624657948812,
+      "avg_results": 5.0,
+      "avg_time_ms": 105.07702827453613
+    },
+    "CADC0886": {
+      "n": 1,
+      "avg_top_score": 0.6558970212936401,
+      "avg_results": 5.0,
+      "avg_time_ms": 109.50827598571777
+    },
+    "CADC0888": {
+      "n": 3,
+      "avg_top_score": 0.631666342417399,
+      "avg_results": 5.0,
+      "avg_time_ms": 102.20948855082194
+    },
+    "CADC0890": {
+      "n": 2,
+      "avg_top_score": 0.6167490482330322,
+      "avg_results": 5.0,
+      "avg_time_ms": 103.26850414276123
+    },
+    "CADC0892": {
+      "n": 3,
+      "avg_top_score": 0.6441440383593241,
+      "avg_results": 5.0,
+      "avg_time_ms": 102.6006539662679
+    },
+    "CADC0894": {
+      "n": 3,
+      "avg_top_score": 0.6511038939158121,
+      "avg_results": 5.0,
+      "avg_time_ms": 120.96627553304036
+    }
+  }
+}

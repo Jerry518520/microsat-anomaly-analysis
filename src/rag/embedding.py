@@ -14,6 +14,14 @@ import logging
 # 设置 HuggingFace 镜像源（国内加速）
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
+# 修复 PyTorch 2.10+ 在 Windows 上的 getpass.getuser() → pwd 模块缺失问题
+import getpass
+if not hasattr(getpass, '_original_getuser'):
+    getpass._original_getuser = getpass.getuser
+def _win_getuser():
+    return os.environ.get('USERNAME', os.environ.get('USER', 'default'))
+getpass.getuser = _win_getuser
+
 # 尝试导入相关库，提供友好的错误提示
 try:
     import torch
