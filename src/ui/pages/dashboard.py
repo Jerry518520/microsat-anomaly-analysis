@@ -109,6 +109,7 @@ def _render_alert_list():
     # 只展示异常分 > 0.05 的真正故障，过滤掉低分/负分噪声
     FAULT_THRESHOLD = 0.05
     faults = [item for item in results if item.get("anomaly_score", 0) > FAULT_THRESHOLD]
+    faults.sort(key=lambda x: x.get("anomaly_score", 0), reverse=True)
     if not faults:
         return st.success(f"全部 {len(results)} 条异常段均低于告警阈值 ({FAULT_THRESHOLD})，当前无待处理故障。")
 
