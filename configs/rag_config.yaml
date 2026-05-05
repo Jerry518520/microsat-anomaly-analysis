@@ -85,7 +85,7 @@ document:
 retrieval:
   # 检索参数
   top_k: 5                  # 返回 top-k 相关文档块
-  score_threshold: 0.7      # 相似度阈值（低于此值不返回）
+  score_threshold: 0.3      # 相似度阈值（BGE-M3余弦相似度在0.3-0.7范围，0.7太严会过滤有效结果）
   max_tokens: 2000          # 检索内容最大 token 数
   
   # 混合检索策略
@@ -105,7 +105,7 @@ llm:
   
   # 请求参数
   temperature: 0.1          # 温度（低值保证确定性）
-  max_tokens: 1024          # 最大生成 token 数
+  max_tokens: 2048          # 最大生成 token 数（原1024太小，系统提示词+上下文占完后Section 6被截断）
   top_p: 0.9                # 核采样
   
   # 超时设置
