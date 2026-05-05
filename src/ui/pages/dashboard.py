@@ -48,10 +48,22 @@ def _render_core_metrics():
     # 只计异常分 > 0.05 的真正故障
     fault_count = sum(1 for item in (rag_data if isinstance(rag_data, list) else []) if item.get("anomaly_score", 0) > 0.05)
     
-    with col1: st.metric("系统异常率", "20.4%", delta="434段/2123段", delta_color="inverse")
+    # 从 segments.csv 计算真实异常率
+    df_seg = load_segments()
+    if df_seg is not None and "anomaly" in df_seg.columns:
+        total_rows = len(df_seg)
+        anomaly_rows = int(df_seg["anomaly"].sum())
+        anomaly_rate = anomaly_rows / total_rows if total_rows > 0 else 0
+        rate_str = f"{anomaly_rate*100:.1f}%"
+        rate_delta = f"{anomaly_rows:,}行/{total_rows:,}行"
+    else:
+        rate_str = "N/A"
+        rate_delta = "数据缺失"
+    
+    with col1: st.metric("系统异常率", rate_str, delta=rate_delta, delta_color="inverse")
     with col2: st.metric("当前告警队列", f"{fault_count} 条", delta=f"共{total_anomalies}条异常段")
     with col3: st.metric("核心诊断 F1", f"{best_f1:.3f}")
-    with col4: st.metric("遥测吞吐量", "303K Rows", delta="9 通道并发")
+    with col4: st.metric("遥测吞吐量", f"{total_rows//1000}K Rows", delta="9 通道并发")
 
 def _render_channel_sparklines():
     st.markdown("### 📡 遥测通道矩阵 (实时监测中)")
