@@ -59,6 +59,13 @@ st.markdown("""
     text-align: right;
     white-space: nowrap;
 }
+a .source-item:hover {
+    background: #253348 !important;
+    border-left-color: #60a5fa !important;
+}
+a .source-item {
+    transition: background 0.2s, border-color 0.2s;
+}
 </style>
 """, unsafe_allow_html=True)
 

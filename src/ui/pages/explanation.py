@@ -17,6 +17,28 @@ if PROJECT_ROOT not in sys.path:
 
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
 
+# ── 文件路径映射（知识库文件 → 实际路径）──
+_KB_DIRS = [
+    os.path.join(PROJECT_ROOT, "docs", "knowledge_base"),
+    os.path.join(PROJECT_ROOT, "docs", "papers"),
+    os.path.join(PROJECT_ROOT, "docs"),
+]
+
+
+def _resolve_kb_path(filename: str) -> str | None:
+    """根据文件名找到知识库文件的实际路径"""
+    for d in _KB_DIRS:
+        p = os.path.join(d, filename)
+        if os.path.isfile(p):
+            return p
+    # 递归搜索
+    for d in _KB_DIRS:
+        for root, _, files in os.walk(d):
+            if filename in files:
+                return os.path.join(root, filename)
+    return None
+
+
 CHANNEL_MAP = {
     "CADC0872": "磁力计 X轴", "CADC0873": "磁力计 Y轴", "CADC0874": "磁力计 Z轴",
     "CADC0884": "光电二极管 1", "CADC0886": "光电二极管 2", "CADC0888": "光电二极管 3",
@@ -425,20 +447,41 @@ def render_detail():
         st.markdown("#### 📚 知识溯源")
         sources = item.get("rag_sources") or item.get("sources", [])
         if sources:
-            for src in sources:
+            for idx, src in enumerate(sources):
                 if isinstance(src, dict):
                     meta = src.get("metadata", src)
                     doc_name = meta.get("filename") or meta.get("source_name") or "未知文献"
                     page = meta.get("page_label") or meta.get("page", "?")
                     score = src.get("score", 0)
-                    st.markdown(f"""
-                    <div class="source-item">
-                        <div>
-                            <span class="doc-name">📄 {doc_name}</span>
+                    
+                    # 尝试解析本地文件路径
+                    file_path = _resolve_kb_path(doc_name)
+                    
+                    if file_path:
+                        # 本地文件：生成 file:// 链接，PDF 带页码
+                        file_url = "file:///" + file_path.replace("\\", "/")
+                        if doc_name.lower().endswith(".pdf") and isinstance(page, int) and page > 0:
+                            file_url += f"#page={page}"
+                        st.markdown(f"""
+                        <a href="{file_url}" target="_blank" style="text-decoration:none;">
+                        <div class="source-item" style="cursor:pointer;transition:background 0.2s;">
+                            <div>
+                                <span class="doc-name">📄 {doc_name}</span>
+                            </div>
+                            <div class="doc-meta">p.{page} · {score:.3f} 🔗</div>
                         </div>
-                        <div class="doc-meta">p.{page} · {score:.3f}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                        </a>
+                        """, unsafe_allow_html=True)
+                    else:
+                        # 无法定位文件：纯展示
+                        st.markdown(f"""
+                        <div class="source-item">
+                            <div>
+                                <span class="doc-name">📄 {doc_name}</span>
+                            </div>
+                            <div class="doc-meta">p.{page} · {score:.3f}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
         else:
             st.caption("暂无关联文献")
 
