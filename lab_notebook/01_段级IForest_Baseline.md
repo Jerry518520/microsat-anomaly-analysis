@@ -9,13 +9,16 @@
 用最朴素的方式：每个segment提取统计特征→IForest检测。不做任何优化，先看"裸跑"效果。
 
 ## 参数
-- 特征: 原始数据集的23列特征（dataset.csv）
+- 特征: 原始数据集的18维段级特征（segments_18d.csv / dataset.csv）
 - 算法: IsolationForest, contamination=0.2（官方默认）
+- sklearn版本: 1.7.2（运行时环境，poetry.lock锁定1.8.0，见实验10）
 - 评估: 段级F1（与官方对齐）
 
 ## 结果
-- **F1 = 0.262** → 与官方benchmark完全一致 ✅
+- **F1 = 0.262**（sklearn 1.7.2环境，4月26日运行）
+- 原论文IForest基准: **F1 = 0.295**（OPS-SAT-AD原论文 Table 3, c=0.2）
 - 对比: 官方AdaBoost(监督) F1=0.836
+- ⚠️ 注: sklearn版本不同会导致IForest结果漂移（见实验10）。sklearn 1.8.0下同一配置Baseline F1=0.283
 
 ## 思路反思
 0.262太低了，但这是无监督算法的"起跑线"。关键发现：
