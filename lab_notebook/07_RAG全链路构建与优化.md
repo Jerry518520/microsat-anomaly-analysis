@@ -39,7 +39,7 @@
 | 指标 | 数值 |
 |------|------|
 | PDF加载 | 5份，955页 |
-| 切分块数 | 5053 chunks |
+| 切分块数 | 5064 chunks（注: 不同构建时间可能有±10差异） |
 | CUDA编码耗时 | 1分46秒 (CPU预计37分钟) |
 | 索引大小 | faiss_index.bin 20.7MB + metadata 2.9MB |
 
@@ -85,7 +85,7 @@
 
 ### 优化1：实验知识入库
 - 创建experiment_knowledge.md（4条目）
-- FAISS索引重建：5PDF+1MD = 5063 chunks
+- FAISS索引重建：5PDF+1MD = 5064 chunks
 - 检索效果：CADC0874查询首次命中Experiment Knowledge Base
 
 ### 优化2：Prompt增强
