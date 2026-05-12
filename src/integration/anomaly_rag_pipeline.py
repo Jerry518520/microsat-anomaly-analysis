@@ -375,8 +375,8 @@ class AnomalyRAGPipeline:
         return RAGExplanation(
             answer=result["answer"],
             sources=result["sources"],
-            retrieval_time=result["metadata"]["retrieval_time"],
-            generation_time=result["metadata"]["generation_time"]
+            retrieval_time=result["metadata"].get("retrieval_time", 0),
+            generation_time=result["metadata"].get("generation_time", 0)
         )
     
     def _build_anomaly_description(self, anomaly: AnomalyResult) -> str:

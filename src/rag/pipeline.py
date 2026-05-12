@@ -225,7 +225,8 @@ class RAGPipeline:
         except Exception as e:
             logger.error(f"RAG 查询失败：{e}")
             
-            # 返回错误信息
+            # 返回错误信息（包含 retrieval_time / generation_time 以防止下游 KeyError）
+            error_time = (datetime.now() - start_time).total_seconds()
             return {
                 "answer": f"抱歉，查询过程中出现错误：{str(e)}",
                 "sources": [],
@@ -233,8 +234,10 @@ class RAGPipeline:
                 "metadata": {
                     "query": query,
                     "query_type": query_type,
+                    "retrieval_time": 0,
+                    "generation_time": 0,
                     "error": str(e),
-                    "total_time": (datetime.now() - start_time).total_seconds()
+                    "total_time": error_time
                 }
             }
     
