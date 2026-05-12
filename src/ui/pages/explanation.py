@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import re
+import time
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -68,14 +69,72 @@ def _get_rag_pipeline():
         return None
 
 
+@st.cache_data(ttl=60)
+def _get_live_anomaly_score(segment_id: int, channel: str):
+    """
+    实时重算指定 segment 的异常分（基于当前数据与当前算法）。
+    返回: (score, mode, timestamp)
+    """
+    from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
+
+    pipeline = AnomalyRAGPipeline()
+    anomalies = pipeline.detect()  # 基于当前数据实时重跑检测
+    now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+
+    for a in anomalies:
+        if int(a.segment) == int(segment_id) and str(a.channel) == str(channel):
+            return float(a.anomaly_score), "recomputed", now_str
+
+    # 若本次检测未判为异常，返回 0（表示该段当前未越过阈值）
+    return 0.0, "recomputed", now_str
+
+
+def _refresh_detection_results(max_explanations: int = 20):
+    """
+    一键重跑检测+RAG解释，并落盘覆盖 anomaly_rag_results.json。
+    """
+    from dataclasses import asdict
+    from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
+
+    pipeline = AnomalyRAGPipeline()
+    results = pipeline.detect_and_explain(max_explanations=max_explanations)
+
+    output_path = os.path.join(RESULTS_DIR, "anomaly_rag_results.json")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump([asdict(r) for r in results], f, indent=2, ensure_ascii=False)
+
+    # 刷新缓存，确保页面读取到新结果
+    load_json.clear()
+    _get_live_anomaly_score.clear()
+    return output_path, len(results)
+
+
 def _is_garbled_text(text: str) -> bool:
     """
-    检测文本是否为乱码（UTF-8 内容被错误编码后的常见特征）。
-    通过统计替换字符 (U+FFFD) 和高位孤立字节比例来判断。
+    检测文本是否为乱码或无效错误信息。
+    检查两类情况：
+    1. UTF-8 内容被错误编码后的常见特征（替换字符、高位孤立字节）
+    2. RAG 管道错误信息（不应作为 AI 诊断展示给用户）
     """
     if not text:
         return False
-    # 统计替换字符和常见乱码模式
+
+    # ---- 新增：检测 RAG 管道错误信息模式 ----
+    _error_patterns = [
+        "RAG解释生成失败",
+        "检索失败",
+        "生成失败",
+        "RAG 查询失败",
+        "查询过程中出现错误",
+        "RAG引擎初始化失败",
+        "抱歉，查询过程中出现错误",
+    ]
+    text_stripped = text.strip()
+    for pattern in _error_patterns:
+        if pattern in text_stripped:
+            return True
+
+    # ---- 原有逻辑：统计替换字符和常见乱码模式 ----
     replacement_count = text.count('\ufffd')
     # 统计连续的高位字节（乱码常见特征）
     garbled_patterns = text.count('��') + text.count('�')
@@ -362,6 +421,28 @@ def render_detail():
     with col_title:
         ch_label = CHANNEL_MAP.get(channel, channel)
         st.markdown(f"### 🔎 深度诊断 | 段 #{seg_id} · {ch_label}")
+
+    # 实时重算 / 全量刷新控制区（不改原有文案，仅增强数据真实性）
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        if st.button("🔄 实时重算异常分", use_container_width=True):
+            try:
+                seg_id_int = int(seg_id)
+                live_score, mode, ts = _get_live_anomaly_score(seg_id_int, channel)
+                item["anomaly_score"] = float(live_score)
+                st.session_state.target_rag_data = item
+                st.success(f"已实时重算 ({mode})：{live_score:.3f} @ {ts}")
+                st.rerun()
+            except Exception as e:
+                st.error(f"实时重算失败: {e}")
+    with c2:
+        if st.button("🚀 刷新检测结果", use_container_width=True):
+            try:
+                with st.spinner("正在重跑检测 + RAG解释，请稍候..."):
+                    out, n = _refresh_detection_results(max_explanations=20)
+                st.success(f"刷新完成：{n} 条结果，已写入 {out}")
+            except Exception as e:
+                st.error(f"刷新失败: {e}")
 
     st.divider()
 
