@@ -70,6 +70,13 @@ class RAGPipeline:
         # 初始化组件（使用依赖注入或默认实例）
         self.embedder = embedder or get_embedder(config_path)
         self.vectorstore = vectorstore or get_vectorstore(config_path)
+        # 自动加载已有向量库索引
+        if self.vectorstore.index is None:
+            loaded = self.vectorstore.load()
+            if loaded:
+                logger.info("已自动加载已有向量库索引")
+            else:
+                logger.warning("未找到已有向量库索引，Pipeline 将无法检索")
         self.llm_client = llm_client or get_llm_client(config_path)
         self.prompt_templates = prompt_templates or get_prompt_templates(config_path)
         
