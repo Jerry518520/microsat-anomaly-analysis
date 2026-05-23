@@ -95,8 +95,19 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
-    st.success("🟢 遥测数据接口正常")
-    st.info("🔵 RAG诊断引擎在线")
+    # 健康检查：遥测数据
+    _seg_path = os.path.join(PROJECT_ROOT, "data", "raw", "segments.csv")
+    if os.path.exists(_seg_path):
+        st.success("🟢 遥测数据接口正常")
+    else:
+        st.error("🔴 遥测数据缺失")
+
+    # 健康检查：FAISS 索引
+    _faiss_path = os.path.join(PROJECT_ROOT, "data", "faiss_index", "index.faiss")
+    if os.path.exists(_faiss_path):
+        st.info("🔵 RAG诊断引擎在线")
+    else:
+        st.warning("🟡 RAG索引未就绪")
 
 # ── 3. 主页面路由逻辑 ──
 

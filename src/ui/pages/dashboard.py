@@ -12,8 +12,8 @@ RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
 
 CHANNEL_MAP = {
     "CADC0872": "磁力计 X轴", "CADC0873": "磁力计 Y轴", "CADC0874": "磁力计 Z轴",
-    "CADC0884": "光二极管 1", "CADC0886": "光二极管 2", "CADC0888": "光二极管 3",
-    "CADC0890": "光二极管 4", "CADC0892": "光二极管 5", "CADC0894": "光二极管 6",
+    "CADC0884": "光电二极管 1", "CADC0886": "光电二极管 2", "CADC0888": "光电二极管 3",
+    "CADC0890": "光电二极管 4", "CADC0892": "光电二极管 5", "CADC0894": "光电二极管 6",
 }
 NO_ANOMALY_CHANNELS = {"CADC0884"}
 
@@ -50,6 +50,7 @@ def _render_core_metrics():
     
     # 从 segments.csv 计算真实异常率
     df_seg = load_segments()
+    total_rows = 0
     if df_seg is not None and "anomaly" in df_seg.columns:
         total_rows = len(df_seg)
         anomaly_rows = int(df_seg["anomaly"].sum())
@@ -59,11 +60,11 @@ def _render_core_metrics():
     else:
         rate_str = "N/A"
         rate_delta = "数据缺失"
-    
+
     with col1: st.metric("系统异常率", rate_str, delta=rate_delta, delta_color="inverse")
     with col2: st.metric("当前告警队列", f"{fault_count} 条", delta=f"共{total_anomalies}条异常段")
     with col3: st.metric("核心诊断 F1", f"{best_f1:.3f}")
-    with col4: st.metric("遥测吞吐量", f"{total_rows//1000}K Rows", delta="9 通道并发")
+    with col4: st.metric("遥测吞吐量", f"{total_rows//1000}K Rows" if total_rows > 0 else "N/A", delta="9 通道并发")
 
 def _render_channel_sparklines():
     st.markdown("### 📡 遥测通道矩阵 (实时监测中)")
@@ -128,8 +129,9 @@ def _render_alert_list():
         score = item.get("anomaly_score", 0)
         # 兼容两种字段名
         explanation = item.get("rag_explanation") or item.get("answer", "AI 诊断正在生成中...")
-        
-        summary = (explanation[:80] + "...") if len(str(explanation)) > 80 else explanation
+        explanation = str(explanation) if not isinstance(explanation, str) else explanation
+
+        summary = (explanation[:80] + "...") if len(explanation) > 80 else explanation
         border_color = "#ef4444" if score > 0.15 else "#f59e0b" if score > 0.05 else "#3b82f6"
         
         st.markdown(f"""

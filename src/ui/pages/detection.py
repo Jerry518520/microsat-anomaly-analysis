@@ -12,6 +12,49 @@ if PROJECT_ROOT not in sys.path: sys.path.insert(0, PROJECT_ROOT)
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
 
 @st.cache_data
+def _get_rag_config():
+    """动态读取 RAG 知识库实际配置"""
+    # 1. 统计文档数
+    doc_dirs = [
+        os.path.join(PROJECT_ROOT, "docs", "knowledge_base"),
+        os.path.join(PROJECT_ROOT, "docs", "papers"),
+    ]
+    doc_count = {"pdf": 0, "md": 0, "html": 0}
+    for d in doc_dirs:
+        if not os.path.isdir(d):
+            continue
+        for f in os.listdir(d):
+            ext = f.lower().rsplit(".", 1)[-1] if "." in f else ""
+            if ext in doc_count:
+                doc_count[ext] += 1
+
+    # 2. 读取 FAISS 索引 chunk 数
+    chunk_count = None
+    faiss_path = os.path.join(PROJECT_ROOT, "data", "faiss_index", "index.faiss")
+    if os.path.exists(faiss_path):
+        try:
+            import faiss
+            idx = faiss.read_index(faiss_path)
+            chunk_count = idx.ntotal
+        except Exception:
+            pass
+
+    # 3. 读取嵌入引擎配置
+    embedding_model = "BGE-M3"
+    config_path = os.path.join(PROJECT_ROOT, "configs", "config.yaml")
+    if os.path.exists(config_path):
+        try:
+            import yaml
+            with open(config_path, "r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            embedding_model = cfg.get("rag", {}).get("embedding_model", embedding_model)
+        except Exception:
+            pass
+
+    return doc_count, chunk_count, embedding_model
+
+
+@st.cache_data
 def load_json(filename):
     path = os.path.join(RESULTS_DIR, filename)
     if os.path.exists(path):
@@ -37,9 +80,14 @@ def render():
     col1, col2 = st.columns([3, 7])
     with col1:
         st.markdown("#### RAG 知识库配置")
-        st.write("已挂载 5 PDF + 1 MD")
-        st.write("Chunk总数: 5064")
-        st.write("嵌入引擎: BGE-M3")
+        doc_count, chunk_count, embedding_model = _get_rag_config()
+        doc_parts = []
+        if doc_count["pdf"]: doc_parts.append(f"{doc_count['pdf']} PDF")
+        if doc_count["md"]: doc_parts.append(f"{doc_count['md']} MD")
+        if doc_count["html"]: doc_parts.append(f"{doc_count['html']} HTML")
+        st.write(f"已挂载 {' + '.join(doc_parts) if doc_parts else '无文档'}")
+        st.write(f"Chunk总数: {chunk_count if chunk_count is not None else '未索引'}")
+        st.write(f"嵌入引擎: {embedding_model}")
         st.button("全量重建 FAISS 索引", use_container_width=True)
 
     with col2:
@@ -51,7 +99,6 @@ def render():
                 ("Stage 0", "stage0_global_if", "全局 IForest (c=0.2)"),
                 ("Stage 1", "stage1_per_channel", "分通道独立 IForest"),
                 ("Stage 2", "stage2_fusion", "IF + 规则融合"),
-                ("Stage 3", "stage3_optimal", "Threshold Sweep 最优"),
             ]
             for stage_name, stage_key, strategy in ordered:
                 f1 = stages.get(stage_key, {}).get("metrics", {}).get("f1")
@@ -67,8 +114,7 @@ def render():
             experiments = [
                 ("Stage 0", "全局 IForest (c=0.2)", 0.2996, "—"),
                 ("Stage 1", "分通道独立 IForest", 0.5381, "+79.6%"),
-                ("Stage 2", "IF + 规则融合", 0.4574, "+52.7%"),
-                ("Stage 3", "Threshold Sweep 最优", 0.5056, "+68.8%"),
+                ("Stage 2", "IF + 规则融合", 0.5683, "+89.7%"),
             ]
         df = pd.DataFrame(experiments, columns=["版本代号", "技术策略", "段级 F1", "相对提升"])
         st.dataframe(df, use_container_width=True, hide_index=True)
