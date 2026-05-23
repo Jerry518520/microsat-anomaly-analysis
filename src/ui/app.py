@@ -3,6 +3,11 @@ import json
 import os
 import sys
 
+# 加载 .env 到 os.environ（确保 RAG Pipeline 的 LLM API Key 可用）
+from dotenv import load_dotenv
+_ENV_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), ".env")
+load_dotenv(_ENV_PATH, override=True)
+
 st.set_page_config(
     page_title="OPS-SAT 遥测异常诊断系统",
     page_icon="🛰️",
