@@ -299,7 +299,7 @@ def _render_structured_diagnosis(item: dict, channel: str):
 
     # ── 乱码检测 ──
     if _is_garbled_text(explanation):
-        st.warning("⚠️ 诊断结论编码异常，显示异常特征摘要作为替代")
+        st.warning("⚠️ 诊断结论编码异常（历史实验结果损坏），显示异常特征摘要作为替代。请点击页面底部「刷新检测结果」重新生成。")
         _render_feature_fallback(item, channel)
         return
 
@@ -394,12 +394,6 @@ def _render_feature_fallback(item: dict, channel: str):
         c1.metric("均值", f"{feature.get('mean', 0):.2e}")
         c2.metric("标准差", f"{feature.get('std', 0):.2e}")
         c3.metric("峰值因子", f"{feature.get('crest_factor', 0):.2f}")
-
-        st.markdown("""
-        <div style='background:#1a1010;padding:10px;border-radius:4px;border-left:3px solid #f59e0b;margin-top:8px;'>
-        <b>💡 提示：</b>RAG 诊断结论暂不可用（编码异常）。请通过下方<b>自由问答</b>输入具体问题。
-        </div>
-        """, unsafe_allow_html=True)
     else:
         st.info("暂无异常特征数据")
 
@@ -441,6 +435,7 @@ def render_detail():
                 with st.spinner("正在重跑检测 + RAG解释，请稍候..."):
                     out, n = _refresh_detection_results(max_explanations=20)
                 st.success(f"刷新完成：{n} 条结果，已写入 {out}")
+                st.rerun()
             except Exception as e:
                 st.error(f"刷新失败: {e}")
 
