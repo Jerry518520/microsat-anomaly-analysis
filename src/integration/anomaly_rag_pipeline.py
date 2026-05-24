@@ -22,6 +22,7 @@ import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, asdict
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent.parent.parent
@@ -428,19 +429,19 @@ class AnomalyRAGPipeline:
             print("\n未检测到异常")
             return []
         
-        # Step 2: 为每个异常生成解释（限制数量）
-        results = []
-        n_to_explain = min(len(anomalies), max_explanations)
-        
-        print(f"\n将为前 {n_to_explain} 个异常生成RAG解释...")
-        
-        for i, anomaly in enumerate(anomalies[:n_to_explain]):
-            print(f"\n[{i+1}/{n_to_explain}] Segment {anomaly.segment}, {anomaly.channel}")
-            
+        # Step 2: 并发为每个异常生成解释（限制数量）
+        self._init_rag()  # 提前初始化，避免线程竞争
+        anomalies_to_explain = anomalies[:min(len(anomalies), max_explanations)]
+        n_to_explain = len(anomalies_to_explain)
+
+        print(f"\n将为前 {n_to_explain} 个异常并发生成RAG解释...")
+
+        def _explain_one(idx_anomaly):
+            idx, anomaly = idx_anomaly
+            print(f"\n[{idx+1}/{n_to_explain}] Segment {anomaly.segment}, {anomaly.channel}")
             try:
                 rag_result = self.explain(anomaly)
-                
-                results.append(CombinedResult(
+                return idx, CombinedResult(
                     segment=anomaly.segment,
                     channel=anomaly.channel,
                     anomaly_score=anomaly.anomaly_score,
@@ -450,11 +451,10 @@ class AnomalyRAGPipeline:
                     rag_sources=rag_result.sources,
                     retrieval_time=rag_result.retrieval_time,
                     generation_time=rag_result.generation_time
-                ))
+                )
             except Exception as e:
                 print(f"  [ERROR] RAG解释失败: {e}")
-                # 仍然记录检测结果，但解释为空
-                results.append(CombinedResult(
+                return idx, CombinedResult(
                     segment=anomaly.segment,
                     channel=anomaly.channel,
                     anomaly_score=anomaly.anomaly_score,
@@ -464,8 +464,20 @@ class AnomalyRAGPipeline:
                     rag_sources=[],
                     retrieval_time=0,
                     generation_time=0
-                ))
-        
+                )
+
+        indexed_results = [None] * n_to_explain
+        max_workers = 4
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(_explain_one, (i, a)): i
+                for i, a in enumerate(anomalies_to_explain)
+            }
+            for future in as_completed(futures):
+                idx, result = future.result()
+                indexed_results[idx] = result
+
+        results = [r for r in indexed_results if r is not None]
         print(f"\n完成！共生成 {len(results)} 条结果")
         return results
     

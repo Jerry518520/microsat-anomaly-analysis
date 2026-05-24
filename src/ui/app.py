@@ -103,7 +103,7 @@ with st.sidebar:
         st.error("🔴 遥测数据缺失")
 
     # 健康检查：FAISS 索引
-    _faiss_path = os.path.join(PROJECT_ROOT, "data", "faiss_index", "index.faiss")
+    _faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
     if os.path.exists(_faiss_path):
         st.info("🔵 RAG诊断引擎在线")
     else:
