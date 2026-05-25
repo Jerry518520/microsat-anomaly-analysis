@@ -6,6 +6,10 @@ textColor = "#FAFAFA"
 
 [server]
 maxUploadSize = 200
+headless = false
+address = "localhost"
+enableCORS = false
+enableXsrfProtection = false
 
 [browser]
 gatherUsageStats = false

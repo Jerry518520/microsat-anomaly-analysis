@@ -131,55 +131,71 @@ class AnomalyRAGPipeline:
     
     # ===== Step 1: 异常检测 =====
     
-    def detect(self, segments_df: Optional[pd.DataFrame] = None) -> List[AnomalyResult]:
+    def detect(self, segments_df: Optional[pd.DataFrame] = None, progress_callback=None) -> List[AnomalyResult]:
         """
         运行完整异常检测流程
-        
+
+        Args:
+            segments_df: 可选的segments数据（None则自动加载）
+            progress_callback: 进度回调函数 callback(current, total, message)
+
         Returns:
             List[AnomalyResult]: 检测到的异常列表
         """
         print("\n" + "="*60)
         print("Step 1: 异常检测流程")
         print("="*60)
-        
+
         # 1.1 加载数据
         if segments_df is None:
             segments_df = load_segments(self.config)
-        
+        if progress_callback:
+            progress_callback(5, 100, "加载数据完成")
+
         # 1.2 提取滑动窗口特征
         print(f"\n[1/5] 提取滑动窗口特征 (window={self.window_size}, step={self.step_size})...")
+        if progress_callback:
+            progress_callback(15, 100, "正在提取滑动窗口特征...")
         features_df = extract_all_sliding_features(
-            segments_df, 
-            window_size=self.window_size, 
+            segments_df,
+            window_size=self.window_size,
             step_size=self.step_size
         )
-        
+
         feature_cols = [c for c in features_df.columns if c not in META_COLS]
         train_mask = features_df["train"] == 1
         train_df = features_df[train_mask]
         test_df = features_df[~train_mask].copy()
-        
+
         # 1.3 统计规则
         print("[2/5] 应用统计规则...")
+        if progress_callback:
+            progress_callback(35, 100, "正在应用统计规则...")
         thresholds = compute_stat_thresholds(train_df, feature_cols)
         n_violated, n_total = apply_stat_rules(test_df, thresholds, feature_cols)
         test_df["rule_violations"] = n_violated
         test_df["rule_total"] = n_total
         rule_pred = pd.Series(
-            (n_violated / n_total.replace(0, 1) >= 0.2).astype(int), 
+            (n_violated / n_total.replace(0, 1) >= 0.2).astype(int),
             index=test_df.index
         )
-        
+
         # 1.4 分通道IForest
         print("[3/5] 分通道IsolationForest...")
+        if progress_callback:
+            progress_callback(55, 100, "正在运行分通道 IsolationForest...")
         channel_preds = self._per_channel_iforest(train_df, test_df, feature_cols)
-        
+
         # 1.5 段级baseline
         print("[4/5] 段级baseline...")
+        if progress_callback:
+            progress_callback(75, 100, "正在计算段级 baseline...")
         seg_baseline_map = self._segment_baseline_iforest(segments_df)
-        
+
         # 1.6 Scheme G融合 + 投票阈值
         print("[5/5] Scheme G融合 + 投票阈值聚合...")
+        if progress_callback:
+            progress_callback(90, 100, "正在融合 Scheme G + 投票阈值...")
         pred_g = self._build_scheme_g(
             test_df, channel_preds, rule_pred, seg_baseline_map
         )
@@ -404,31 +420,39 @@ class AnomalyRAGPipeline:
     # ===== Step 3: 联合Pipeline =====
     
     def detect_and_explain(
-        self, 
+        self,
         segments_df: Optional[pd.DataFrame] = None,
-        max_explanations: int = 10
+        max_explanations: int = 10,
+        progress_callback=None
     ) -> List[CombinedResult]:
         """
         完整流程：检测异常 + 生成RAG解释
-        
+
         Args:
             segments_df: 可选的segments数据（None则自动加载）
             max_explanations: 最多解释多少个异常（RAG API调用有限制）
-        
+            progress_callback: 进度回调函数 callback(current, total, message)
+
         Returns:
             List[CombinedResult]: 联合结果列表
         """
         print("\n" + "="*60)
         print("AnomalyRAGPipeline: 完整流程")
         print("="*60)
-        
-        # Step 1: 检测
-        anomalies = self.detect(segments_df)
-        
+
+        # Step 1: 检测（将 detect 的 0-100 映射到整体进度的 0-10）
+        if progress_callback:
+            progress_callback(0, 100, "正在运行异常检测算法...")
+        def _detect_progress(current, total, message):
+            if progress_callback:
+                mapped = int(10 * current / total)
+                progress_callback(mapped, 100, message)
+        anomalies = self.detect(segments_df, progress_callback=_detect_progress if progress_callback else None)
+
         if not anomalies:
             print("\n未检测到异常")
             return []
-        
+
         # Step 2: 并发为每个异常生成解释（限制数量）
         self._init_rag()  # 提前初始化，避免线程竞争
         anomalies_to_explain = anomalies[:min(len(anomalies), max_explanations)]
@@ -436,12 +460,15 @@ class AnomalyRAGPipeline:
 
         print(f"\n将为前 {n_to_explain} 个异常并发生成RAG解释...")
 
+        completed_count = 0
+
         def _explain_one(idx_anomaly):
+            nonlocal completed_count
             idx, anomaly = idx_anomaly
             print(f"\n[{idx+1}/{n_to_explain}] Segment {anomaly.segment}, {anomaly.channel}")
             try:
                 rag_result = self.explain(anomaly)
-                return idx, CombinedResult(
+                result = CombinedResult(
                     segment=anomaly.segment,
                     channel=anomaly.channel,
                     anomaly_score=anomaly.anomaly_score,
@@ -454,7 +481,7 @@ class AnomalyRAGPipeline:
                 )
             except Exception as e:
                 print(f"  [ERROR] RAG解释失败: {e}")
-                return idx, CombinedResult(
+                result = CombinedResult(
                     segment=anomaly.segment,
                     channel=anomaly.channel,
                     anomaly_score=anomaly.anomaly_score,
@@ -465,6 +492,11 @@ class AnomalyRAGPipeline:
                     retrieval_time=0,
                     generation_time=0
                 )
+            completed_count += 1
+            if progress_callback:
+                pct = 10 + int(90 * completed_count / n_to_explain)
+                progress_callback(pct, 100, f"RAG解释生成中... ({completed_count}/{n_to_explain})")
+            return idx, result
 
         indexed_results = [None] * n_to_explain
         max_workers = 4

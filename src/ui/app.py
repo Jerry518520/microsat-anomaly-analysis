@@ -104,10 +104,17 @@ with st.sidebar:
 
     # 健康检查：FAISS 索引
     _faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
-    if os.path.exists(_faiss_path):
+    _rag_available = False
+    try:
+        from src.rag.pipeline import get_rag_pipeline  # noqa: F401
+        _rag_available = True
+    except Exception:
+        pass
+
+    if _rag_available and os.path.exists(_faiss_path):
         st.info("🔵 RAG诊断引擎在线")
     else:
-        st.warning("🟡 RAG索引未就绪")
+        st.info("ℹ️ RAG 诊断引擎暂未部署（仅展示模式）")
 
 # ── 3. 主页面路由逻辑 ──
 
