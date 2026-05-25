@@ -5,7 +5,7 @@
 embedding:
   # 模型配置
   model_name: "F:/微小卫星项目/microsat-anomaly-analysis/models/Xorbits/bge-m3"  # 本地ModelScope下载
-  device: "auto"  # 自动检测: CUDA优先, 否则CPU
+  device: "cuda"  # CUDA 加速（必须）
   batch_size: 32  # 批处理大小（GPU 优化）
   
   # 模型参数
@@ -29,7 +29,7 @@ vectorstore:
   auto_save: true                       # 自动保存
   
   # GPU 加速
-  use_gpu: false            # 先CPU跑通, GPU后面优化
+  use_gpu: true             # CUDA 加速（必须）
   gpu_id: 0                 # GPU ID
 
 # ========== 文档处理配置 ==========
@@ -114,16 +114,8 @@ llm:
 
 # ========== Prompt 模板配置 ==========
 prompt:
-  # 系统提示词
-  system_prompt: |
-    你是一个卫星异常诊断专家，专门分析遥测数据异常。
-    请基于提供的卫星领域知识，给出专业、准确的异常原因分析。
-    
-    回答要求：
-    1. 必须基于提供的知识片段进行分析
-    2. 明确标注知识来源（文档名 + 页码）
-    3. 如果知识片段不足，请说明"现有知识库信息不足"
-    4. 使用中文回答，保持专业性和可读性
+  # 系统提示词（留空则使用代码中的默认详细 prompt）
+  system_prompt: ""
   
   # 用户提示词模板
   user_template: |

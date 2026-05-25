@@ -65,12 +65,11 @@ def _get_rag_pipeline():
         return _rag_pipeline
     except Exception as e:
         _rag_init_error = str(e)
-        st.error(f"RAG引擎初始化失败: {e}")
         return None
 
 
 @st.cache_data(ttl=60)
-def _get_live_anomaly_score(segment_id: int, channel: str):
+def _get_live_anomaly_score(segment_id: int, channel: str, progress_callback=None):
     """
     实时重算指定 segment 的异常分（基于当前数据与当前算法）。
     返回: (score, mode, timestamp)
@@ -78,7 +77,7 @@ def _get_live_anomaly_score(segment_id: int, channel: str):
     from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
 
     pipeline = AnomalyRAGPipeline()
-    anomalies = pipeline.detect()  # 基于当前数据实时重跑检测
+    anomalies = pipeline.detect(progress_callback=progress_callback)
     now_str = time.strftime("%Y-%m-%d %H:%M:%S")
 
     for a in anomalies:
@@ -89,15 +88,19 @@ def _get_live_anomaly_score(segment_id: int, channel: str):
     return 0.0, "recomputed", now_str
 
 
-def _refresh_detection_results(max_explanations: int = 20):
+def _refresh_detection_results(max_explanations: int = 20, progress_callback=None):
     """
     一键重跑检测+RAG解释，并落盘覆盖 anomaly_rag_results.json。
+    progress_callback(current, total, message) 用于更新进度条。
     """
     from dataclasses import asdict
     from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
 
     pipeline = AnomalyRAGPipeline()
-    results = pipeline.detect_and_explain(max_explanations=max_explanations)
+    results = pipeline.detect_and_explain(
+        max_explanations=max_explanations,
+        progress_callback=progress_callback
+    )
 
     output_path = os.path.join(RESULTS_DIR, "anomaly_rag_results.json")
     with open(output_path, "w", encoding="utf-8") as f:
@@ -174,7 +177,8 @@ def _parse_explanation(explanation: str) -> dict:
         "通道定位": ["通道定位", "传感器定位", "通道说明", "异常通道分析", "异常通道定位", "异常通道物理含义分析", "通道标识"],
         "异常类型": ["异常类型", "异常分类", "异常类型判断", "异常类型分析", "异常类型与可能原因"],
         "可能原因": ["可能原因", "原因分析", "异常原因", "潜在原因", "异常原因推断", "异常原因分析", "基于知识的可能原因"],
-        "影响评估": ["影响评估", "影响分析", "潜在影响", "影响范围", "补充说明", "局限性说明", "知识局限性", "知识充分性"],
+        "影响评估": ["影响评估", "影响分析", "潜在影响", "影响范围", "补充说明", "局限性说明", "知识局限性", "知识充分性", "知识依据", "知识缺口", "信息充足"],
+        "结论": ["结论", "诊断结论", "总结"],
         "建议措施": ["建议措施", "排查建议", "处理建议", "应对措施", "建议后续操作", "诊断总结与建议", "建议"],
         "紧急程度": ["紧急程度", "严重程度", "优先级"],
         "来源": ["来源", "知识来源", "参考来源"],
@@ -240,8 +244,9 @@ def _split_sections_raw(explanation: str) -> dict:
         "通道定位": ["通道定位", "传感器定位", "通道说明", "异常通道分析", "异常通道定位", "异常通道物理含义分析", "通道标识"],
         "异常类型": ["异常类型", "异常分类", "异常类型判断", "异常类型分析", "异常类型与可能原因"],
         "可能原因": ["可能原因", "原因分析", "异常原因", "潜在原因", "异常原因推断", "异常原因分析", "基于知识的可能原因"],
-        "影响评估": ["影响评估", "影响分析", "潜在影响", "影响范围", "补充说明", "局限性说明", "知识局限性", "知识充分性"],
-        "建议措施": ["建议措施", "排查建议", "处理建议", "应对措施", "建议后续操作", "诊断总结与建议"],
+        "影响评估": ["影响评估", "影响分析", "潜在影响", "影响范围", "补充说明", "局限性说明", "知识局限性", "知识充分性", "知识依据", "知识缺口", "信息充足"],
+        "结论": ["结论", "诊断结论", "总结"],
+        "建议措施": ["建议措施", "排查建议", "处理建议", "应对措施", "建议后续操作", "诊断总结与建议", "建议"],
         "紧急程度": ["紧急程度", "严重程度", "优先级"],
         "来源": ["来源", "知识来源", "参考来源"],
     }
@@ -339,7 +344,9 @@ def _render_structured_diagnosis(item: dict, channel: str):
     SECTION_ORDER = [
         ("可能原因", "🔴 可能原因"),
         ("影响评估", "⚡ 影响评估"),
+        ("结论", "📋 结论"),
         ("建议措施", "✅ 建议措施"),
+        ("来源", "📚 知识来源"),
     ]
 
     rendered_any = False
@@ -349,13 +356,12 @@ def _render_structured_diagnosis(item: dict, channel: str):
         rendered_any = True
         section_md = raw_sections[key]
         st.markdown(f"**{label}**")
-        # 直接渲染 section 的原始 markdown（保留 LLM 的格式）
         content = _extract_metric_text(section_md)
         if content:
             st.markdown(content)
         st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
-    # 如果上面 3 个 section 都没匹配到，渲染整个 explanation
+    # 如果没有匹配到任何 section，渲染整个 explanation
     if not rendered_any:
         st.markdown(explanation)
 
@@ -416,28 +422,62 @@ def render_detail():
         ch_label = CHANNEL_MAP.get(channel, channel)
         st.markdown(f"### 🔎 深度诊断 | 段 #{seg_id} · {ch_label}")
 
-    # 实时重算 / 全量刷新控制区（不改原有文案，仅增强数据真实性）
+    # 实时重算 / 全量刷新控制区
+    pipeline = _get_rag_pipeline()
+    rag_online = pipeline is not None
+
+    if not rag_online:
+        if _rag_init_error:
+            st.warning(f"⚠️ RAG 引擎未就绪：{_rag_init_error}")
+        else:
+            st.info("ℹ️ RAG 诊断引擎暂未部署，实时功能不可用。")
+
     c1, c2 = st.columns([1, 1])
     with c1:
-        if st.button("🔄 实时重算异常分", use_container_width=True):
-            try:
-                seg_id_int = int(seg_id)
-                live_score, mode, ts = _get_live_anomaly_score(seg_id_int, channel)
-                item["anomaly_score"] = float(live_score)
-                st.session_state.target_rag_data = item
-                st.success(f"已实时重算 ({mode})：{live_score:.3f} @ {ts}")
-                st.rerun()
-            except Exception as e:
-                st.error(f"实时重算失败: {e}")
+        if rag_online:
+            if st.button("🔄 实时重算异常分", use_container_width=True):
+                try:
+                    progress_bar = st.progress(0, text="正在初始化检测...")
+
+                    def _on_progress(current, total, message):
+                        progress_bar.progress(current / total, text=message)
+
+                    seg_id_int = int(seg_id)
+                    live_score, mode, ts = _get_live_anomaly_score(
+                        seg_id_int, channel, progress_callback=_on_progress
+                    )
+                    progress_bar.progress(100, text=f"完成！异常分: {live_score:.3f}")
+                    item["anomaly_score"] = float(live_score)
+                    st.session_state.target_rag_data = item
+                    st.success(f"已实时重算 ({mode})：{live_score:.3f} @ {ts}")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"实时重算失败: {e}")
+        else:
+            st.button("🔄 实时重算异常分", use_container_width=True, disabled=True,
+                       help="RAG 诊断引擎暂未部署")
     with c2:
-        if st.button("🚀 刷新检测结果", use_container_width=True):
-            try:
-                with st.spinner("正在重跑检测 + RAG解释，请稍候..."):
-                    out, n = _refresh_detection_results(max_explanations=20)
-                st.success(f"刷新完成：{n} 条结果，已写入 {out}")
-                st.rerun()
-            except Exception as e:
-                st.error(f"刷新失败: {e}")
+        if rag_online:
+            if st.button("🚀 刷新检测结果", use_container_width=True):
+                try:
+                    progress_bar = st.progress(0, text="正在初始化...")
+                    status_text = st.empty()
+
+                    def _on_progress(current, total, message):
+                        progress_bar.progress(current / total, text=message)
+
+                    out, n = _refresh_detection_results(
+                        max_explanations=20,
+                        progress_callback=_on_progress
+                    )
+                    progress_bar.progress(100, text=f"完成！共 {n} 条结果")
+                    st.success(f"刷新完成：{n} 条结果，已写入 {out}")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"刷新失败: {e}")
+        else:
+            st.button("🚀 刷新检测结果", use_container_width=True, disabled=True,
+                       help="RAG 诊断引擎暂未部署")
 
     st.divider()
 
@@ -565,9 +605,8 @@ def render_detail():
 
     # ── 3. 自由追问（接入 RAG Pipeline，精简 prompt）──
     st.markdown("#### 💬 异常追踪问答")
-    pipeline = _get_rag_pipeline()
 
-    if pipeline:
+    if rag_online:
         user_query = st.chat_input("追问示例：对姿态控制的影响？")
         if user_query:
             with st.chat_message("user"):
@@ -603,7 +642,7 @@ def render_detail():
                 except Exception as e:
                     st.error(f"查询出错: {e}")
     else:
-        st.info("问答引擎加载中...")
+        st.caption("🔒 RAG 诊断引擎暂未部署，问答功能暂不可用。部署后即可启用智能追问。")
 
 
 @st.cache_data

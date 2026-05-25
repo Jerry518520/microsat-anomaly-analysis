@@ -152,8 +152,11 @@ def _render_alert_list():
             args=(seg_id, channel, item) # 把真实数据当作参数传进去
         )
 def render():
-    _render_core_metrics()
+    with st.spinner("加载核心指标..."):
+        _render_core_metrics()
     st.divider()
-    _render_channel_sparklines()
+    with st.spinner("加载遥测通道数据..."):
+        _render_channel_sparklines()
     st.divider()
-    _render_alert_list()
+    with st.spinner("加载告警队列..."):
+        _render_alert_list()
