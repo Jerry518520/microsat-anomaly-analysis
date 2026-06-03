@@ -203,59 +203,270 @@ const OscilloscopePlotly: React.FC<OscilloscopeProps> = ({ data, timestamps, ano
 // 4. 路由页面视图
 // ==========================================
 
+// ==========================================
+// 4a. 通道波形迷你图组件
+// ==========================================
+
+interface ChannelData {
+  channel: string;
+  label: string;
+  anomaly_rate: number;
+  status: string;
+  sparkline_values: number[];
+  anomaly_indices: number[];
+}
+
+const ChannelSparkline: React.FC<{ data: ChannelData }> = ({ data }) => {
+  const plotRef = useRef<HTMLDivElement>(null);
+
+  const statusColor = data.status === 'critical' ? '#FF2D55'
+    : data.status === 'warning' ? '#FBBF24'
+    : data.status === 'caution' ? '#FF6B35'
+    : data.status === 'offline' ? '#3A4558'
+    : '#34D399';
+
+  const statusIcon = data.status === 'critical' ? '🔴'
+    : data.status === 'warning' ? '🟡'
+    : data.status === 'caution' ? '🟠'
+    : data.status === 'offline' ? '⚫'
+    : '🟢';
+
+  useEffect(() => {
+    if (!plotRef.current || !data.sparkline_values.length) return;
+
+    const anomalyY = data.anomaly_indices
+      .filter(idx => idx < data.sparkline_values.length)
+      .map(idx => data.sparkline_values[idx]);
+
+    const anomalyX = data.anomaly_indices
+      .filter(idx => idx < data.sparkline_values.length);
+
+    Plotly.newPlot(plotRef.current, [
+      {
+        y: data.sparkline_values,
+        mode: 'lines',
+        type: 'scatter',
+        line: { color: statusColor, width: 1 },
+        fill: 'tozeroy',
+        fillcolor: `${statusColor}14`,
+        hoverinfo: 'y',
+        showlegend: false,
+      },
+      ...(anomalyX.length > 0 ? [{
+        x: anomalyX,
+        y: anomalyY,
+        mode: 'markers',
+        type: 'scatter' as const,
+        marker: { color: '#FF2D55', size: 4 },
+        hoverinfo: 'x+y',
+        showlegend: false,
+      }] : [])
+    ], {
+      height: 100,
+      margin: { l: 0, r: 0, t: 20, b: 0 },
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      xaxis: { visible: false },
+      yaxis: { visible: false },
+      showlegend: false,
+      title: {
+        text: `${statusIcon} ${data.channel} (${data.label})`,
+        font: { size: 11, color: statusColor, family: 'IBM Plex Mono' },
+        x: 0.02, y: 0.95,
+      },
+    }, { displayModeBar: false, responsive: true });
+
+    return () => {
+      if (plotRef.current) Plotly.purge(plotRef.current);
+    };
+  }, [data, statusColor, statusIcon]);
+
+  return (
+    <HudCard status={data.status === 'critical' ? 'CRITICAL' : data.status === 'warning' ? 'WARNING' : undefined}>
+      <div ref={plotRef} className="w-full" style={{ minHeight: 100 }} />
+      <div className="flex justify-between items-center mt-1 px-1">
+        <span className="text-[10px] font-ibm-mono text-[#7B8CA8]">
+          异常率: <span style={{ color: statusColor }}>{(data.anomaly_rate * 100).toFixed(1)}%</span>
+        </span>
+        <span className="text-[10px] font-ibm-mono" style={{ color: statusColor }}>
+          {data.status.toUpperCase()}
+        </span>
+      </div>
+    </HudCard>
+  );
+};
+
+// ==========================================
+// 4b. Dashboard 主视图
+// ==========================================
+
+interface MetricsData {
+  anomaly_rate_str: string;
+  anomaly_rows: number;
+  total_rows: number;
+  fault_count: number;
+  total_anomalies: number;
+  best_f1: number;
+  throughput: number;
+  channel_count: number;
+}
+
+interface AlertItem {
+  segment: string;
+  channel: string;
+  channel_label: string;
+  anomaly_score: number;
+  severity: string;
+  summary: string;
+  anomaly_type: string;
+}
+
 const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, anomalyData?: any) => void }> = ({ onNavigate }) => {
-  const queue = [
-    { seg: '1247', ch: 'CADC0874', score: 0.234, summary: "AI: 磁力计Z轴出现间歇性尖峰异常，疑似太阳风暴干扰导致高频噪声畸变。" },
-    { seg: '0892', ch: 'CADC0890', score: 0.156, summary: "AI: 光电管4出现周期性衰减，可能为物理传感器组件表面轻微老化。" },
-    { seg: '0455', ch: 'CADC0886', score: 0.089, summary: "AI: 光电管2出现轻微读数漂移，仍在当前可接受的滤波动态基线范围内。" }
-  ];
+  const [metrics, setMetrics] = useState<MetricsData | null>(null);
+  const [channels, setChannels] = useState<ChannelData[]>([]);
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [metricsRes, channelsRes, alertsRes] = await Promise.all([
+          fetch('/api/dashboard/metrics'),
+          fetch('/api/dashboard/channels'),
+          fetch('/api/dashboard/alerts'),
+        ]);
+        if (metricsRes.ok) setMetrics(await metricsRes.json());
+        if (channelsRes.ok) {
+          const data = await channelsRes.json();
+          setChannels(data.channels || []);
+        } else {
+          setError(`API 返回错误 (${channelsRes.status})`);
+        }
+        if (alertsRes.ok) {
+          const data = await alertsRes.json();
+          setAlerts(data.alerts || []);
+        }
+      } catch (e) {
+        console.error('Dashboard fetch error:', e);
+        setError('无法连接后端服务 (localhost:8000)，请确认已运行 python start_ui.py');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  const faultCount = metrics?.fault_count ?? alerts.length;
+  const totalAnomalies = metrics?.total_anomalies ?? 0;
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex items-center justify-between">
         <h2 className="font-rajdhani text-xl font-bold tracking-wider text-[#00E5FF]">REAL-TIME ALARM CENTER // 实时告警中心</h2>
+        {loading && <span className="text-[10px] font-ibm-mono text-[#7B8CA8] animate-pulse">LOADING DATA...</span>}
       </div>
 
+      {/* 核心指标卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <HudCard><div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">系统异常率</div><div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">1.2%</div><div className="text-xs font-ibm-mono text-[#FF6B35]">452行/45K行</div></HudCard>
-        <HudCard status="WARNING"><div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">当前告警队列 (Score &gt; 0.05)</div><div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">{queue.length} ACTIVE</div><div className="text-xs font-ibm-mono text-[#FF6B35]">共12条异常段</div></HudCard>
-        <HudCard><div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">核心诊断 F1</div><div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">0.568</div><div className="text-xs font-ibm-mono text-[#34D399]">Stage 2 Fusion</div></HudCard>
-        <HudCard><div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">遥测吞吐量</div><div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">45K ROWS</div><div className="text-xs font-ibm-mono text-[#34D399]">9 通道并发</div></HudCard>
+        <HudCard>
+          <div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">系统异常率</div>
+          <div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">
+            {metrics?.anomaly_rate_str ?? '—'}
+          </div>
+          <div className="text-xs font-ibm-mono text-[#FF6B35]">
+            {metrics ? `${metrics.anomaly_rows.toLocaleString()}行 / ${metrics.total_rows.toLocaleString()}行` : '加载中...'}
+          </div>
+        </HudCard>
+        <HudCard status={faultCount > 0 ? 'WARNING' : undefined}>
+          <div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">当前告警队列 (Score &gt; 0.05)</div>
+          <div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">{faultCount} ACTIVE</div>
+          <div className="text-xs font-ibm-mono text-[#FF6B35]">共{totalAnomalies}条异常段</div>
+        </HudCard>
+        <HudCard>
+          <div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">核心诊断 F1</div>
+          <div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">
+            {metrics?.best_f1?.toFixed(3) ?? '—'}
+          </div>
+          <div className="text-xs font-ibm-mono text-[#34D399]">Stage 2 Fusion</div>
+        </HudCard>
+        <HudCard>
+          <div className="text-xs text-[#7B8CA8] font-ibm-mono uppercase">遥测吞吐量</div>
+          <div className="text-2xl font-bold font-rajdhani text-[#E5E9F0] my-1 font-ibm-mono">
+            {metrics ? `${Math.floor(metrics.throughput / 1000)}K ROWS` : '—'}
+          </div>
+          <div className="text-xs font-ibm-mono text-[#34D399]">{metrics?.channel_count ?? 9} 通道并发</div>
+        </HudCard>
       </div>
 
+      {/* 遥测通道波形矩阵 */}
+      <div>
+        <div className="text-xs font-rajdhani text-[#00E5FF] mb-3 font-bold tracking-wider">
+          📡 TELEMETRY CHANNEL MATRIX // 遥测通道矩阵 (实时监测中)
+        </div>
+        {error ? (
+          <HudCard status="WARNING">
+            <div className="text-xs font-ibm-mono text-[#FBBF24] text-center py-6">
+              ⚠️ {error}
+            </div>
+          </HudCard>
+        ) : channels.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {channels.map(ch => (
+              <ChannelSparkline key={ch.channel} data={ch} />
+            ))}
+          </div>
+        ) : (
+          <HudCard>
+            <div className="text-xs font-ibm-mono text-[#7B8CA8] text-center py-6">
+              {loading ? '正在加载通道数据...' : '未找到 segments.csv 数据文件'}
+            </div>
+          </HudCard>
+        )}
+      </div>
+
+      {/* 故障告警队列 */}
       <HudCard>
         <div className="text-xs font-rajdhani text-[#00E5FF] mb-3 font-bold tracking-wider">FAULT ALARM QUEUE // 故障告警队列</div>
-        <div className="divide-y divide-[#3A4558]/30">
-          {queue.map((q, i) => {
-            const status = getStatusByScore(q.ch, q.score);
-            const borderColor = status === 'CRITICAL' ? '#FF2D55' : status === 'WARNING' ? '#FBBF24' : '#00E5FF';
-            
-            return (
-              <div key={i} className="py-3 first:pt-0 last:pb-0">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-1">
-                  <div className="flex items-center space-x-2 text-xs font-ibm-mono">
-                    <span className="text-[#E5E9F0] font-bold">段 #{q.seg}</span><span className="text-[#3A4558]">·</span>
-                    <span className="text-[#00E5FF]">{q.ch}</span><span className="text-[#3A4558]">·</span>
-                    <span className="text-[#E5E9F0] font-sans">{CHANNEL_MAP[q.ch]}</span>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-1.5 text-xs font-ibm-mono" style={{ color: borderColor }}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${status === 'CRITICAL' ? 'animate-pulse' : ''}`} style={{ backgroundColor: borderColor }}></span>
-                      <span>SCORE: {q.score.toFixed(3)}</span>
+        {alerts.length === 0 ? (
+          <div className="text-xs font-ibm-mono text-[#7B8CA8] text-center py-4">
+            {loading ? '正在加载告警数据...' : '当前无未处理告警，队列安全 ✓'}
+          </div>
+        ) : (
+          <div className="divide-y divide-[#3A4558]/30">
+            {alerts.map((q, i) => {
+              const status = getStatusByScore(q.channel, q.anomaly_score);
+              const borderColor = status === 'CRITICAL' ? '#FF2D55' : status === 'WARNING' ? '#FBBF24' : '#00E5FF';
+
+              return (
+                <div key={i} className="py-3 first:pt-0 last:pb-0">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center space-x-2 text-xs font-ibm-mono">
+                      <span className="text-[#E5E9F0] font-bold">段 #{q.segment}</span><span className="text-[#3A4558]">·</span>
+                      <span className="text-[#00E5FF]">{q.channel}</span><span className="text-[#3A4558]">·</span>
+                      <span className="text-[#E5E9F0] font-sans">{q.channel_label}</span>
                     </div>
-                    <button 
-                      onClick={() => onNavigate('explanation', q.ch, q)}
-                      className="text-xs font-ibm-mono text-[#00E5FF] hover:text-white flex items-center bg-[#00E5FF]/10 hover:bg-[#00E5FF]/30 px-2 py-0.5 rounded-sm border border-[#00E5FF]/20 transition-all"
-                    >
-                      深度诊断分析 <ChevronRight size={12} className="ml-0.5" />
-                    </button>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-1.5 text-xs font-ibm-mono" style={{ color: borderColor }}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${status === 'CRITICAL' ? 'animate-pulse' : ''}`} style={{ backgroundColor: borderColor }}></span>
+                        <span>SCORE: {q.anomaly_score.toFixed(3)}</span>
+                      </div>
+                      <button
+                        onClick={() => onNavigate('explanation', q.channel, { seg: q.segment, ch: q.channel, score: q.anomaly_score, summary: q.summary })}
+                        className="text-xs font-ibm-mono text-[#00E5FF] hover:text-white flex items-center bg-[#00E5FF]/10 hover:bg-[#00E5FF]/30 px-2 py-0.5 rounded-sm border border-[#00E5FF]/20 transition-all"
+                      >
+                        深度诊断分析 <ChevronRight size={12} className="ml-0.5" />
+                      </button>
+                    </div>
                   </div>
+                  <p className="text-xs text-[#7B8CA8] pl-2 border-l border-[#3A4558] mt-1">🧠 <b>AI摘要:</b> {q.summary}</p>
                 </div>
-                <p className="text-xs text-[#7B8CA8] pl-2 border-l border-[#3A4558] mt-1">🧠 <b>AI摘要:</b> {q.summary}</p>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </HudCard>
     </div>
   );
