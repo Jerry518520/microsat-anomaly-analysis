@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Activity,
   Sliders,
@@ -321,43 +321,53 @@ interface AlertItem {
   anomaly_type: string;
 }
 
+const REFRESH_INTERVAL = 30000; // 30秒自动刷新
+
 const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, anomalyData?: any) => void }> = ({ onNavigate }) => {
   const [metrics, setMetrics] = useState<MetricsData | null>(null);
   const [channels, setChannels] = useState<ChannelData[]>([]);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [metricsRes, channelsRes, alertsRes] = await Promise.all([
-          fetch('/api/dashboard/metrics'),
-          fetch('/api/dashboard/channels'),
-          fetch('/api/dashboard/alerts'),
-        ]);
-        if (metricsRes.ok) setMetrics(await metricsRes.json());
-        if (channelsRes.ok) {
-          const data = await channelsRes.json();
-          setChannels(data.channels || []);
-        } else {
-          setError(`API 返回错误 (${channelsRes.status})`);
-        }
-        if (alertsRes.ok) {
-          const data = await alertsRes.json();
-          setAlerts(data.alerts || []);
-        }
-      } catch (e) {
-        console.error('Dashboard fetch error:', e);
-        setError('无法连接后端服务 (localhost:8000)，请确认已运行 python start_ui.py');
-      } finally {
-        setLoading(false);
+  const fetchAll = useCallback(async (isAutoRefresh = false) => {
+    if (!isAutoRefresh) setRefreshing(true);
+    setError(null);
+    try {
+      const [metricsRes, channelsRes, alertsRes] = await Promise.all([
+        fetch('/api/dashboard/metrics'),
+        fetch('/api/dashboard/channels'),
+        fetch('/api/dashboard/alerts'),
+      ]);
+      if (metricsRes.ok) setMetrics(await metricsRes.json());
+      if (channelsRes.ok) {
+        const data = await channelsRes.json();
+        setChannels(data.channels || []);
+      } else {
+        setError(`API 返回错误 (${channelsRes.status})`);
       }
-    };
-    fetchAll();
+      if (alertsRes.ok) {
+        const data = await alertsRes.json();
+        setAlerts(data.alerts || []);
+      }
+      setLastUpdated(new Date());
+    } catch (e) {
+      console.error('Dashboard fetch error:', e);
+      setError('无法连接后端服务 (localhost:8000)，请确认已运行 python start_ui.py');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
+
+  // 初始加载 + 定时轮询
+  useEffect(() => {
+    fetchAll();
+    const timer = setInterval(() => fetchAll(true), REFRESH_INTERVAL);
+    return () => clearInterval(timer);
+  }, [fetchAll]);
 
   const faultCount = metrics?.fault_count ?? alerts.length;
   const totalAnomalies = metrics?.total_anomalies ?? 0;
@@ -366,7 +376,22 @@ const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, a
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex items-center justify-between">
         <h2 className="font-rajdhani text-xl font-bold tracking-wider text-[#00E5FF]">REAL-TIME ALARM CENTER // 实时告警中心</h2>
-        {loading && <span className="text-[10px] font-ibm-mono text-[#7B8CA8] animate-pulse">LOADING DATA...</span>}
+        <div className="flex items-center space-x-3">
+          {lastUpdated && (
+            <span className="text-[10px] font-ibm-mono text-[#7B8CA8]">
+              <Clock size={10} className="inline mr-1" />
+              {lastUpdated.toLocaleTimeString('zh-CN')}
+            </span>
+          )}
+          <button
+            onClick={() => fetchAll()}
+            disabled={refreshing}
+            className="text-[10px] font-ibm-mono text-[#00E5FF] hover:text-white bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 px-2 py-1 rounded-sm border border-[#00E5FF]/20 transition-all flex items-center space-x-1 disabled:opacity-50"
+          >
+            <RefreshCw size={10} className={refreshing ? 'animate-spin' : ''} />
+            <span>{refreshing ? '刷新中...' : '手动刷新'}</span>
+          </button>
+        </div>
       </div>
 
       {/* 核心指标卡片 */}
