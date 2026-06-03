@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #0F1419;
+    --bg-card: #1A1F2E;
+    --bg-card-hover: #1E2538;
+    --bg-input: #111827;
+    --text-primary: #E2E8F0;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --border-default: #2D3548;
+    --border-subtle: #1E293B;
+    --accent-blue: #38BDF8;
+    --accent-green: #22C55E;
+    --accent-yellow: #F59E0B;
+    --accent-orange: #F97316;
+    --accent-red: #EF4444;
+    --accent-critical: #DC2626;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* 卡片组件 */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 16px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.card:hover {
+  background-color: var(--bg-card-hover);
+  border-color: #3D4A5F;
+}
+
+/* 告警卡片 — 左侧色条 */
+.card-alert-red {
+  border-left: 3px solid var(--accent-red);
+}
+.card-alert-orange {
+  border-left: 3px solid var(--accent-orange);
+}
+.card-alert-yellow {
+  border-left: 3px solid var(--accent-yellow);
+}
+
+/* 状态指示灯 */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot-green { background-color: var(--accent-green); }
+.status-dot-yellow { background-color: var(--accent-yellow); }
+.status-dot-red { background-color: var(--accent-red); animation: pulse-dot 2s infinite; }
+.status-dot-gray { background-color: var(--text-muted); }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 字体 */
+.font-mono {
+  font-family: "IBM Plex Mono", "Cascadia Code", "Fira Code", "Consolas", monospace;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4A5568;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* 淡入 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
