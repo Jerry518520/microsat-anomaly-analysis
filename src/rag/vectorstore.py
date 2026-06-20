@@ -27,8 +27,7 @@ except ImportError as e:
 # 导入嵌入模块
 from .embedding import BGE_M3_Embedder, get_embedder
 
-# 配置日志
-logging.basicConfig(level=logging.INFO)
+# 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
 
 

@@ -19,20 +19,6 @@ model:
     n_estimators: 100
     random_state: 42
 
-# 滑动窗口参数
-sliding_window:
-  window_size: 50       # 窗口长度（采样点数）
-  step_size: 10         # 步长
-  statistics:           # 每个窗口提取的统计特征
-    - mean
-    - std
-    - min
-    - max
-    - median
-    - skew
-    - kurtosis
-    - iqr
-
 # 评估参数
 evaluation:
   metrics:
@@ -43,12 +29,4 @@ evaluation:
     - recall
   per_channel: true     # 是否分通道计算指标
 
-# RAG 参数 (Week2+)
-rag:
-  embedding_model: "BAAI/bge-m3"  # 支持中英文跨语言检索
-  vector_db: "faiss"
-  chunk_size: 512
-  chunk_overlap: 50
-  top_k: 5
-  use_gpu: true  # 启用 GPU 加速
-  gpu_id: 0
+# RAG 参数已统一到 configs/rag_config.yaml

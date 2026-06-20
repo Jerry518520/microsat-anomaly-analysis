@@ -11,7 +11,7 @@ import yaml
 import logging
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO)
+# 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
 
 
@@ -152,14 +152,10 @@ class PromptTemplates:
     ) -> Dict[str, str]:
         system = system_prompt or self.system_prompt
         user = (
-            f"问题: {query}\n\n"
-            f"参考知识:\n{context}\n\n"
-            "要求：\n"
-            "1. 直接回答，不解释问题背景\n"
-            "2. 分点列出，每点一行，每点≤30字\n"
-            "3. 标注来源，格式：[文档名 p.页码]\n"
-            "4. 知识不足写\"知识库未覆盖\"\n"
-            "5. 禁止寒暄、总结套话"
+            f"请对以下遥测异常进行诊断。\n\n"
+            f"【异常信息】\n{query}\n\n"
+            f"【参考知识片段】\n{context}\n\n"
+            "请严格按照系统提示中的7段结构输出诊断结论。"
         )
         return {"system": system, "user": user}
 

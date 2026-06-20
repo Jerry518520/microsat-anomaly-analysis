@@ -1,14 +1,18 @@
 """
 重跑段级IForest Baseline — 确认官方基准数字
 """
+import os
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 import json
 
+# 项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # 1. 读取数据集
-df = pd.read_csv('F:/微小卫星项目/microsat-anomaly-analysis/data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv')
+df = pd.read_csv(os.path.join(PROJECT_ROOT, 'data', 'raw', 'dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv'))
 print(f"数据集形状: {df.shape}")
 print(f"异常率: {df['anomaly'].mean():.4f}")
 print(f"训练集: {(df['train']==1).sum()}, 测试集: {(df['train']==0).sum()}")
@@ -61,7 +65,7 @@ output = {
     'results': results
 }
 
-with open('F:/微小卫星项目/microsat-anomaly-analysis/data/results/baseline_rerun_confirm.json', 'w', encoding='utf-8') as f:
+with open(os.path.join(PROJECT_ROOT, 'data', 'results', 'baseline_rerun_confirm.json'), 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=2, ensure_ascii=False)
 
 print("\n结果已保存到 data/results/baseline_rerun_confirm.json")

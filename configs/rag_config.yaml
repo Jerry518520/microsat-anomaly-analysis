@@ -4,7 +4,7 @@
 # ========== 嵌入模型配置 ==========
 embedding:
   # 模型配置
-  model_name: "F:/微小卫星项目/microsat-anomaly-analysis/models/Xorbits/bge-m3"  # 本地ModelScope下载
+  model_name: "models/Xorbits/bge-m3"  # 本地ModelScope下载（相对于项目根目录）
   device: "cuda"  # CUDA 加速（必须）
   batch_size: 32  # 批处理大小（GPU 优化）
   
@@ -29,7 +29,7 @@ vectorstore:
   auto_save: true                       # 自动保存
   
   # GPU 加速
-  use_gpu: true             # CUDA 加速（必须）
+  use_gpu: false            # faiss-cpu（Python 3.13 无 faiss-gpu wheel）
   gpu_id: 0                 # GPU ID
 
 # ========== 文档处理配置 ==========

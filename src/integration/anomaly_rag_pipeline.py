@@ -30,8 +30,9 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from src.utils.data_loader import load_segments, load_config, get_project_root
-from src.features.sliding_window import extract_all_sliding_features, FEATURE_NAMES, META_COLS
-from src.experiments.rule_fallback import compute_stat_thresholds, apply_stat_rules
+from src.utils.constants import CHANNEL_PHYSICS, META_COLS
+from src.utils.stat_rules import compute_stat_thresholds, apply_stat_rules
+from src.features.segment_features import run_segment_baseline
 from src.rag.pipeline import RAGPipeline, get_rag_pipeline
 
 
@@ -79,19 +80,6 @@ class AnomalyRAGPipeline:
     3. RAG知识库解释生成
     """
     
-    # 通道物理含义映射
-    CHANNEL_PHYSICS = {
-        "CADC0872": "Magnetometer X-axis (磁力计X轴)",
-        "CADC0873": "Magnetometer Y-axis (磁力计Y轴)", 
-        "CADC0874": "Magnetometer Z-axis (磁力计Z轴)",
-        "CADC0884": "Photodiode 1 angle (光电二极管1角度)",
-        "CADC0886": "Photodiode 2 angle (光电二极管2角度)",
-        "CADC0888": "Photodiode 3 angle (光电二极管3角度)",
-        "CADC0890": "Photodiode 4 angle (光电二极管4角度)",
-        "CADC0892": "Photodiode 5 angle (光电二极管5角度)",
-        "CADC0894": "Photodiode 6 angle (光电二极管6角度)",
-    }
-    
     # 强通道（磁力计，F1>0.47）
     STRONG_CHANNELS = {"CADC0872", "CADC0873", "CADC0874"}
     
@@ -102,8 +90,6 @@ class AnomalyRAGPipeline:
         self.rag_pipeline = None  # 延迟初始化
         
         # 检测参数（最优配置）
-        self.window_size = 20
-        self.step_size = 10
         self.vote_threshold = 0.25  # 最优投票阈值
         self.psi = 128  # 最优子采样参数
         
@@ -152,15 +138,13 @@ class AnomalyRAGPipeline:
         if progress_callback:
             progress_callback(5, 100, "加载数据完成")
 
-        # 1.2 提取滑动窗口特征
-        print(f"\n[1/5] 提取滑动窗口特征 (window={self.window_size}, step={self.step_size})...")
+        # 1.2 加载段级18维特征
+        print(f"\n[1/5] 加载段级18维特征...")
         if progress_callback:
-            progress_callback(15, 100, "正在提取滑动窗口特征...")
-        features_df = extract_all_sliding_features(
-            segments_df,
-            window_size=self.window_size,
-            step_size=self.step_size
-        )
+            progress_callback(15, 100, "正在加载段级特征...")
+        root = get_project_root()
+        feat_path = os.path.join(root, self.config["data"]["raw_dir"], self.config["data"]["features_file"])
+        features_df = pd.read_csv(feat_path, encoding="utf-8")
 
         feature_cols = [c for c in features_df.columns if c not in META_COLS]
         train_mask = features_df["train"] == 1
@@ -314,17 +298,45 @@ class AnomalyRAGPipeline:
         """窗口预测聚合为段级结果"""
         test_df = test_df.copy()
         test_df["pred"] = window_preds.values if hasattr(window_preds, 'values') else window_preds
-        
+
         seg = test_df.groupby("segment").agg(
             channel=("channel", "first"),
             y_true=("anomaly", "first"),
             anomaly_score=("pred", "mean"),  # 异常窗口比例
             n_windows=("pred", "count"),
         ).reset_index()
-        
+
+        # 如果每个段只有一行（段级特征），需要计算置信度分数
+        if (seg["n_windows"] == 1).all():
+            # 对于段级数据，使用特征值计算置信度
+            # 基于规则违规比例和通道预测的组合
+            seg["anomaly_score"] = seg.apply(
+                lambda row: self._compute_segment_confidence(row, test_df), axis=1
+            )
+
         seg["is_anomaly"] = seg["anomaly_score"] >= threshold
-        
+
         return seg
+
+    def _compute_segment_confidence(self, row, test_df):
+        """为段级数据计算置信度分数（0-1）"""
+        seg_id = row["segment"]
+        seg_data = test_df[test_df["segment"] == seg_id].iloc[0]
+
+        # 基于规则违规比例
+        rule_ratio = seg_data.get("rule_violations", 0) / max(seg_data.get("rule_total", 1), 1)
+
+        # 基于 pred 值（0 或 1）
+        pred_val = float(seg_data.get("pred", 0))
+
+        # 组合置信度：pred=1 时给较高分数，pred=0 时给较低分数
+        # 同时考虑规则违规比例作为调整因子
+        if pred_val == 1:
+            confidence = 0.7 + 0.3 * rule_ratio  # 0.7-1.0
+        else:
+            confidence = 0.0 + 0.3 * rule_ratio  # 0.0-0.3
+
+        return min(max(confidence, 0.0), 1.0)
     
     def _extract_feature_summary(self, seg_windows, feature_cols):
         """提取该段的关键特征统计"""
@@ -378,7 +390,7 @@ class AnomalyRAGPipeline:
         self._init_rag()
         
         # 构建异常描述
-        channel_desc = self.CHANNEL_PHYSICS.get(anomaly.channel, anomaly.channel)
+        channel_desc = CHANNEL_PHYSICS.get(anomaly.channel, anomaly.channel)
         anomaly_desc = self._build_anomaly_description(anomaly)
         
         # 调用RAG pipeline
@@ -398,7 +410,7 @@ class AnomalyRAGPipeline:
     
     def _build_anomaly_description(self, anomaly: AnomalyResult) -> str:
         """构建异常的文字描述"""
-        channel_desc = self.CHANNEL_PHYSICS.get(anomaly.channel, anomaly.channel)
+        channel_desc = CHANNEL_PHYSICS.get(anomaly.channel, anomaly.channel)
         
         desc_parts = [
             f"检测到{channel_desc}通道异常",

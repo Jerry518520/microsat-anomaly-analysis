@@ -13,8 +13,11 @@ import requests
 import json
 from datetime import datetime
 
-# 配置日志
-logging.basicConfig(level=logging.INFO)
+# 自动加载 .env 文件（项目根目录）
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+
+# 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
 
 

@@ -108,8 +108,9 @@ with st.sidebar:
     try:
         from src.rag.pipeline import get_rag_pipeline  # noqa: F401
         _rag_available = True
-    except Exception:
-        pass
+    except Exception as _e:
+        import logging
+        logging.getLogger(__name__).debug(f"RAG 模块加载失败（不影响其他功能）: {_e}")
 
     if _rag_available and os.path.exists(_faiss_path):
         st.info("🔵 RAG诊断引擎在线")

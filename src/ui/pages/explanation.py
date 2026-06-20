@@ -16,6 +16,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from src.utils.constants import CHANNEL_MAP, NO_ANOMALY_CHANNELS
+from src.utils.results_loader import load_json as _load_json_raw
+
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
 
 # ── 文件路径映射（知识库文件 → 实际路径）──
@@ -39,14 +42,6 @@ def _resolve_kb_path(filename: str) -> str | None:
                 return os.path.join(root, filename)
     return None
 
-
-CHANNEL_MAP = {
-    "CADC0872": "磁力计 X轴", "CADC0873": "磁力计 Y轴", "CADC0874": "磁力计 Z轴",
-    "CADC0884": "光电二极管 1", "CADC0886": "光电二极管 2", "CADC0888": "光电二极管 3",
-    "CADC0890": "光电二极管 4", "CADC0892": "光电二极管 5", "CADC0894": "光电二极管 6",
-}
-NO_ANOMALY_CHANNELS = {"CADC0884"}
-
 # ── RAG Pipeline 延迟初始化 ──
 _rag_pipeline = None
 _rag_init_error = None
@@ -69,15 +64,16 @@ def _get_rag_pipeline():
 
 
 @st.cache_data(ttl=60)
-def _get_live_anomaly_score(segment_id: int, channel: str, progress_callback=None):
+def _get_live_anomaly_score(segment_id: int, channel: str):
     """
     实时重算指定 segment 的异常分（基于当前数据与当前算法）。
     返回: (score, mode, timestamp)
+    注意: progress_callback 不放入缓存参数，避免不可哈希问题
     """
     from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
 
     pipeline = AnomalyRAGPipeline()
-    anomalies = pipeline.detect(progress_callback=progress_callback)
+    anomalies = pipeline.detect()
     now_str = time.strftime("%Y-%m-%d %H:%M:%S")
 
     for a in anomalies:
@@ -437,14 +433,10 @@ def render_detail():
         if rag_online:
             if st.button("🔄 实时重算异常分", use_container_width=True):
                 try:
-                    progress_bar = st.progress(0, text="正在初始化检测...")
-
-                    def _on_progress(current, total, message):
-                        progress_bar.progress(current / total, text=message)
-
+                    progress_bar = st.progress(0, text="正在重算异常分...")
                     seg_id_int = int(seg_id)
                     live_score, mode, ts = _get_live_anomaly_score(
-                        seg_id_int, channel, progress_callback=_on_progress
+                        seg_id_int, channel
                     )
                     progress_bar.progress(100, text=f"完成！异常分: {live_score:.3f}")
                     item["anomaly_score"] = float(live_score)
@@ -647,14 +639,4 @@ def render_detail():
 
 @st.cache_data
 def load_json(filename):
-    path = os.path.join(RESULTS_DIR, filename)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    # fallback: 子目录查找
-    for sub in os.listdir(RESULTS_DIR) if os.path.isdir(RESULTS_DIR) else []:
-        sub_path = os.path.join(RESULTS_DIR, sub, filename)
-        if os.path.isfile(sub_path):
-            with open(sub_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    return None
+    return _load_json_raw(filename)

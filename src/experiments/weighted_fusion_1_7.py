@@ -1,4 +1,4 @@
-﻿"""
+"""
 鍒嗛€氶亾鍔犳潈铻嶅悎浼樺寲 (1.7)
 鐩爣: SegF1浠?.325鎻愬崌鍒?0.35
 
@@ -19,8 +19,9 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
-from src.utils.data_loader import load_segments, load_config, get_project_root
-from src.features.sliding_window import extract_all_sliding_features, META_COLS
+from src.utils.data_loader import load_config, get_project_root, load_segments
+from src.features.sliding_window import extract_all_sliding_features
+from src.utils.constants import META_COLS
 from src.experiments.rule_fallback import compute_stat_thresholds, apply_stat_rules
 
 

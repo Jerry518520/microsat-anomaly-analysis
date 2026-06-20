@@ -1,7 +1,7 @@
 """Dashboard API — 实时告警中心数据接口"""
-import json
 import os
 import sys
+import pandas as pd
 from fastapi import APIRouter
 from starlette.responses import Response
 
@@ -9,34 +9,13 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
-
-CHANNEL_MAP = {
-    "CADC0872": "磁力计 X轴", "CADC0873": "磁力计 Y轴", "CADC0874": "磁力计 Z轴",
-    "CADC0884": "光电二极管 1", "CADC0886": "光电二极管 2", "CADC0888": "光电二极管 3",
-    "CADC0890": "光电二极管 4", "CADC0892": "光电二极管 5", "CADC0894": "光电二极管 6",
-}
-NO_ANOMALY_CHANNELS = {"CADC0884"}
-FAULT_THRESHOLD = 0.05
+from src.utils.constants import CHANNEL_MAP, NO_ANOMALY_CHANNELS, FAULT_THRESHOLD
+from src.utils.results_loader import load_json
 
 router = APIRouter()
 
 
-def _load_json(filename: str):
-    path = os.path.join(RESULTS_DIR, filename)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    for sub in os.listdir(RESULTS_DIR) if os.path.isdir(RESULTS_DIR) else []:
-        sub_path = os.path.join(RESULTS_DIR, sub, filename)
-        if os.path.isfile(sub_path):
-            with open(sub_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    return None
-
-
 def _load_segments():
-    import pandas as pd
     path = os.path.join(PROJECT_ROOT, "data", "raw", "segments.csv")
     if not os.path.exists(path):
         return None
@@ -58,8 +37,8 @@ def _severity(score: float, channel: str = "") -> str:
 @router.get("/metrics")
 def get_core_metrics():
     """核心指标: 异常率、告警数、F1、吞吐量"""
-    rag_data = _load_json("anomaly_rag_results.json")
-    ss_data = _load_json("subsampling_sweep_1.9_results.json")
+    rag_data = load_json("anomaly_rag_results.json")
+    ss_data = load_json("subsampling_sweep_1.9_results.json")
     df_seg = _load_segments()
 
     best_f1 = ss_data.get("best_seg_f1", 0.425) if ss_data else 0.425
@@ -150,7 +129,7 @@ def get_channels():
 @router.get("/alerts")
 def get_alerts():
     """故障告警队列 — 异常分 > 0.05 的条目"""
-    rag_data = _load_json("anomaly_rag_results.json")
+    rag_data = load_json("anomaly_rag_results.json")
     if not rag_data:
         return {"alerts": [], "total": 0}
 
