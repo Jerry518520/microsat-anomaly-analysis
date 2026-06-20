@@ -11,8 +11,9 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, roc_auc_score, precision_score, recall_score
-from src.utils.data_loader import load_segments, load_config, get_project_root
-from src.features.sliding_window import extract_all_sliding_features, META_COLS
+from src.utils.data_loader import load_config, get_project_root, load_segments
+from src.features.sliding_window import extract_all_sliding_features
+from src.utils.constants import META_COLS
 
 
 def run_iforest_eval(features_df, contamination=0.4):

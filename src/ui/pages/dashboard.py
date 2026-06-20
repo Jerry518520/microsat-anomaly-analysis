@@ -2,34 +2,18 @@
 首页 — 实时监控看板 + 故障告警队列
 """
 import streamlit as st
-import json
 import os
 import sys
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if PROJECT_ROOT not in sys.path: sys.path.insert(0, PROJECT_ROOT)
-RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
 
-CHANNEL_MAP = {
-    "CADC0872": "磁力计 X轴", "CADC0873": "磁力计 Y轴", "CADC0874": "磁力计 Z轴",
-    "CADC0884": "光电二极管 1", "CADC0886": "光电二极管 2", "CADC0888": "光电二极管 3",
-    "CADC0890": "光电二极管 4", "CADC0892": "光电二极管 5", "CADC0894": "光电二极管 6",
-}
-NO_ANOMALY_CHANNELS = {"CADC0884"}
+from src.utils.constants import CHANNEL_MAP, NO_ANOMALY_CHANNELS, FAULT_THRESHOLD
+from src.utils.results_loader import load_json as _load_json_raw
 
 @st.cache_data
 def load_json(filename):
-    path = os.path.join(RESULTS_DIR, filename)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    # fallback: 在子目录中查找（兼容 reorganize 后的目录结构）
-    for sub in os.listdir(RESULTS_DIR) if os.path.isdir(RESULTS_DIR) else []:
-        sub_path = os.path.join(RESULTS_DIR, sub, filename)
-        if os.path.isfile(sub_path):
-            with open(sub_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    return None
+    return _load_json_raw(filename)
 
 @st.cache_data
 def load_segments():
@@ -108,7 +92,6 @@ def _render_alert_list():
     if not results: return st.success("当前无未处理告警。")
 
     # 只展示异常分 > 0.05 的真正故障，过滤掉低分/负分噪声
-    FAULT_THRESHOLD = 0.05
     faults = [item for item in results if item.get("anomaly_score", 0) > FAULT_THRESHOLD]
     faults.sort(key=lambda x: x.get("anomaly_score", 0), reverse=True)
     if not faults:

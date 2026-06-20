@@ -32,8 +32,7 @@ except ImportError as e:
     print("请安装：pip install torch sentence-transformers transformers")
     sys.exit(1)
 
-# 配置日志
-logging.basicConfig(level=logging.INFO)
+# 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
 
 
@@ -69,7 +68,14 @@ class BGE_M3_Embedder:
         logger.info(f"初始化 BGE-M3 嵌入编码器，设备：{self.device}")
         
         # 模型参数
-        self.model_name = self.embedding_config.get("model_name", "BAAI/bge-m3")
+        model_name = self.embedding_config.get("model_name", "BAAI/bge-m3")
+        # 如果是相对路径且存在，解析为绝对路径
+        project_root = Path(__file__).parent.parent.parent
+        model_path = project_root / model_name
+        if model_path.is_dir():
+            self.model_name = str(model_path)
+        else:
+            self.model_name = model_name
         self.batch_size = self.embedding_config.get("batch_size", 32)
         self.normalize_embeddings = self.embedding_config.get("normalize_embeddings", True)
         self.max_length = self.embedding_config.get("max_length", 512)
@@ -270,7 +276,7 @@ class BGE_M3_Embedder:
     
     def get_embedding_dimension(self) -> int:
         """获取嵌入向量维度"""
-        return self.model.get_sentence_embedding_dimension()
+        return self.model.get_embedding_dimension()
     
     def clear_cache(self):
         """清空缓存"""

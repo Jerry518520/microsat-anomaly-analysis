@@ -22,9 +22,11 @@ PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 os.chdir(PROJECT_ROOT)
 
-# 设置 API key (从环境变量或硬编码)
+# 加载 .env 中的 API key
+from dotenv import load_dotenv
+load_dotenv()
 if not os.environ.get("VOLCENGINE_API_KEY"):
-    os.environ["VOLCENGINE_API_KEY"] = "ark-e1423552-067c-4537-80a2-ad6c764c3bbe-52da8"
+    raise RuntimeError("VOLCENGINE_API_KEY 未设置，请在 .env 文件中配置")
 
 from src.rag.vectorstore import FAISSVectorStore
 from src.rag.embedding import BGE_M3_Embedder

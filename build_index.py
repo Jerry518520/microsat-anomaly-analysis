@@ -6,7 +6,7 @@ os.environ['HF_HUB_OFFLINE'] = '1'
 os.environ['TRANSFORMERS_OFFLINE'] = '1'
 
 # Change to project root
-os.chdir(r'F:\微小卫星项目\microsat-anomaly-analysis')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # 1. Load config
 with open('configs/rag_config.yaml', 'r', encoding='utf-8') as f:

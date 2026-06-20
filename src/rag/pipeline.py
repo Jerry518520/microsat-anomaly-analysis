@@ -17,8 +17,7 @@ from .vectorstore import FAISSVectorStore, get_vectorstore
 from .llm_client import LLMClient, get_llm_client
 from .prompts import PromptTemplates, get_prompt_templates
 
-# 配置日志
-logging.basicConfig(level=logging.INFO)
+# 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
 
 

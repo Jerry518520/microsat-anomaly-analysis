@@ -1,7 +1,7 @@
 """
 公平对比实验 — 控制变量法
 所有阶段在同一个环境、同一条管线、同一个random_state下运行
-数据: segments.csv → 滑动窗口22维特征 → 分通道建模
+数据: segments.csv → 段级18维特征 → 分通道建模
 random_state: 42 (全局)
 
 阶段:
@@ -30,8 +30,8 @@ warnings.filterwarnings('ignore')
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJECT_ROOT)
 
-from src.utils.data_loader import load_segments, load_config, get_project_root
-from src.features.sliding_window import extract_all_sliding_features, META_COLS
+from src.utils.data_loader import load_config, get_project_root, load_segments
+from src.utils.constants import META_COLS
 
 
 def eval_iforest(X_train, y_train, X_test, y_test, contamination, psi=None, seed=42):
@@ -141,10 +141,12 @@ def main():
     raw_df = load_segments(config)
     print(f"原始数据: {raw_df.shape[0]} 行, {raw_df['segment'].nunique()} 个segment")
 
-    # 滑动窗口特征提取
-    print("提取滑动窗口特征 (ws=20)...")
-    features_df = extract_all_sliding_features(raw_df, window_size=20, step_size=10)
-    feature_cols = [c for c in features_df.columns if c not in META_COLS and c != 'window_idx']
+    # 段级18维特征加载
+    print("加载段级18维特征...")
+    feat_path = os.path.join(root, config["data"]["raw_dir"], config["data"]["features_file"])
+    features_df = pd.read_csv(feat_path, encoding="utf-8")
+    meta_cols = ["channel", "segment", "anomaly", "train", "sampling"]
+    feature_cols = [c for c in features_df.columns if c not in meta_cols]
     print(f"特征维度: {len(feature_cols)} 列")
     print(f"样本总数: {len(features_df)}")
 
@@ -204,7 +206,7 @@ def main():
     # Stage 0: 段级Baseline (同一测试集，公平对比)
     # ============================================================
     print_header("Stage 0: 段级Baseline (同一测试集)")
-    # 对每个segment，用其22维滑动窗口特征的均值作为段级特征
+    # 使用段级18维特征
     train_seg_agg = train_df.groupby('segment').agg(
         anomaly=('anomaly', 'first'),
         channel=('channel', 'first'),
@@ -250,7 +252,7 @@ def main():
     }
 
     # ============================================================
-    # Stage 1: 滑动窗口Baseline 全局IForest
+    # Stage 1: 分通道IForest
     # ============================================================
     print_header("Stage 1: Baseline 全局IForest")
     stage1_results = {}

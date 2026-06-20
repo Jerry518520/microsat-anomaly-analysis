@@ -2,14 +2,14 @@
 系统后台 — 算法调优参数 + 评测对比与实验演进
 """
 import streamlit as st
-import json
 import os
 import sys
 import pandas as pd
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if PROJECT_ROOT not in sys.path: sys.path.insert(0, PROJECT_ROOT)
-RESULTS_DIR = os.path.join(PROJECT_ROOT, "data", "results")
+
+from src.utils.results_loader import load_json as _load_json_raw
 
 @st.cache_data
 def _get_rag_config():
@@ -56,16 +56,7 @@ def _get_rag_config():
 
 @st.cache_data
 def load_json(filename):
-    path = os.path.join(RESULTS_DIR, filename)
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    for sub in os.listdir(RESULTS_DIR) if os.path.isdir(RESULTS_DIR) else []:
-        sub_path = os.path.join(RESULTS_DIR, sub, filename)
-        if os.path.isfile(sub_path):
-            with open(sub_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    return None
+    return _load_json_raw(filename)
 
 def render():
     st.markdown("## ⚙️ 核心算法参数与基准调优")

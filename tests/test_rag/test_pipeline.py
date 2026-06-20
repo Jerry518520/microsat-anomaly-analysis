@@ -17,7 +17,7 @@ sys.path.insert(0, str(project_root))
 from src.rag.pipeline import RAGPipeline, get_rag_pipeline, query_knowledge, analyze_anomaly
 from src.rag.embedding import BGE_M3_Embedder
 from src.rag.vectorstore import FAISSVectorStore
-from src.rag.llm_client import NVIDIALLMClient
+from src.rag.llm_client import LLMClient
 from src.rag.prompts import PromptTemplates
 
 
@@ -105,7 +105,7 @@ class TestRAGPipeline:
     @pytest.fixture
     def mock_llm_client(self):
         """模拟 LLM 客户端"""
-        llm_client = Mock(spec=NVIDIALLMClient)
+        llm_client = Mock(spec=LLMClient)
         llm_client.generate.return_value = "根据知识库分析，卫星遥测数据异常可能由以下原因导致：1. 传感器故障 2. 通信链路问题"
         llm_client.get_stats.return_value = {
             "total_requests": 1,
