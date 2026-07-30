@@ -78,8 +78,8 @@ frontend/.vite/
 # Bundled Node.js runtime (too large for git, distribute separately)
 node-runtime/
 
-# 单独分发的运行时数据包（不入库，单独发给队友）
-data_share.zip
+# 运行时数据包：已纳入版本库（约 22MB，含 segments.csv + results JSON + vectorstore），队友 clone 即得
+# data_share.zip
 
 # Tooling / IDE artifacts (理解工具、代码图、日志等，不入库)
 .understand-anything/

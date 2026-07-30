@@ -23,6 +23,72 @@
 
 ---
 
+## 🚀 队友部署指南（分发版 · 必读）
+
+> 本仓库**工作分支是 `dev`**，默认 `main` 仅含初始化空壳。**克隆务必加 `-b dev`**，否则拿到的是空项目。
+
+### 前置要求
+- **NVIDIA 显卡 + CUDA 11.8+**（本项目锁死 `faiss-gpu`，无 GPU 无法安装/运行；向量检索走 GPU）
+- **Python 3.11 / 3.12**（推荐；faiss-gpu 官方 wheel 齐全，3.13 需自行解决安装）
+- **Node.js 18+**（仅前端开发需要）
+- Git
+
+### 第 1 步：克隆（必须 `-b dev`）
+```bash
+git clone -b dev https://github.com/Jerry518520/microsat-anomaly-analysis.git
+cd microsat-anomaly-analysis
+```
+
+### 第 2 步：Python 依赖
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate    # Linux / macOS
+pip install -r requirements.txt
+```
+
+### 第 3 步：解压数据包（已随仓库分发，无需额外索取）
+仓库根目录的 `data_share.zip`（约 22MB）包含运行所需的全部数据：
+`data/raw/segments.csv` + `data/results/*.json` + `data/vectorstore/*`。
+在**项目根目录**解压即可（解压后应与 `src/`、`frontend/` 同级出现 `data/`）：
+```bash
+# Windows：右键解压，或 PowerShell
+Expand-Archive data_share.zip -DestinationPath .
+# Linux / macOS
+unzip data_share.zip
+```
+
+### 第 4 步：配置环境变量
+```bash
+cp .env.example .env        # 然后编辑 .env
+```
+- `VOLCENGINE_API_KEY`：**RAG 问答接口必需**；若只做看板/检测/波形联调可暂时留空。
+- `EMBEDDING_MODEL_PATH`：选填。留空则首次调用 RAG 时自动从 HuggingFace 镜像（hf-mirror.com）下载 `BAAI/bge-m3`；若已拿到本地模型，设为 `models/Xorbits/bge-m3`。
+
+### 第 5 步：启动
+**Windows（推荐，一键启动后端+前端）：**
+```bash
+python scripts/start_ui.py
+```
+**Linux / macOS（`start_ui.py` 为 Windows 专用，需手动启动）：**
+```bash
+# 终端 1：后端
+.venv/bin/activate
+uvicorn src.api.main:app --port 8000 --host 127.0.0.1
+# 终端 2：前端
+cd frontend && npm install && npm run dev
+```
+启动后访问：
+- 前端界面：http://localhost:5180
+- 后端 API 文档：http://localhost:8000/docs
+
+### 接口对齐（前端开发）
+- 接口契约见 **`API.md`**（/api/health、/api/dashboard、/api/detection、/api/explanation）。
+- 对接清单与分工见 **`HANDOFF.md`**。
+- **除 `/api/explanation/query`（RAG 问答）需要 4.4GB 嵌入模型外，其余接口仅需 `data_share.zip` 数据即可联调**，无需模型权重。
+
+---
+
 ## 项目概述
 
 本项目基于 **ESA OPS-SAT 卫星遥测数据集**，实现了一套完整的微小卫星遥测异常检测与智能解释系统：
@@ -226,7 +292,7 @@ microsat-anomaly-analysis/
 | **异常检测** | scikit-learn (Isolation Forest) | 机器学习 |
 | **特征工程** | pandas + numpy + 自定义提取器 | 18维特征 |
 | **嵌入模型** | BGE-M3 (sentence-transformers) | 向量化 |
-| **向量库** | FAISS (faiss-cpu) | 相似度检索 |
+| **向量库** | FAISS (faiss-gpu, 需 CUDA) | 相似度检索 |
 | **LLM** | DeepSeek V3 (火山引擎 Ark) | 文本生成 |
 | **RAG 框架** | LangChain | 流程编排 |
 | **旧版 UI** | Streamlit | 已弃用 |
@@ -237,9 +303,9 @@ microsat-anomaly-analysis/
 
 ### 系统要求
 
-- **Python**: 3.11+ (推荐 3.11 或 3.12，3.13 无 faiss-gpu wheel)
+- **Python**: 3.11 / 3.12（推荐；faiss-gpu 官方 wheel 齐全，3.13 需自行解决 faiss-gpu 安装）
 - **Node.js**: 18+ (前端开发)
-- **CUDA**: 11.8+ (可选，用于 GPU 加速嵌入)
+- **CUDA**: 11.8+（**必需**，本项目使用 faiss-gpu，无 NVIDIA/CUDA 无法安装或运行）
 - **操作系统**: Windows 10/11, Linux, macOS
 
 ### Python 环境
@@ -282,14 +348,18 @@ npm install
 
 ### 环境变量
 
-在项目根目录创建 `.env` 文件：
+参考仓库根目录的 `.env.example` 创建 `.env` 文件：
 
 ```env
-# 火山引擎 API Key (RAG 必需)
+# 火山引擎 API Key（RAG 问答必需；仅做看板/检测可留空）
 VOLCENGINE_API_KEY=your_api_key_here
 
-# 可选: HuggingFace 镜像
+# 可选：HuggingFace 镜像（加速 BGE-M3 下载）
 HF_ENDPOINT=https://hf-mirror.com
+
+# 可选：本地嵌入模型路径。留空则使用 BAAI/bge-m3 自动下载；
+#       若已拿到本地模型则设为 models/Xorbits/bge-m3
+EMBEDDING_MODEL_PATH=
 ```
 
 ### 模型下载
@@ -476,7 +546,7 @@ RAG 系统配置：
 ```yaml
 # 嵌入模型
 embedding:
-  model_name: "models/Xorbits/bge-m3"
+  model_name: "BAAI/bge-m3"  # 默认从 HuggingFace 镜像自动下载；可用环境变量 EMBEDDING_MODEL_PATH 覆盖为本地路径
   device: "cuda"
   batch_size: 32
   max_length: 512
@@ -583,19 +653,13 @@ python scripts/run_rag_experiment.py
 
 ## 常见问题
 
-### Q1: CUDA 不可用怎么办？
+### Q1: 没有 NVIDIA / CUDA 能用吗？
 
-```bash
-# 检查 CUDA
-python -c "import torch; print(torch.cuda.is_available())"
+本项目的向量检索依赖 `faiss-gpu`，**必须有 NVIDIA 显卡和 CUDA 环境**才能安装运行。若机器无 GPU：
+- 看板/检测/波形接口仍可读 `data_share.zip` 中的数据并联调前端；
+- 但 RAG 问答（`/api/explanation/query`）与嵌入计算需要 GPU，无法在无卡环境运行。
 
-# 如果不可用，修改 configs/rag_config.yaml
-embedding:
-  device: "cpu"  # 改为 cpu
-
-vectorstore:
-  use_gpu: false  # 使用 faiss-cpu
-```
+如确需 CPU 版兜底，可把 `requirements.txt` 中的 `faiss-gpu` 换成 `faiss-cpu`，并将 `rag_config.yaml` 的 `embedding.device` 改为 `cpu`（属非官方方案，未经充分测试）。
 
 ### Q2: FAISS 索引构建失败？
 

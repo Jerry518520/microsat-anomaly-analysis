@@ -2,7 +2,7 @@ streamlit>=1.30.0
 plotly>=5.18.0
 pandas>=2.0.0
 python-dotenv>=1.0.0
-faiss-cpu  # Python 3.13 无 faiss-gpu wheel，嵌入用 CUDA torch
+faiss-gpu  # 必须！需 NVIDIA/CUDA；无 GPU 环境无法安装/运行
 sentence-transformers
 langchain
 langchain-community
