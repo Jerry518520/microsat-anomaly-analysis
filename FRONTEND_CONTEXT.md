@@ -27,7 +27,7 @@
 - **解释**：RAG（知识库用 BGE-M3 向量化 + FAISS 索引 + 大模型生成自然语言诊断）。
 - **基线指标（用于大屏展示，请勿当作实时值）**：
   - F1：Stage0=0.2996 → Stage1=0.5381 → Stage2=0.5683
-  - 最佳 SegF1 = 0.425
+  - 最佳 SegF1 = 0.5683
 - **大屏目的**：实时监控告警中心 + 单异常深度诊断 + RAG 解释可视化。
 
 ---
@@ -75,23 +75,24 @@
 | `total_rows` | int | 总行数 |
 | `fault_count` | int | 异常分 > 0.05 的故障数 |
 | `total_anomalies` | int | RAG 结果中的异常条目数 |
-| `best_f1` | float | 最佳 SegF1（默认 0.425） |
+| `best_f1` | float | 最佳 SegF1（实测 = best_seg_f1 = 0.5683，取自 subsampling_sweep_1.9_results.json） |
 | `throughput` | int | 处理行数 |
 | `channel_count` | int | 固定 9 |
 
 示例：
 ```json
 {
-  "anomaly_rate": 0.123,
-  "anomaly_rate_str": "12.3%",
-  "anomaly_rows": 36900,
-  "total_rows": 300000,
-  "fault_count": 7,
-  "total_anomalies": 42,
-  "best_f1": 0.425,
-  "throughput": 300000,
+  "anomaly_rate": 0.3304,
+  "anomaly_rate_str": "33.0%",
+  "anomaly_rows": 100264,
+  "total_rows": 303493,
+  "fault_count": 200,
+  "total_anomalies": 200,
+  "best_f1": 0.5683,
+  "throughput": 303493,
   "channel_count": 9
 }
+> 注：以上为 2026-07-30 实际计算值（来源 `data/raw/segments.csv` + `data/results/anomaly_rag_results.json`）：total_rows=303493、anomaly_rows=100264、anomaly_rate=33.0%、fault_count=total_anomalies=200（anomaly_score>0.05 的 RAG 条目数）、best_f1=0.5683（=best_seg_f1）。
 ```
 
 ### 3.2 GET `/api/dashboard/channels`
