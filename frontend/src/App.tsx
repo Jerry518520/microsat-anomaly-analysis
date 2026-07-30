@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, startTransition } from 'react';
+import ReactMarkdown from 'react-markdown';
 import {
   Activity,
   Sliders,
@@ -44,17 +45,35 @@ const SEVERITY_COLORS: Record<Severity, string> = {
 // 2. Plotly 图表包装
 // ==========================================
 
-const Plot: React.FC<{ data: any[]; layout: any; config?: any; style?: React.CSSProperties }> = ({ data, layout, config, style }) => {
+interface PlotProps {
+  data: Record<string, unknown>[];
+  layout: Record<string, unknown>;
+  config?: Record<string, unknown>;
+  style?: React.CSSProperties;
+  useResizeHandler?: boolean;
+}
+
+const Plot: React.FC<PlotProps> = ({ data, layout, config, style, useResizeHandler }) => {
   const plotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (plotRef.current && data) {
-      Plotly.newPlot(plotRef.current, data, layout, config);
+    const el = plotRef.current;
+    if (el && data) {
+      Plotly.newPlot(el, data, layout, config);
       return () => {
-        if (plotRef.current) Plotly.purge(plotRef.current);
+        Plotly.purge(el);
       };
     }
   }, [data, layout, config]);
+
+  useEffect(() => {
+    if (!useResizeHandler || !plotRef.current) return;
+    const observer = new ResizeObserver(() => {
+      if (plotRef.current) Plotly.Plots.resize(plotRef.current);
+    });
+    observer.observe(plotRef.current);
+    return () => observer.disconnect();
+  }, [useResizeHandler]);
 
   return <div ref={plotRef} style={style} />;
 };
@@ -85,7 +104,9 @@ const ChannelSparkline: React.FC<{ data: ChannelData }> = ({ data }) => {
     const anomalyX = data.anomaly_indices
       .filter(idx => idx < data.sparkline_values.length);
 
-    Plotly.newPlot(plotRef.current, [
+    const el = plotRef.current;
+
+    Plotly.newPlot(el, [
       {
         y: data.sparkline_values,
         mode: 'lines',
@@ -116,7 +137,7 @@ const ChannelSparkline: React.FC<{ data: ChannelData }> = ({ data }) => {
     }, { displayModeBar: false, responsive: true });
 
     return () => {
-      if (plotRef.current) Plotly.purge(plotRef.current);
+      Plotly.purge(el);
     };
   }, [data, color]);
 
@@ -273,7 +294,42 @@ interface AlertItem {
   anomaly_type: string;
 }
 
-const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, anomalyData?: any) => void }> = ({ onNavigate }) => {
+interface AnomalyDataContext {
+  seg?: string;
+  ch?: string;
+  score?: number;
+  summary?: string;
+}
+
+interface SourceItem {
+  filename: string;
+  page?: string;
+  score?: number;
+  local_path?: string;
+}
+
+interface WaveformData {
+  values: number[];
+  timestamps: string[];
+  anomaly_mask: number[];
+}
+
+interface DetailSections {
+  '可能原因'?: string;
+  '影响评估'?: string;
+  '建议措施'?: string;
+  '结论'?: string;
+}
+
+interface DetailData {
+  channel_label?: string;
+  urgency?: string;
+  sections: DetailSections;
+  sources?: SourceItem[];
+  raw_explanation?: string;
+}
+
+const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, anomalyData?: AnomalyDataContext) => void }> = ({ onNavigate }) => {
   const [metrics, setMetrics] = useState<MetricsData | null>(null);
   const [channels, setChannels] = useState<ChannelData[]>([]);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
@@ -283,8 +339,10 @@ const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, a
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchAll = useCallback(async (isAutoRefresh = false) => {
-    if (!isAutoRefresh) setRefreshing(true);
-    setError(null);
+    startTransition(() => {
+      if (!isAutoRefresh) setRefreshing(true);
+      setError(null);
+    });
     try {
       const [metricsRes, channelsRes, alertsRes] = await Promise.all([
         fetch('/api/dashboard/metrics'),
@@ -313,9 +371,12 @@ const DashboardView: React.FC<{ onNavigate: (page: string, channelId?: string, a
   }, []);
 
   useEffect(() => {
-    fetchAll();
+    const raf = requestAnimationFrame(() => fetchAll());
     const timer = setInterval(() => fetchAll(true), REFRESH_INTERVAL);
-    return () => clearInterval(timer);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(timer);
+    };
   }, [fetchAll]);
 
   const faultCount = metrics?.fault_count ?? alerts.length;
@@ -521,13 +582,71 @@ const DetectionView: React.FC = () => {
 // 8. Explanation 视图
 // ==========================================
 
-const ExplanationView: React.FC<{ channelId?: string; anomalyData?: any; onBack: () => void }> = ({ channelId = 'CADC0874', anomalyData, onBack }) => {
-  const chLabel = CHANNEL_MAP[channelId] || channelId;
-  const score = anomalyData?.score || 0.234;
-
-  const mockData = Array.from({ length: 100 }, (_, i) => Math.sin(i / 5) * 10 + (Math.random() * 2));
+// Fallback mock 数据（模块顶层，避免渲染期间调用 impure 函数）
+const MOCK_FALLBACK = (() => {
+  // 确定性伪随机（mulberry32）
+  let s = 42;
+  const rand = () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const mockData = Array.from({ length: 100 }, (_, i) => Math.sin(i / 5) * 10 + (rand() * 2));
   const mockAnomalies = mockData.map((_, i) => i === 45 || i === 46 || i === 78);
   const mockTimes = Array.from({ length: 100 }, (_, i) => `14:${Math.floor(i / 60).toString().padStart(2, '0')}:${(i % 60).toString().padStart(2, '0')}`);
+  return { mockData, mockAnomalies, mockTimes };
+})();
+
+const ExplanationView: React.FC<{ channelId?: string; anomalyData?: AnomalyDataContext; onBack: () => void }> = ({ channelId = 'CADC0874', anomalyData, onBack }) => {
+  const chLabel = CHANNEL_MAP[channelId] || channelId;
+  const score = anomalyData?.score || 0;
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [waveformData, setWaveformData] = useState<WaveformData | null>(null);
+  const [detailData, setDetailData] = useState<DetailData | null>(null);
+
+  // Fallback mock 数据
+
+  // 从后端获取真实数据
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!channelId || !anomalyData?.seg) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const [waveRes, detailRes] = await Promise.all([
+          fetch(`/api/explanation/waveform?channel=${channelId}&segment=${anomalyData.seg}`),
+          fetch(`/api/explanation/detail?channel=${channelId}&segment=${anomalyData.seg}`)
+        ]);
+        if (waveRes.ok) {
+          const waveData = await waveRes.json();
+          if (!waveData.error) setWaveformData(waveData);
+        }
+        if (detailRes.ok) {
+          const detData = await detailRes.json();
+          if (!detData.error) setDetailData(detData);
+        }
+      } catch (e) {
+        console.error('Explanation fetch error:', e);
+        setError('无法连接后端服务');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [channelId, anomalyData?.seg]);
+
+  // 使用真实数据或 fallback 到 mock
+  const displayData = waveformData?.values || MOCK_FALLBACK.mockData;
+  const displayTimes = waveformData?.timestamps || MOCK_FALLBACK.mockTimes;
+  const displayAnomalies = waveformData?.anomaly_mask?.map((v: number) => v === 1) || MOCK_FALLBACK.mockAnomalies;
+
+  // 诊断数据
+  const rawSections = detailData?.sections || {};
+  const sources = detailData?.sources || [];
+  const urgency = detailData?.urgency || '高优先级';
+
+  // 检查 sections 是否是乱码（key 不包含正常中文字符）
+  const isGarbled = Object.keys(rawSections).some(k => !/[一-鿿]/.test(k));
+  const sections = isGarbled ? {} : rawSections;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -537,15 +656,21 @@ const ExplanationView: React.FC<{ channelId?: string; anomalyData?: any; onBack:
           ← 返回
         </button>
         <h2 className="text-base font-semibold text-[var(--text-primary)]">
-          深度诊断 | 段 #{anomalyData?.seg || '1247'} · {chLabel}
+          深度诊断 | 段 #{anomalyData?.seg || '—'} · {chLabel}
         </h2>
+        {loading && <span className="text-xs text-[var(--text-muted)]">加载中...</span>}
+        {error && <span className="text-xs text-[var(--accent-red)]">{error}</span>}
       </div>
 
       {/* 示波器 */}
       <div className="card card-alert-red">
-        <div className="text-xs font-medium text-[var(--accent-red)] mb-2 uppercase tracking-wider">示波器波形</div>
+        <div className="text-xs font-medium text-[var(--accent-red)] mb-2 uppercase tracking-wider">
+          示波器波形
+          {waveformData && <span className="ml-2 text-[var(--text-muted)]">(真实数据)</span>}
+          {!waveformData && !loading && <span className="ml-2 text-[var(--text-muted)]">(模拟数据)</span>}
+        </div>
         <div className="h-72 bg-[var(--bg-primary)] border border-[var(--border-default)] rounded relative overflow-hidden" style={{ minHeight: 288 }}>
-          <OscilloscopePlotly data={mockData} timestamps={mockTimes} anomalies={mockAnomalies} />
+          <OscilloscopePlotly data={displayData} timestamps={displayTimes} anomalies={displayAnomalies} />
           <div className="absolute bottom-2 right-2 flex space-x-4 text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-card)]/90 px-2 py-1 rounded pointer-events-none">
             <div><span className="text-[var(--accent-blue)]">CH:</span> {channelId}</div>
             <div><span className="text-[var(--accent-yellow)]">LIMIT:</span> ±3σ</div>
@@ -559,12 +684,13 @@ const ExplanationView: React.FC<{ channelId?: string; anomalyData?: any; onBack:
           <div className="card">
             <div className="text-sm font-medium text-[var(--text-primary)] mb-3 pb-2 border-b border-[var(--border-subtle)]">
               AI 结构化诊断
+              {detailData && <span className="ml-2 text-xs text-[var(--accent-green)]">(RAG生成)</span>}
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-sm bg-[var(--bg-primary)] p-3 rounded border border-[var(--border-subtle)] mb-4">
               <div>
                 <div className="text-xs text-[var(--text-muted)] mb-0.5">通道定位</div>
-                <div className="font-medium">{chLabel}</div>
+                <div className="font-medium">{detailData?.channel_label || chLabel}</div>
               </div>
               <div>
                 <div className="text-xs text-[var(--text-muted)] mb-0.5">异常分</div>
@@ -572,26 +698,46 @@ const ExplanationView: React.FC<{ channelId?: string; anomalyData?: any; onBack:
               </div>
               <div>
                 <div className="text-xs text-[var(--text-muted)] mb-0.5">紧急程度</div>
-                <div className="font-medium text-[var(--accent-orange)]">高优先级</div>
+                <div className="font-medium text-[var(--accent-orange)]">{urgency}</div>
               </div>
             </div>
 
-            <div className="space-y-4 text-sm">
-              <div className="pb-3 border-b border-[var(--border-subtle)]">
-                <h4 className="font-medium text-[var(--text-primary)] mb-1">可能原因</h4>
-                <p className="text-[var(--text-secondary)] leading-relaxed">近24小时内太阳风暴引起的高能粒子流诱发了剧烈的轨道静电磁场扰动，卫星磁力计感应线圈在Z轴平面产生高频感应电动势错觉，致使遥测发生离群多阶尖峰脉冲。</p>
-              </div>
-              <div className="pb-3 border-b border-[var(--border-subtle)]">
-                <h4 className="font-medium text-[var(--text-primary)] mb-1">影响评估</h4>
-                <p className="text-[var(--text-secondary)] leading-relaxed">若在此不加干预或未能进行软件基线滤波对冲，将直接恶化反动量轮姿态确定系统（ADCS）的物理收敛环路收敛速度。</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-[var(--text-primary)] mb-1">建议措施</h4>
-                <ol className="list-decimal list-inside text-[var(--text-secondary)] space-y-1 mt-1 pl-1">
-                  <li>下发瞬态指令刷新 Z轴 磁力计卡尔曼滤波器的静态协方差参数。</li>
-                  <li>对比当前星敏感器（Star Tracker）备份联合标定数据判定真实漂移量。</li>
-                </ol>
-              </div>
+            <div className="space-y-4 text-sm prose prose-sm max-w-none prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-strong:text-[var(--text-primary)] prose-li:text-[var(--text-secondary)]">
+              {sections['可能原因'] && (
+                <div className="pb-3 border-b border-[var(--border-subtle)]">
+                  <h4 className="font-medium text-[var(--text-primary)] mb-1">可能原因</h4>
+                  <ReactMarkdown>{sections['可能原因']}</ReactMarkdown>
+                </div>
+              )}
+              {sections['影响评估'] && (
+                <div className="pb-3 border-b border-[var(--border-subtle)]">
+                  <h4 className="font-medium text-[var(--text-primary)] mb-1">影响评估</h4>
+                  <ReactMarkdown>{sections['影响评估']}</ReactMarkdown>
+                </div>
+              )}
+              {sections['建议措施'] && (
+                <div className="pb-3 border-b border-[var(--border-subtle)]">
+                  <h4 className="font-medium text-[var(--text-primary)] mb-1">建议措施</h4>
+                  <ReactMarkdown>{sections['建议措施']}</ReactMarkdown>
+                </div>
+              )}
+              {sections['结论'] && (
+                <div className="pb-3 border-b border-[var(--border-subtle)]">
+                  <h4 className="font-medium text-[var(--text-primary)] mb-1">诊断结论</h4>
+                  <ReactMarkdown>{sections['结论']}</ReactMarkdown>
+                </div>
+              )}
+              {!sections['可能原因'] && !sections['结论'] && detailData?.raw_explanation && (
+                <div>
+                  <h4 className="font-medium text-[var(--text-primary)] mb-1">完整诊断</h4>
+                  <ReactMarkdown>{detailData.raw_explanation}</ReactMarkdown>
+                </div>
+              )}
+              {!sections['可能原因'] && !sections['结论'] && !detailData?.raw_explanation && (
+                <div>
+                  <p className="text-[var(--text-muted)]">暂无诊断数据，请确认后端服务已启动并生成 RAG 结果。</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -604,20 +750,27 @@ const ExplanationView: React.FC<{ channelId?: string; anomalyData?: any; onBack:
             知识溯源
           </div>
           <div className="space-y-2 text-sm">
-            <div className="p-2.5 bg-[var(--bg-primary)] border-l-2 border-[var(--accent-green)] rounded-r hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer">
-              <div className="font-medium">ESA_ops_anomaly.pdf</div>
-              <div className="flex justify-between text-xs text-[var(--text-muted)] mt-1">
-                <span>p.47</span>
-                <span className="font-mono text-[var(--accent-green)]">0.891</span>
-              </div>
-            </div>
-            <div className="p-2.5 bg-[var(--bg-primary)] border-l-2 border-[var(--accent-blue)] rounded-r hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer">
-              <div className="font-medium">adcs_handbook.pdf</div>
-              <div className="flex justify-between text-xs text-[var(--text-muted)] mt-1">
-                <span>p.112</span>
-                <span className="font-mono text-[var(--accent-blue)]">0.702</span>
-              </div>
-            </div>
+            {sources.length > 0 ? (
+              sources.map((src: SourceItem, idx: number) => (
+                <div
+                  key={idx}
+                  className="p-2.5 bg-[var(--bg-primary)] border-l-2 border-[var(--accent-green)] rounded-r hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer"
+                  title={src.local_path || ''}
+                >
+                  <div className="font-medium">{src.filename}</div>
+                  <div className="flex justify-between text-xs text-[var(--text-muted)] mt-1">
+                    <span>{src.page || '—'}</span>
+                    <span className="font-mono text-[var(--accent-green)]">{(src.score || 0).toFixed(3)}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="p-2.5 bg-[var(--bg-primary)] border-l-2 border-[var(--accent-green)] rounded-r">
+                  <div className="font-medium text-[var(--text-muted)]">暂无溯源数据</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -631,9 +784,9 @@ const ExplanationView: React.FC<{ channelId?: string; anomalyData?: any; onBack:
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
-  const [targetContext, setTargetContext] = useState<{ channelId?: string; anomalyData?: any }>({});
+  const [targetContext, setTargetContext] = useState<{ channelId?: string; anomalyData?: AnomalyDataContext }>({});
 
-  const handleNavigate = (page: string, channelId?: string, anomalyData?: any) => {
+  const handleNavigate = (page: string, channelId?: string, anomalyData?: AnomalyDataContext) => {
     setTargetContext({ channelId, anomalyData });
     setCurrentPage(page);
   };

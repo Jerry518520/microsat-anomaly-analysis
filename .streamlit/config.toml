@@ -13,3 +13,6 @@ enableXsrfProtection = false
 
 [browser]
 gatherUsageStats = false
+
+[client]
+showSidebarNavigation = false

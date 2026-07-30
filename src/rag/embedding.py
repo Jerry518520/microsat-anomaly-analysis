@@ -68,7 +68,9 @@ class BGE_M3_Embedder:
         logger.info(f"初始化 BGE-M3 嵌入编码器，设备：{self.device}")
         
         # 模型参数
-        model_name = self.embedding_config.get("model_name", "BAAI/bge-m3")
+        # 优先使用环境变量 EMBEDDING_MODEL_PATH（便于不同机器指向本地模型），
+        # 默认从配置读取（仓库默认 BAAI/bge-m3，首次运行自动从 HuggingFace 镜像下载）
+        model_name = os.getenv("EMBEDDING_MODEL_PATH") or self.embedding_config.get("model_name", "BAAI/bge-m3")
         # 如果是相对路径且存在，解析为绝对路径
         project_root = Path(__file__).parent.parent.parent
         model_path = project_root / model_name
