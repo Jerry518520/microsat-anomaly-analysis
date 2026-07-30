@@ -59,18 +59,18 @@
 **GET `/metrics`** — 核心指标
 ```json
 {
-  "anomaly_rate": 0.2,
-  "anomaly_rate_str": "20.0%",
-  "anomaly_rows": 60000,
-  "total_rows": 303494,
-  "fault_count": 12,
-  "total_anomalies": 48,
-  "best_f1": 0.425,
-  "throughput": 303494,
+  "anomaly_rate": 0.3304,
+  "anomaly_rate_str": "33.0%",
+  "anomaly_rows": 100264,
+  "total_rows": 303493,
+  "fault_count": 200,
+  "total_anomalies": 200,
+  "best_f1": 0.5683,
+  "throughput": 303493,
   "channel_count": 9
 }
 ```
-> 注：`best_f1` 即 `best_seg_f1`，代码默认 `0.425`（见 `src/api/routes/dashboard.py:45`）；`0.5683` 是 Stage-2 IF 模型 F1，属于 `/detection/experiments`，勿混用。
+> 注：`best_f1` 即 `best_seg_f1`，取自 `data/results/subsampling_sweep_1.9_results.json` = **0.5683**（与 `/detection/experiments` 的 Stage-2 融合 F1 相同）；`0.425` 仅是该文件缺失时的兜底默认值，不是真实值。其余字段为 2026-07-30 实际计算值（来源 `segments.csv` + `anomaly_rag_results.json`）：total_rows=303493、anomaly_rows=100264、anomaly_rate=33.0%、fault_count=total_anomalies=200。
 
 **GET `/channels`** — 各通道 sparkline + 状态（每通道取最后 500 点）
 ```json
@@ -115,7 +115,9 @@
 
 **GET `/rag-config`**
 ```json
-{ "status": "online", "doc_count": {"pdf":6,"md":2,"html":3}, "chunk_count": 5064, "embedding_model": "BGE-M3" }
+{ "status": "online", "doc_count": {"pdf":10,"md":3,"html":4}, "chunk_count": 5064, "embedding_model": "BGE-M3" }
+```
+> `doc_count` 为 `docs/knowledge_base`(pdf4/md1/html1) 与 `docs/papers`(pdf6/md2/html3) 两目录合计；`chunk_count` 部署后由 faiss 索引实际分块数决定（当前知识库约 5064）。
 ```
 
 **GET `/experiments`** — 实验演进 F1 Benchmark
