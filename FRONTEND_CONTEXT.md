@@ -1,6 +1,6 @@
 # 前端设计上下文包（Frontend Design Context Pack）
 
-> **用途**：本文档供「调用高级大模型设计/扩展前端」的队友直接粘贴进对话使用。
+> **用途**：本文档供「调用高级大模型**从零重写**前端」的队友直接粘贴进对话使用。
 > 它包含三层：① API 契约（端点+响应字段+样例）② 数据字典/领域语义 ③ 设计简报。
 > 配合仓库内的 `.codegraph/`（代码知识图谱）一起用效果最佳，见文末第 7 节。
 
@@ -8,12 +8,12 @@
 
 ## 0. 给高级大模型的一句话指令（可直接粘贴）
 
-你是来**设计 / 扩展**「OPS-SAT 卫星遥测异常诊断系统」前端大屏的。后端 FastAPI 已完整就绪，提供稳定的 REST 接口。
+你是来**设计 / 从零重写**「OPS-SAT 卫星遥测异常诊断系统」前端大屏的。后端 FastAPI 已完整就绪，提供稳定的 REST 接口；你负责生成一套全新的 `frontend/` 代码，可完全丢弃现有实现。
 
-**硬性约束**：
-- 必须**基于现有结构扩展**，不要重写整个 `frontend/src/App.tsx`；复用已存在的组件与 fetch 模式（见第 6 节）。
+**硬性约束**（这些是「锚点」，重写时不可违背；其余结构你自由发挥）：
+- **可全量重写** `frontend/`：可丢弃现有 `App.tsx`、组件与 fetch 封装，从零生成全新代码（第 6 节仅作现状参考，不必复用）。
 - 技术栈必须沿用：React 19 + Vite + TypeScript + Tailwind CSS 4 + Plotly.js（见第 2 节）。
-- 所有数据来自第 3 节的接口，不要在前端硬编码任何业务阈值（阈值以后端返回为准）。
+- 所有数据来自第 3 节的接口，**严格对齐 API.md 契约**（端点 URL、字段名、JSON 结构都不可改）；不要在前端硬编码任何业务阈值（阈值以后端返回为准）。
 
 ---
 
@@ -46,7 +46,7 @@
 
 - 后端：FastAPI 2.0.0，运行于 `http://localhost:8000`。
 - 开发服务器：Vite 默认 `http://localhost:5173` 或 `5180`；CORS 已放开这两个源。
-- 现有 Plotly 封装组件：`OscilloscopePlotly`、`ChannelSparkline`、`Plot`（见第 6 节），新图表应复用而非新建底层封装。
+- 图表库为 Plotly.js；现有 `OscilloscopePlotly`/`ChannelSparkline`/`Plot` 仅是参考实现，重写时可重新设计封装，但图表渲染必须基于 Plotly。
 
 ---
 
@@ -251,7 +251,7 @@ RAG 自由问答。请求体：`{ "query": str, "channel": str, "segment": str, 
 
 ---
 
-## 6. 现有前端结构（让大模型"扩展而非重写"，来自 `.codegraph`）
+## 6. 现有前端结构（仅供参考，重写时可丢弃，来自 `.codegraph`）
 
 `frontend/src/App.tsx` 组件树（共 9 个节点）：
 ```
@@ -266,13 +266,13 @@ App
 └─ getSeverity        （severity → 颜色映射工具）
 ```
 
-**现有 fetch 模式（直接复用）**：
+**现有 fetch 模式（仅供参考）**：
 - DashboardView 用 `Promise.all([fetch('/api/dashboard/metrics'), fetch('/api/dashboard/channels'), fetch('/api/dashboard/alerts')])`（见 App.tsx ~L348-350）。
 - ExplanationView 用 `Promise.all([fetch(\`/api/explanation/waveform?channel=${id}&segment=${seg}\`), fetch(\`/api/explanation/detail?channel=${id}&segment=${seg}\`)])`（见 ~L616-617）。
 - 连接失败提示：`无法连接后端服务 (localhost:8000)，请确认已运行 python start_ui.py`。
 - 状态管理：`useState` / `useEffect`；`currentPage` 控制视图；`targetContext` 在视图间传递 `{channelId, anomalyData}`。
 
-**新增面板时**：在对应 View 组件内追加，沿用上述 fetch 模式与 Plotly 封装组件；不要新建独立的 HTTP 客户端。
+**重写时**：你可自由重新组织组件与 HTTP 请求方式（可自建轻量 fetch 封装），但调用的端点 URL 与字段名必须严格对应第 3 节的 API 契约，不得臆造。
 
 ---
 
@@ -292,6 +292,6 @@ App
 ## 8. 给队友的速查清单
 - [ ] 后端起服务：`python start_ui.py`（监听 :8000），否则前端拉不到数据。
 - [ ] 前端起服务：`cd frontend && npm install && npm run dev`（:5173 / :5180）。
-- [ ] 设计前先读本文件第 3、4、6 节；让高级大模型基于现有组件扩展。
+- [ ] 设计前先读本文件第 3、4、5 节；让高级大模型据此从零重写 frontend/（第 6 节仅作现状参考，无需复用）。
 - [ ] 阈值/通道含义改了 → 同步改 `src/utils/constants.py`，前端只读接口。
 - [ ] 验证：DashboardView 三接口、ExplanationView 两接口、RAG 问答框都要能跑通。
