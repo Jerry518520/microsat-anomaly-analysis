@@ -63,31 +63,3 @@ def plot_segment_time_series(segments_df, segment_id, save_path=None):
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close()
 
-
-def plot_sliding_window_visual(segments_df, segment_id, window_size=50,
-                                step_size=10, save_path=None):
-    """可视化滑动窗口（用于 PPT 展示）"""
-    seg_data = segments_df[segments_df["segment"] == segment_id]
-    values = seg_data["value"].values
-    is_anomaly = seg_data["anomaly"].iloc[0]
-
-    fig, ax = plt.subplots(figsize=(14, 5))
-
-    # 原始信号
-    ax.plot(values, color="#2F5496", linewidth=1, label="Raw Signal", alpha=0.8)
-
-    # 标注滑动窗口
-    colors = plt.cm.viridis(np.linspace(0.2, 0.8, len(range(0, len(values) - window_size + 1, step_size))))
-    for i, start in enumerate(range(0, len(values) - window_size + 1, step_size)):
-        ax.axvspan(start, start + window_size, alpha=0.15, color=colors[i])
-
-    ax.set_title(f"Sliding Window Visualization — Segment {segment_id} — "
-                 f"{'ANOMALY' if is_anomaly else 'NORMAL'} (window={window_size}, step={step_size})",
-                 fontsize=13)
-    ax.set_xlabel("Sample Index")
-    ax.set_ylabel("Value")
-    ax.legend()
-    plt.tight_layout()
-    if save_path:
-        plt.savefig(save_path, dpi=150, bbox_inches="tight")
-    plt.close()

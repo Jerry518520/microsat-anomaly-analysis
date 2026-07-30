@@ -35,5 +35,5 @@ NO_ANOMALY_CHANNELS = {"CADC0884"}
 # 告警阈值
 FAULT_THRESHOLD = 0.05
 
-# 元数据列（滑动窗口/段级特征通用）
+# 元数据列（段级特征通用）
 META_COLS = ["channel", "segment", "anomaly", "train", "sampling"]

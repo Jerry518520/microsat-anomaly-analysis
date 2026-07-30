@@ -1,4 +1,5 @@
 """Explanation API — 深度诊断详情接口"""
+import json
 import os
 import re
 import sys

@@ -4,7 +4,7 @@
 # ========== 嵌入模型配置 ==========
 embedding:
   # 模型配置
-  model_name: "models/Xorbits/bge-m3"  # 本地ModelScope下载（相对于项目根目录）
+  model_name: "BAAI/bge-m3"  # 默认从 HuggingFace 镜像(hf-mirror.com)自动下载；可用环境变量 EMBEDDING_MODEL_PATH 覆盖为本地路径(如 models/Xorbits/bge-m3)
   device: "cuda"  # CUDA 加速（必须）
   batch_size: 32  # 批处理大小（GPU 优化）
   

@@ -1,0 +1,4039 @@
+{
+ "files": [
+  {
+   "path": "configs/config.yaml",
+   "lang": "yaml",
+   "size": 709,
+   "nodes": 0
+  },
+  {
+   "path": "configs/rag_config.yaml",
+   "lang": "yaml",
+   "size": 5563,
+   "nodes": 0
+  },
+  {
+   "path": "frontend/eslint.config.js",
+   "lang": "javascript",
+   "size": 591,
+   "nodes": 7
+  },
+  {
+   "path": "frontend/src/App.tsx",
+   "lang": "tsx",
+   "size": 36534,
+   "nodes": 30
+  },
+  {
+   "path": "frontend/src/main.tsx",
+   "lang": "tsx",
+   "size": 226,
+   "nodes": 5
+  },
+  {
+   "path": "frontend/src/plotly.d.ts",
+   "lang": "typescript",
+   "size": 310,
+   "nodes": 2
+  },
+  {
+   "path": "frontend/vite.config.ts",
+   "lang": "typescript",
+   "size": 364,
+   "nodes": 4
+  },
+  {
+   "path": "scripts/_gen_handover.py",
+   "lang": "python",
+   "size": 1328,
+   "nodes": 15
+  },
+  {
+   "path": "scripts/build_index.py",
+   "lang": "python",
+   "size": 4268,
+   "nodes": 40
+  },
+  {
+   "path": "scripts/gen_ppt_diagrams.py",
+   "lang": "python",
+   "size": 8739,
+   "nodes": 13
+  },
+  {
+   "path": "scripts/run_rag_experiment.py",
+   "lang": "python",
+   "size": 15439,
+   "nodes": 20
+  },
+  {
+   "path": "scripts/start_ui.py",
+   "lang": "python",
+   "size": 11408,
+   "nodes": 36
+  },
+  {
+   "path": "src/__init__.py",
+   "lang": "python",
+   "size": 30,
+   "nodes": 1
+  },
+  {
+   "path": "src/api/__init__.py",
+   "lang": "python",
+   "size": 0,
+   "nodes": 1
+  },
+  {
+   "path": "src/api/main.py",
+   "lang": "python",
+   "size": 1195,
+   "nodes": 9
+  },
+  {
+   "path": "src/api/models.py",
+   "lang": "python",
+   "size": 1633,
+   "nodes": 11
+  },
+  {
+   "path": "src/api/routes/__init__.py",
+   "lang": "python",
+   "size": 0,
+   "nodes": 1
+  },
+  {
+   "path": "src/api/routes/dashboard.py",
+   "lang": "python",
+   "size": 5823,
+   "nodes": 17
+  },
+  {
+   "path": "src/api/routes/detection.py",
+   "lang": "python",
+   "size": 4562,
+   "nodes": 11
+  },
+  {
+   "path": "src/api/routes/explanation.py",
+   "lang": "python",
+   "size": 9913,
+   "nodes": 20
+  },
+  {
+   "path": "src/evaluation/__init__.py",
+   "lang": "python",
+   "size": 30,
+   "nodes": 1
+  },
+  {
+   "path": "src/evaluation/feature_importance.py",
+   "lang": "python",
+   "size": 5894,
+   "nodes": 17
+  },
+  {
+   "path": "src/evaluation/metrics.py",
+   "lang": "python",
+   "size": 1087,
+   "nodes": 5
+  },
+  {
+   "path": "src/experiments/baseline_rerun.py",
+   "lang": "python",
+   "size": 2600,
+   "nodes": 24
+  },
+  {
+   "path": "src/experiments/baseline_rerun_v2.py",
+   "lang": "python",
+   "size": 424,
+   "nodes": 7
+  },
+  {
+   "path": "src/experiments/fair_comparison.py",
+   "lang": "python",
+   "size": 1626,
+   "nodes": 17
+  },
+  {
+   "path": "src/features/__init__.py",
+   "lang": "python",
+   "size": 30,
+   "nodes": 1
+  },
+  {
+   "path": "src/features/extract_segments_18d.py",
+   "lang": "python",
+   "size": 7824,
+   "nodes": 21
+  },
+  {
+   "path": "src/features/segment_features.py",
+   "lang": "python",
+   "size": 1889,
+   "nodes": 6
+  },
+  {
+   "path": "src/integration/__init__.py",
+   "lang": "python",
+   "size": 175,
+   "nodes": 3
+  },
+  {
+   "path": "src/integration/anomaly_rag_pipeline.py",
+   "lang": "python",
+   "size": 22127,
+   "nodes": 41
+  },
+  {
+   "path": "src/rag/__init__.py",
+   "lang": "python",
+   "size": 1007,
+   "nodes": 7
+  },
+  {
+   "path": "src/rag/embedding.py",
+   "lang": "python",
+   "size": 12144,
+   "nodes": 32
+  },
+  {
+   "path": "src/rag/llm_client.py",
+   "lang": "python",
+   "size": 14855,
+   "nodes": 28
+  },
+  {
+   "path": "src/rag/pipeline.py",
+   "lang": "python",
+   "size": 15837,
+   "nodes": 31
+  },
+  {
+   "path": "src/rag/prompts.py",
+   "lang": "python",
+   "size": 9544,
+   "nodes": 25
+  },
+  {
+   "path": "src/rag/vectorstore.py",
+   "lang": "python",
+   "size": 24295,
+   "nodes": 36
+  },
+  {
+   "path": "src/ui/app.py",
+   "lang": "python",
+   "size": 4954,
+   "nodes": 22
+  },
+  {
+   "path": "src/ui/pages/__init__.py",
+   "lang": "python",
+   "size": 20,
+   "nodes": 1
+  },
+  {
+   "path": "src/ui/pages/dashboard.py",
+   "lang": "python",
+   "size": 7125,
+   "nodes": 14
+  },
+  {
+   "path": "src/ui/pages/detection.py",
+   "lang": "python",
+   "size": 5454,
+   "nodes": 10
+  },
+  {
+   "path": "src/ui/pages/explanation.py",
+   "lang": "python",
+   "size": 26703,
+   "nodes": 30
+  },
+  {
+   "path": "src/utils/__init__.py",
+   "lang": "python",
+   "size": 30,
+   "nodes": 1
+  },
+  {
+   "path": "src/utils/constants.py",
+   "lang": "python",
+   "size": 1277,
+   "nodes": 6
+  },
+  {
+   "path": "src/utils/data_loader.py",
+   "lang": "python",
+   "size": 2957,
+   "nodes": 13
+  },
+  {
+   "path": "src/utils/results_loader.py",
+   "lang": "python",
+   "size": 1290,
+   "nodes": 6
+  },
+  {
+   "path": "src/utils/stat_rules.py",
+   "lang": "python",
+   "size": 2304,
+   "nodes": 7
+  },
+  {
+   "path": "src/utils/visualization.py",
+   "lang": "python",
+   "size": 2418,
+   "nodes": 9
+  },
+  {
+   "path": "tests/test_rag/__init__.py",
+   "lang": "python",
+   "size": 29,
+   "nodes": 1
+  },
+  {
+   "path": "tests/test_rag/test_pipeline.py",
+   "lang": "python",
+   "size": 12423,
+   "nodes": 37
+  },
+  {
+   "path": "tests/test_rag/test_regression_fixes.py",
+   "lang": "python",
+   "size": 11077,
+   "nodes": 20
+  }
+ ],
+ "functions": [
+  {
+   "kind": "function",
+   "name": "getSeverity",
+   "qname": "getSeverity",
+   "file": "frontend/src/App.tsx",
+   "line": 28,
+   "sig": "(ch: string, score: number): Severity"
+  },
+  {
+   "kind": "function",
+   "name": "Plot",
+   "qname": "Plot",
+   "file": "frontend/src/App.tsx",
+   "line": 56,
+   "sig": "({ data, layout, config, style, useResizeHandler })"
+  },
+  {
+   "kind": "function",
+   "name": "ChannelSparkline",
+   "qname": "ChannelSparkline",
+   "file": "frontend/src/App.tsx",
+   "line": 94,
+   "sig": "({ data })"
+  },
+  {
+   "kind": "function",
+   "name": "TerminalComponent",
+   "qname": "TerminalComponent",
+   "file": "frontend/src/App.tsx",
+   "line": 165,
+   "sig": "({ channelId })"
+  },
+  {
+   "kind": "function",
+   "name": "OscilloscopePlotly",
+   "qname": "OscilloscopePlotly",
+   "file": "frontend/src/App.tsx",
+   "line": 219,
+   "sig": "({ data, timestamps, anomalies })"
+  },
+  {
+   "kind": "function",
+   "name": "DashboardView",
+   "qname": "DashboardView",
+   "file": "frontend/src/App.tsx",
+   "line": 332,
+   "sig": "({ onNavigate })"
+  },
+  {
+   "kind": "function",
+   "name": "DetectionView",
+   "qname": "DetectionView",
+   "file": "frontend/src/App.tsx",
+   "line": 529,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "ExplanationView",
+   "qname": "ExplanationView",
+   "file": "frontend/src/App.tsx",
+   "line": 596,
+   "sig": "({ channelId = 'CADC0874', anomalyData, onBack })"
+  },
+  {
+   "kind": "function",
+   "name": "App",
+   "qname": "App",
+   "file": "frontend/src/App.tsx",
+   "line": 785,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "R",
+   "qname": "R",
+   "file": "scripts/_gen_handover.py",
+   "line": 7,
+   "sig": "(p)"
+  },
+  {
+   "kind": "function",
+   "name": "E",
+   "qname": "E",
+   "file": "scripts/_gen_handover.py",
+   "line": 11,
+   "sig": "(s)"
+  },
+  {
+   "kind": "function",
+   "name": "snippet",
+   "qname": "snippet",
+   "file": "scripts/_gen_handover.py",
+   "line": 23,
+   "sig": "(code, start_marker, end_marker, max_lines=20)"
+  },
+  {
+   "kind": "function",
+   "name": "draw_box",
+   "qname": "draw_box",
+   "file": "scripts/gen_ppt_diagrams.py",
+   "line": 32,
+   "sig": "(ax, x, y, w, h, color, title, details, title_size=12, detail_size=9)"
+  },
+  {
+   "kind": "function",
+   "name": "arrow",
+   "qname": "arrow",
+   "file": "scripts/gen_ppt_diagrams.py",
+   "line": 47,
+   "sig": "(ax, x1, y1, x2, y2, color=None, style='-')"
+  },
+  {
+   "kind": "function",
+   "name": "gen_architecture",
+   "qname": "gen_architecture",
+   "file": "scripts/gen_ppt_diagrams.py",
+   "line": 53,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "gen_tech_route",
+   "qname": "gen_tech_route",
+   "file": "scripts/gen_ppt_diagrams.py",
+   "line": 92,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "gen_gantt",
+   "qname": "gen_gantt",
+   "file": "scripts/gen_ppt_diagrams.py",
+   "line": 145,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "load_detection_results",
+   "qname": "load_detection_results",
+   "file": "scripts/run_rag_experiment.py",
+   "line": 40,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "test_retrieval_quality",
+   "qname": "test_retrieval_quality",
+   "file": "scripts/run_rag_experiment.py",
+   "line": 73,
+   "sig": "(embedder, vectorstore, anomaly_segments, n_samples=30)"
+  },
+  {
+   "kind": "function",
+   "name": "run_rag_generation",
+   "qname": "run_rag_generation",
+   "file": "scripts/run_rag_experiment.py",
+   "line": 177,
+   "sig": "(embedder, vectorstore, anomaly_segments, n_generate=20)"
+  },
+  {
+   "kind": "function",
+   "name": "generate_example_reports",
+   "qname": "generate_example_reports",
+   "file": "scripts/run_rag_experiment.py",
+   "line": 304,
+   "sig": "(rag_results, output_path)"
+  },
+  {
+   "kind": "function",
+   "name": "main",
+   "qname": "main",
+   "file": "scripts/run_rag_experiment.py",
+   "line": 347,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "log",
+   "qname": "log",
+   "file": "scripts/start_ui.py",
+   "line": 35,
+   "sig": "(tag, msg)"
+  },
+  {
+   "kind": "function",
+   "name": "port_in_use",
+   "qname": "port_in_use",
+   "file": "scripts/start_ui.py",
+   "line": 40,
+   "sig": "(port)"
+  },
+  {
+   "kind": "function",
+   "name": "wait_for_port",
+   "qname": "wait_for_port",
+   "file": "scripts/start_ui.py",
+   "line": 45,
+   "sig": "(port, timeout=30)"
+  },
+  {
+   "kind": "function",
+   "name": "kill_port",
+   "qname": "kill_port",
+   "file": "scripts/start_ui.py",
+   "line": 54,
+   "sig": "(port)"
+  },
+  {
+   "kind": "function",
+   "name": "kill_pid_tree",
+   "qname": "kill_pid_tree",
+   "file": "scripts/start_ui.py",
+   "line": 71,
+   "sig": "(pid)"
+  },
+  {
+   "kind": "function",
+   "name": "cleanup",
+   "qname": "cleanup",
+   "file": "scripts/start_ui.py",
+   "line": 78,
+   "sig": "(signum=None, frame=None)"
+  },
+  {
+   "kind": "function",
+   "name": "install_signal_handlers",
+   "qname": "install_signal_handlers",
+   "file": "scripts/start_ui.py",
+   "line": 94,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "check_python",
+   "qname": "check_python",
+   "file": "scripts/start_ui.py",
+   "line": 108,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "check_node",
+   "qname": "check_node",
+   "file": "scripts/start_ui.py",
+   "line": 117,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "check_node_modules",
+   "qname": "check_node_modules",
+   "file": "scripts/start_ui.py",
+   "line": 130,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "check_api_deps",
+   "qname": "check_api_deps",
+   "file": "scripts/start_ui.py",
+   "line": 144,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "check_port",
+   "qname": "check_port",
+   "file": "scripts/start_ui.py",
+   "line": 155,
+   "sig": "(port, name)"
+  },
+  {
+   "kind": "function",
+   "name": "start_api",
+   "qname": "start_api",
+   "file": "scripts/start_ui.py",
+   "line": 169,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "start_web",
+   "qname": "start_web",
+   "file": "scripts/start_ui.py",
+   "line": 203,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "open_browser",
+   "qname": "open_browser",
+   "file": "scripts/start_ui.py",
+   "line": 237,
+   "sig": "(url, delay=2)"
+  },
+  {
+   "kind": "function",
+   "name": "_open",
+   "qname": "open_browser::_open",
+   "file": "scripts/start_ui.py",
+   "line": 238,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "health_check",
+   "qname": "health_check",
+   "file": "scripts/start_ui.py",
+   "line": 246,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "main",
+   "qname": "main",
+   "file": "scripts/start_ui.py",
+   "line": 273,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "health_check",
+   "qname": "health_check",
+   "file": "src/api/main.py",
+   "line": 36,
+   "sig": "()"
+  },
+  {
+   "kind": "class",
+   "name": "CoreMetrics",
+   "qname": "CoreMetrics",
+   "file": "src/api/models.py",
+   "line": 6,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "ChannelInfo",
+   "qname": "ChannelInfo",
+   "file": "src/api/models.py",
+   "line": 18,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "AlertItem",
+   "qname": "AlertItem",
+   "file": "src/api/models.py",
+   "line": 27,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "RagConfig",
+   "qname": "RagConfig",
+   "file": "src/api/models.py",
+   "line": 37,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "ExperimentStage",
+   "qname": "ExperimentStage",
+   "file": "src/api/models.py",
+   "line": 44,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "ChannelF1",
+   "qname": "ChannelF1",
+   "file": "src/api/models.py",
+   "line": 51,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "DiagnosisReport",
+   "qname": "DiagnosisReport",
+   "file": "src/api/models.py",
+   "line": 58,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "SystemStatus",
+   "qname": "SystemStatus",
+   "file": "src/api/models.py",
+   "line": 70,
+   "sig": null
+  },
+  {
+   "kind": "function",
+   "name": "_load_segments",
+   "qname": "_load_segments",
+   "file": "src/api/routes/dashboard.py",
+   "line": 19,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_severity",
+   "qname": "_severity",
+   "file": "src/api/routes/dashboard.py",
+   "line": 26,
+   "sig": "(score: float, channel: str = \"\") -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_core_metrics",
+   "qname": "get_core_metrics",
+   "file": "src/api/routes/dashboard.py",
+   "line": 39,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_channels",
+   "qname": "get_channels",
+   "file": "src/api/routes/dashboard.py",
+   "line": 77,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_alerts",
+   "qname": "get_alerts",
+   "file": "src/api/routes/dashboard.py",
+   "line": 131,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_system_status",
+   "qname": "get_system_status",
+   "file": "src/api/routes/dashboard.py",
+   "line": 163,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_rag_config",
+   "qname": "get_rag_config",
+   "file": "src/api/routes/detection.py",
+   "line": 16,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_experiments",
+   "qname": "get_experiments",
+   "file": "src/api/routes/detection.py",
+   "line": 61,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_channel_f1",
+   "qname": "get_channel_f1",
+   "file": "src/api/routes/detection.py",
+   "line": 105,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "get_system_params",
+   "qname": "get_system_params",
+   "file": "src/api/routes/detection.py",
+   "line": 132,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_resolve_kb_path",
+   "qname": "_resolve_kb_path",
+   "file": "src/api/routes/explanation.py",
+   "line": 25,
+   "sig": "(filename: str) -> Optional[str]"
+  },
+  {
+   "kind": "function",
+   "name": "_parse_explanation",
+   "qname": "_parse_explanation",
+   "file": "src/api/routes/explanation.py",
+   "line": 37,
+   "sig": "(explanation: str) -> dict"
+  },
+  {
+   "kind": "function",
+   "name": "_match_key",
+   "qname": "_parse_explanation::_match_key",
+   "file": "src/api/routes/explanation.py",
+   "line": 62,
+   "sig": "(line: str) -> Optional[str]"
+  },
+  {
+   "kind": "function",
+   "name": "_is_garbled",
+   "qname": "_is_garbled",
+   "file": "src/api/routes/explanation.py",
+   "line": 99,
+   "sig": "(text: str) -> bool"
+  },
+  {
+   "kind": "function",
+   "name": "get_detail",
+   "qname": "get_detail",
+   "file": "src/api/routes/explanation.py",
+   "line": 118,
+   "sig": "(segment: str = Query(...), channel: str = Query(...))"
+  },
+  {
+   "kind": "function",
+   "name": "get_waveform",
+   "qname": "get_waveform",
+   "file": "src/api/routes/explanation.py",
+   "line": 187,
+   "sig": "(\n    channel: str = Query(...),\n    segment: Optional[str] = Query(None),\n    context_size: int = Query(200),\n)"
+  },
+  {
+   "kind": "function",
+   "name": "rag_query",
+   "qname": "rag_query",
+   "file": "src/api/routes/explanation.py",
+   "line": 244,
+   "sig": "(body: dict)"
+  },
+  {
+   "kind": "function",
+   "name": "compute_iforest_importance",
+   "qname": "compute_iforest_importance",
+   "file": "src/evaluation/feature_importance.py",
+   "line": 21,
+   "sig": "(model, feature_names, top_k=10)"
+  },
+  {
+   "kind": "function",
+   "name": "compute_permutation_importance",
+   "qname": "compute_permutation_importance",
+   "file": "src/evaluation/feature_importance.py",
+   "line": 59,
+   "sig": "(model, X_test, y_test, feature_names,\r\n                                    top_k=10, n_repeats=10)"
+  },
+  {
+   "kind": "function",
+   "name": "iforest_f1",
+   "qname": "compute_permutation_importance::iforest_f1",
+   "file": "src/evaluation/feature_importance.py",
+   "line": 67,
+   "sig": "(y_true, y_pred_raw)"
+  },
+  {
+   "kind": "function",
+   "name": "plot_feature_importance",
+   "qname": "plot_feature_importance",
+   "file": "src/evaluation/feature_importance.py",
+   "line": 97,
+   "sig": "(iforest_imp, perm_imp, save_path=None)"
+  },
+  {
+   "kind": "function",
+   "name": "run_feature_importance_pipeline",
+   "qname": "run_feature_importance_pipeline",
+   "file": "src/evaluation/feature_importance.py",
+   "line": 128,
+   "sig": "(config=None)"
+  },
+  {
+   "kind": "function",
+   "name": "compute_all_metrics",
+   "qname": "compute_all_metrics",
+   "file": "src/evaluation/metrics.py",
+   "line": 12,
+   "sig": "(y_true, y_pred, y_scores=None)"
+  },
+  {
+   "kind": "function",
+   "name": "print_classification_report",
+   "qname": "print_classification_report",
+   "file": "src/evaluation/metrics.py",
+   "line": 25,
+   "sig": "(y_true, y_pred)"
+  },
+  {
+   "kind": "function",
+   "name": "print_confusion_matrix",
+   "qname": "print_confusion_matrix",
+   "file": "src/evaluation/metrics.py",
+   "line": 30,
+   "sig": "(y_true, y_pred)"
+  },
+  {
+   "kind": "function",
+   "name": "number_of_peaks_finding",
+   "qname": "number_of_peaks_finding",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 21,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "duration",
+   "qname": "duration",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 28,
+   "sig": "(df)"
+  },
+  {
+   "kind": "function",
+   "name": "smooth10_n_peaks",
+   "qname": "smooth10_n_peaks",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 35,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "smooth20_n_peaks",
+   "qname": "smooth20_n_peaks",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 42,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "diff_peaks",
+   "qname": "diff_peaks",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 49,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "diff2_peaks",
+   "qname": "diff2_peaks",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 54,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "diff_var",
+   "qname": "diff_var",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 59,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "diff2_var",
+   "qname": "diff2_var",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 64,
+   "sig": "(array)"
+  },
+  {
+   "kind": "function",
+   "name": "gaps_squared",
+   "qname": "gaps_squared",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 69,
+   "sig": "(df)"
+  },
+  {
+   "kind": "function",
+   "name": "generate_dataset",
+   "qname": "generate_dataset",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 97,
+   "sig": "(source_df)"
+  },
+  {
+   "kind": "function",
+   "name": "validate_against_dataset",
+   "qname": "validate_against_dataset",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 154,
+   "sig": "(generated_df, dataset_csv_path)"
+  },
+  {
+   "kind": "function",
+   "name": "main",
+   "qname": "main",
+   "file": "src/features/extract_segments_18d.py",
+   "line": 205,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "run_segment_baseline",
+   "qname": "run_segment_baseline",
+   "file": "src/features/segment_features.py",
+   "line": 11,
+   "sig": "(config: dict = None)"
+  },
+  {
+   "kind": "function",
+   "name": "save_segment_features",
+   "qname": "save_segment_features",
+   "file": "src/features/segment_features.py",
+   "line": 32,
+   "sig": "(config: dict = None)"
+  },
+  {
+   "kind": "class",
+   "name": "AnomalyResult",
+   "qname": "AnomalyResult",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 40,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "RAGExplanation",
+   "qname": "RAGExplanation",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 51,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "CombinedResult",
+   "qname": "CombinedResult",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 60,
+   "sig": null
+  },
+  {
+   "kind": "class",
+   "name": "AnomalyRAGPipeline",
+   "qname": "AnomalyRAGPipeline",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 73,
+   "sig": null
+  },
+  {
+   "kind": "method",
+   "name": "__init__",
+   "qname": "AnomalyRAGPipeline::__init__",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 86,
+   "sig": "(self, config_path: Optional[str] = None)"
+  },
+  {
+   "kind": "method",
+   "name": "_init_rag",
+   "qname": "AnomalyRAGPipeline::_init_rag",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 105,
+   "sig": "(self)"
+  },
+  {
+   "kind": "method",
+   "name": "detect",
+   "qname": "AnomalyRAGPipeline::detect",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 120,
+   "sig": "(self, segments_df: Optional[pd.DataFrame] = None, progress_callback=None) -> List[AnomalyResult]"
+  },
+  {
+   "kind": "method",
+   "name": "_per_channel_iforest",
+   "qname": "AnomalyRAGPipeline::_per_channel_iforest",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 215,
+   "sig": "(self, train_df, test_df, feature_cols)"
+  },
+  {
+   "kind": "method",
+   "name": "_segment_baseline_iforest",
+   "qname": "AnomalyRAGPipeline::_segment_baseline_iforest",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 247,
+   "sig": "(self, segments_df)"
+  },
+  {
+   "kind": "method",
+   "name": "_build_scheme_g",
+   "qname": "AnomalyRAGPipeline::_build_scheme_g",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 280,
+   "sig": "(self, test_df, channel_preds, rule_pred, seg_baseline_map)"
+  },
+  {
+   "kind": "method",
+   "name": "_segment_aggregate",
+   "qname": "AnomalyRAGPipeline::_segment_aggregate",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 297,
+   "sig": "(self, test_df, window_preds, threshold)"
+  },
+  {
+   "kind": "method",
+   "name": "_compute_segment_confidence",
+   "qname": "AnomalyRAGPipeline::_compute_segment_confidence",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 321,
+   "sig": "(self, row, test_df)"
+  },
+  {
+   "kind": "method",
+   "name": "_extract_feature_summary",
+   "qname": "AnomalyRAGPipeline::_extract_feature_summary",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 341,
+   "sig": "(self, seg_windows, feature_cols)"
+  },
+  {
+   "kind": "method",
+   "name": "_classify_anomaly_type",
+   "qname": "AnomalyRAGPipeline::_classify_anomaly_type",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 353,
+   "sig": "(self, feat_summary: Dict, channel: str) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "explain",
+   "qname": "AnomalyRAGPipeline::explain",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 380,
+   "sig": "(self, anomaly: AnomalyResult) -> RAGExplanation"
+  },
+  {
+   "kind": "method",
+   "name": "_build_anomaly_description",
+   "qname": "AnomalyRAGPipeline::_build_anomaly_description",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 411,
+   "sig": "(self, anomaly: AnomalyResult) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "detect_and_explain",
+   "qname": "AnomalyRAGPipeline::detect_and_explain",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 434,
+   "sig": "(\r\n        self,\r\n        segments_df: Optional[pd.DataFrame] = None,\r\n        max_explanations: int = 10,\r\n        progress_callback=None\r\n    ) -> List[CombinedResult]"
+  },
+  {
+   "kind": "function",
+   "name": "_detect_progress",
+   "qname": "AnomalyRAGPipeline::detect_and_explain::_detect_progress",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 458,
+   "sig": "(current, total, message)"
+  },
+  {
+   "kind": "function",
+   "name": "_explain_one",
+   "qname": "AnomalyRAGPipeline::detect_and_explain::_explain_one",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 477,
+   "sig": "(idx_anomaly)"
+  },
+  {
+   "kind": "method",
+   "name": "to_json",
+   "qname": "AnomalyRAGPipeline::to_json",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 528,
+   "sig": "(self, results: List[CombinedResult], output_path: str)"
+  },
+  {
+   "kind": "function",
+   "name": "detect_and_explain",
+   "qname": "detect_and_explain",
+   "file": "src/integration/anomaly_rag_pipeline.py",
+   "line": 536,
+   "sig": "(config_path: Optional[str] = None) -> List[CombinedResult]"
+  },
+  {
+   "kind": "function",
+   "name": "_win_getuser",
+   "qname": "_win_getuser",
+   "file": "src/rag/embedding.py",
+   "line": 21,
+   "sig": "()"
+  },
+  {
+   "kind": "class",
+   "name": "BGE_M3_Embedder",
+   "qname": "BGE_M3_Embedder",
+   "file": "src/rag/embedding.py",
+   "line": 39,
+   "sig": null
+  },
+  {
+   "kind": "method",
+   "name": "__init__",
+   "qname": "BGE_M3_Embedder::__init__",
+   "file": "src/rag/embedding.py",
+   "line": 54,
+   "sig": "(self, config_path: Optional[str] = None, device: Optional[str] = None)"
+  },
+  {
+   "kind": "method",
+   "name": "_load_config",
+   "qname": "BGE_M3_Embedder::_load_config",
+   "file": "src/rag/embedding.py",
+   "line": 93,
+   "sig": "(self, config_path: Optional[str]) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "_detect_device",
+   "qname": "BGE_M3_Embedder::_detect_device",
+   "file": "src/rag/embedding.py",
+   "line": 112,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "_load_model",
+   "qname": "BGE_M3_Embedder::_load_model",
+   "file": "src/rag/embedding.py",
+   "line": 131,
+   "sig": "(self) -> SentenceTransformer"
+  },
+  {
+   "kind": "method",
+   "name": "encode",
+   "qname": "BGE_M3_Embedder::encode",
+   "file": "src/rag/embedding.py",
+   "line": 160,
+   "sig": "(\r\n        self, \r\n        texts: Union[str, List[str]], \r\n        batch_size: Optional[int] = None,\r\n        show_progress_bar: Optional[bool] = None,\r\n        normalize: Optional[bool] = None\r\n    ) -> np.ndarray"
+  },
+  {
+   "kind": "method",
+   "name": "encode_with_metadata",
+   "qname": "BGE_M3_Embedder::encode_with_metadata",
+   "file": "src/rag/embedding.py",
+   "line": 218,
+   "sig": "(\r\n        self, \r\n        documents: List[Dict[str, Any]],\r\n        text_field: str = \"text\",\r\n        metadata_fields: List[str] = None\r\n    ) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "similarity",
+   "qname": "BGE_M3_Embedder::similarity",
+   "file": "src/rag/embedding.py",
+   "line": 256,
+   "sig": "(self, text1: str, text2: str) -> float"
+  },
+  {
+   "kind": "method",
+   "name": "get_embedding_dimension",
+   "qname": "BGE_M3_Embedder::get_embedding_dimension",
+   "file": "src/rag/embedding.py",
+   "line": 277,
+   "sig": "(self) -> int"
+  },
+  {
+   "kind": "method",
+   "name": "clear_cache",
+   "qname": "BGE_M3_Embedder::clear_cache",
+   "file": "src/rag/embedding.py",
+   "line": 281,
+   "sig": "(self)"
+  },
+  {
+   "kind": "method",
+   "name": "__repr__",
+   "qname": "BGE_M3_Embedder::__repr__",
+   "file": "src/rag/embedding.py",
+   "line": 286,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_embedder",
+   "qname": "get_embedder",
+   "file": "src/rag/embedding.py",
+   "line": 294,
+   "sig": "(config_path: Optional[str] = None) -> BGE_M3_Embedder"
+  },
+  {
+   "kind": "function",
+   "name": "encode_texts",
+   "qname": "encode_texts",
+   "file": "src/rag/embedding.py",
+   "line": 310,
+   "sig": "(texts: List[str], **kwargs) -> np.ndarray"
+  },
+  {
+   "kind": "class",
+   "name": "LLMClient",
+   "qname": "LLMClient",
+   "file": "src/rag/llm_client.py",
+   "line": 24,
+   "sig": null
+  },
+  {
+   "kind": "method",
+   "name": "__init__",
+   "qname": "LLMClient::__init__",
+   "file": "src/rag/llm_client.py",
+   "line": 41,
+   "sig": "(self, config_path: Optional[str] = None)"
+  },
+  {
+   "kind": "method",
+   "name": "_load_config",
+   "qname": "LLMClient::_load_config",
+   "file": "src/rag/llm_client.py",
+   "line": 83,
+   "sig": "(self, config_path: Optional[str]) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "_prepare_messages",
+   "qname": "LLMClient::_prepare_messages",
+   "file": "src/rag/llm_client.py",
+   "line": 101,
+   "sig": "(\r\n        self, \r\n        prompt: str, \r\n        system_prompt: Optional[str] = None,\r\n        history: Optional[List[Dict[str, str]]] = None\r\n    ) -> List[Dict[str, str]]"
+  },
+  {
+   "kind": "method",
+   "name": "generate",
+   "qname": "LLMClient::generate",
+   "file": "src/rag/llm_client.py",
+   "line": 139,
+   "sig": "(\r\n        self, \r\n        prompt: str, \r\n        system_prompt: Optional[str] = None,\r\n        history: Optional[List[Dict[str, str]]] = None,\r\n        temperature: Optional[float] = None,\r\n        max_tokens: Optional[int] = None,\r\n        stream: bool = False\r\n    ) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "_normal_request",
+   "qname": "LLMClient::_normal_request",
+   "file": "src/rag/llm_client.py",
+   "line": 209,
+   "sig": "(self, request_data: Dict, headers: Dict) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "_stream_request",
+   "qname": "LLMClient::_stream_request",
+   "file": "src/rag/llm_client.py",
+   "line": 254,
+   "sig": "(self, request_data: Dict, headers: Dict) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "generate_with_context",
+   "qname": "LLMClient::generate_with_context",
+   "file": "src/rag/llm_client.py",
+   "line": 323,
+   "sig": "(\r\n        self, \r\n        query: str, \r\n        context: str,\r\n        system_prompt: Optional[str] = None,\r\n        template: Optional[str] = None\r\n    ) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "get_stats",
+   "qname": "LLMClient::get_stats",
+   "file": "src/rag/llm_client.py",
+   "line": 370,
+   "sig": "(self) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "reset_stats",
+   "qname": "LLMClient::reset_stats",
+   "file": "src/rag/llm_client.py",
+   "line": 388,
+   "sig": "(self)"
+  },
+  {
+   "kind": "method",
+   "name": "__repr__",
+   "qname": "LLMClient::__repr__",
+   "file": "src/rag/llm_client.py",
+   "line": 395,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_llm_client",
+   "qname": "get_llm_client",
+   "file": "src/rag/llm_client.py",
+   "line": 408,
+   "sig": "(config_path: Optional[str] = None) -> LLMClient"
+  },
+  {
+   "kind": "function",
+   "name": "generate_response",
+   "qname": "generate_response",
+   "file": "src/rag/llm_client.py",
+   "line": 424,
+   "sig": "(prompt: str, **kwargs) -> str"
+  },
+  {
+   "kind": "class",
+   "name": "RAGPipeline",
+   "qname": "RAGPipeline",
+   "file": "src/rag/pipeline.py",
+   "line": 24,
+   "sig": null
+  },
+  {
+   "kind": "method",
+   "name": "__init__",
+   "qname": "RAGPipeline::__init__",
+   "file": "src/rag/pipeline.py",
+   "line": 47,
+   "sig": "(\r\n        self, \r\n        config_path: Optional[str] = None,\r\n        embedder: Optional[BGE_M3_Embedder] = None,\r\n        vectorstore: Optional[FAISSVectorStore] = None,\r\n        llm_client: Optional[LLMClient] = None,\r\n        prompt_templates: Optional[PromptTemplates] = None\r\n    )"
+  },
+  {
+   "kind": "method",
+   "name": "_load_config",
+   "qname": "RAGPipeline::_load_config",
+   "file": "src/rag/pipeline.py",
+   "line": 95,
+   "sig": "(self, config_path: Optional[str]) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "query",
+   "qname": "RAGPipeline::query",
+   "file": "src/rag/pipeline.py",
+   "line": 113,
+   "sig": "(\r\n        self, \r\n        query: str, \r\n        top_k: Optional[int] = None,\r\n        score_threshold: Optional[float] = None,\r\n        query_type: str = \"general\",\r\n        **kwargs\r\n    ) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "analyze_anomaly",
+   "qname": "RAGPipeline::analyze_anomaly",
+   "file": "src/rag/pipeline.py",
+   "line": 250,
+   "sig": "(\r\n        self,\r\n        channel_id: str,\r\n        anomaly_type: str,\r\n        anomaly_description: str,\r\n        additional_info: Optional[Dict[str, Any]] = None,\r\n        **kwargs\r\n    ) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "compare_topics",
+   "qname": "RAGPipeline::compare_topics",
+   "file": "src/rag/pipeline.py",
+   "line": 285,
+   "sig": "(\r\n        self,\r\n        topic: str,\r\n        comparison_type: str = \"similar\",\r\n        **kwargs\r\n    ) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "batch_query",
+   "qname": "RAGPipeline::batch_query",
+   "file": "src/rag/pipeline.py",
+   "line": 309,
+   "sig": "(\r\n        self, \r\n        queries: List[str], \r\n        **kwargs\r\n    ) -> List[Dict[str, Any]]"
+  },
+  {
+   "kind": "method",
+   "name": "load_knowledge_base",
+   "qname": "RAGPipeline::load_knowledge_base",
+   "file": "src/rag/pipeline.py",
+   "line": 333,
+   "sig": "(self, pdf_paths: Union[str, List[str]], **kwargs) -> int"
+  },
+  {
+   "kind": "method",
+   "name": "load_existing_knowledge_base",
+   "qname": "RAGPipeline::load_existing_knowledge_base",
+   "file": "src/rag/pipeline.py",
+   "line": 346,
+   "sig": "(self, directory: Optional[str] = None) -> bool"
+  },
+  {
+   "kind": "method",
+   "name": "get_stats",
+   "qname": "RAGPipeline::get_stats",
+   "file": "src/rag/pipeline.py",
+   "line": 358,
+   "sig": "(self) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "reset_stats",
+   "qname": "RAGPipeline::reset_stats",
+   "file": "src/rag/pipeline.py",
+   "line": 381,
+   "sig": "(self)"
+  },
+  {
+   "kind": "method",
+   "name": "__repr__",
+   "qname": "RAGPipeline::__repr__",
+   "file": "src/rag/pipeline.py",
+   "line": 390,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_rag_pipeline",
+   "qname": "get_rag_pipeline",
+   "file": "src/rag/pipeline.py",
+   "line": 403,
+   "sig": "(config_path: Optional[str] = None) -> RAGPipeline"
+  },
+  {
+   "kind": "function",
+   "name": "query_knowledge",
+   "qname": "query_knowledge",
+   "file": "src/rag/pipeline.py",
+   "line": 419,
+   "sig": "(query: str, **kwargs) -> Dict[str, Any]"
+  },
+  {
+   "kind": "function",
+   "name": "analyze_anomaly",
+   "qname": "analyze_anomaly",
+   "file": "src/rag/pipeline.py",
+   "line": 434,
+   "sig": "(\r\n    channel_id: str,\r\n    anomaly_type: str,\r\n    anomaly_description: str,\r\n    **kwargs\r\n) -> Dict[str, Any]"
+  },
+  {
+   "kind": "class",
+   "name": "PromptTemplates",
+   "qname": "PromptTemplates",
+   "file": "src/rag/prompts.py",
+   "line": 18,
+   "sig": null
+  },
+  {
+   "kind": "method",
+   "name": "__init__",
+   "qname": "PromptTemplates::__init__",
+   "file": "src/rag/prompts.py",
+   "line": 21,
+   "sig": "(self, config_path: Optional[str] = None)"
+  },
+  {
+   "kind": "method",
+   "name": "_load_config",
+   "qname": "PromptTemplates::_load_config",
+   "file": "src/rag/prompts.py",
+   "line": 97,
+   "sig": "(self, config_path: Optional[str]) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "get_system_prompt",
+   "qname": "PromptTemplates::get_system_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 113,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "get_user_prompt",
+   "qname": "PromptTemplates::get_user_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 116,
+   "sig": "(\r\n        self,\r\n        channel_id: str = \"\",\r\n        anomaly_type: str = \"\",\r\n        anomaly_description: str = \"\",\r\n        context: str = \"\",\r\n        **kwargs\r\n    ) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "_get_simplified_prompt",
+   "qname": "PromptTemplates::_get_simplified_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 137,
+   "sig": "(self, context: str, **kwargs) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "get_rag_prompt",
+   "qname": "PromptTemplates::get_rag_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 147,
+   "sig": "(\r\n        self,\r\n        query: str,\r\n        context: str,\r\n        system_prompt: Optional[str] = None\r\n    ) -> Dict[str, str]"
+  },
+  {
+   "kind": "method",
+   "name": "get_anomaly_analysis_prompt",
+   "qname": "PromptTemplates::get_anomaly_analysis_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 162,
+   "sig": "(\r\n        self,\r\n        channel_id: str,\r\n        anomaly_type: str,\r\n        anomaly_description: str,\r\n        context: str,\r\n        additional_info: Optional[Dict[str, Any]] = None\r\n    ) -> Dict[str, str]"
+  },
+  {
+   "kind": "method",
+   "name": "get_comparison_prompt",
+   "qname": "PromptTemplates::get_comparison_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 192,
+   "sig": "(\r\n        self,\r\n        query: str,\r\n        context: str,\r\n        comparison_type: str = \"similar\"\r\n    ) -> Dict[str, str]"
+  },
+  {
+   "kind": "method",
+   "name": "format_citation",
+   "qname": "PromptTemplates::format_citation",
+   "file": "src/rag/prompts.py",
+   "line": 214,
+   "sig": "(self, document_name: str, page_number: int) -> str"
+  },
+  {
+   "kind": "method",
+   "name": "update_templates",
+   "qname": "PromptTemplates::update_templates",
+   "file": "src/rag/prompts.py",
+   "line": 220,
+   "sig": "(self, **kwargs)"
+  },
+  {
+   "kind": "method",
+   "name": "get_all_templates",
+   "qname": "PromptTemplates::get_all_templates",
+   "file": "src/rag/prompts.py",
+   "line": 229,
+   "sig": "(self) -> Dict[str, str]"
+  },
+  {
+   "kind": "method",
+   "name": "__repr__",
+   "qname": "PromptTemplates::__repr__",
+   "file": "src/rag/prompts.py",
+   "line": 236,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_prompt_templates",
+   "qname": "get_prompt_templates",
+   "file": "src/rag/prompts.py",
+   "line": 243,
+   "sig": "(config_path: Optional[str] = None) -> PromptTemplates"
+  },
+  {
+   "kind": "function",
+   "name": "get_system_prompt",
+   "qname": "get_system_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 250,
+   "sig": "() -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_user_prompt",
+   "qname": "get_user_prompt",
+   "file": "src/rag/prompts.py",
+   "line": 254,
+   "sig": "(**kwargs) -> str"
+  },
+  {
+   "kind": "class",
+   "name": "FAISSVectorStore",
+   "qname": "FAISSVectorStore",
+   "file": "src/rag/vectorstore.py",
+   "line": 34,
+   "sig": null
+  },
+  {
+   "kind": "method",
+   "name": "__init__",
+   "qname": "FAISSVectorStore::__init__",
+   "file": "src/rag/vectorstore.py",
+   "line": 51,
+   "sig": "(\r\n        self, \r\n        config_path: Optional[str] = None,\r\n        embedder: Optional[BGE_M3_Embedder] = None\r\n    )"
+  },
+  {
+   "kind": "method",
+   "name": "_load_config",
+   "qname": "FAISSVectorStore::_load_config",
+   "file": "src/rag/vectorstore.py",
+   "line": 102,
+   "sig": "(self, config_path: Optional[str]) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "_create_text_splitter",
+   "qname": "FAISSVectorStore::_create_text_splitter",
+   "file": "src/rag/vectorstore.py",
+   "line": 120,
+   "sig": "(self) -> RecursiveCharacterTextSplitter"
+  },
+  {
+   "kind": "method",
+   "name": "_load_pdf",
+   "qname": "FAISSVectorStore::_load_pdf",
+   "file": "src/rag/vectorstore.py",
+   "line": 129,
+   "sig": "(self, pdf_path: str) -> List[Document]"
+  },
+  {
+   "kind": "method",
+   "name": "_split_documents",
+   "qname": "FAISSVectorStore::_split_documents",
+   "file": "src/rag/vectorstore.py",
+   "line": 159,
+   "sig": "(self, documents: List[Document]) -> List[Document]"
+  },
+  {
+   "kind": "method",
+   "name": "_create_faiss_index",
+   "qname": "FAISSVectorStore::_create_faiss_index",
+   "file": "src/rag/vectorstore.py",
+   "line": 187,
+   "sig": "(self, embeddings: np.ndarray) -> faiss.Index"
+  },
+  {
+   "kind": "method",
+   "name": "add_documents",
+   "qname": "FAISSVectorStore::add_documents",
+   "file": "src/rag/vectorstore.py",
+   "line": 254,
+   "sig": "(\r\n        self, \r\n        pdf_paths: Union[str, List[str]],\r\n        metadata: Optional[Dict[str, Any]] = None\r\n    ) -> int"
+  },
+  {
+   "kind": "method",
+   "name": "search",
+   "qname": "FAISSVectorStore::search",
+   "file": "src/rag/vectorstore.py",
+   "line": 327,
+   "sig": "(\r\n        self, \r\n        query: str, \r\n        top_k: Optional[int] = None,\r\n        score_threshold: Optional[float] = None\r\n    ) -> List[Dict[str, Any]]"
+  },
+  {
+   "kind": "method",
+   "name": "search_with_context",
+   "qname": "FAISSVectorStore::search_with_context",
+   "file": "src/rag/vectorstore.py",
+   "line": 424,
+   "sig": "(\r\n        self, \r\n        query: str, \r\n        top_k: Optional[int] = None,\r\n        max_tokens: Optional[int] = None\r\n    ) -> Tuple[str, List[Dict[str, Any]]]"
+  },
+  {
+   "kind": "method",
+   "name": "save",
+   "qname": "FAISSVectorStore::save",
+   "file": "src/rag/vectorstore.py",
+   "line": 478,
+   "sig": "(self, directory: Optional[str] = None)"
+  },
+  {
+   "kind": "method",
+   "name": "load",
+   "qname": "FAISSVectorStore::load",
+   "file": "src/rag/vectorstore.py",
+   "line": 522,
+   "sig": "(self, directory: Optional[str] = None) -> bool"
+  },
+  {
+   "kind": "method",
+   "name": "get_stats",
+   "qname": "FAISSVectorStore::get_stats",
+   "file": "src/rag/vectorstore.py",
+   "line": 574,
+   "sig": "(self) -> Dict[str, Any]"
+  },
+  {
+   "kind": "method",
+   "name": "clear",
+   "qname": "FAISSVectorStore::clear",
+   "file": "src/rag/vectorstore.py",
+   "line": 591,
+   "sig": "(self)"
+  },
+  {
+   "kind": "method",
+   "name": "__repr__",
+   "qname": "FAISSVectorStore::__repr__",
+   "file": "src/rag/vectorstore.py",
+   "line": 599,
+   "sig": "(self) -> str"
+  },
+  {
+   "kind": "function",
+   "name": "get_vectorstore",
+   "qname": "get_vectorstore",
+   "file": "src/rag/vectorstore.py",
+   "line": 612,
+   "sig": "(config_path: Optional[str] = None) -> FAISSVectorStore"
+  },
+  {
+   "kind": "function",
+   "name": "search_knowledge",
+   "qname": "search_knowledge",
+   "file": "src/rag/vectorstore.py",
+   "line": 628,
+   "sig": "(query: str, top_k: int = 5) -> List[Dict[str, Any]]"
+  },
+  {
+   "kind": "function",
+   "name": "load_json",
+   "qname": "load_json",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 15,
+   "sig": "(filename)"
+  },
+  {
+   "kind": "function",
+   "name": "load_segments",
+   "qname": "load_segments",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 19,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_render_core_metrics",
+   "qname": "_render_core_metrics",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 25,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_render_channel_sparklines",
+   "qname": "_render_channel_sparklines",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 53,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_render_alert_list",
+   "qname": "_render_alert_list",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 86,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "nav_to_detail",
+   "qname": "_render_alert_list::nav_to_detail",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 103,
+   "sig": "(s_id, ch, data_item)"
+  },
+  {
+   "kind": "function",
+   "name": "render",
+   "qname": "render",
+   "file": "src/ui/pages/dashboard.py",
+   "line": 137,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_get_rag_config",
+   "qname": "_get_rag_config",
+   "file": "src/ui/pages/detection.py",
+   "line": 15,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "load_json",
+   "qname": "load_json",
+   "file": "src/ui/pages/detection.py",
+   "line": 58,
+   "sig": "(filename)"
+  },
+  {
+   "kind": "function",
+   "name": "render",
+   "qname": "render",
+   "file": "src/ui/pages/detection.py",
+   "line": 61,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_resolve_kb_path",
+   "qname": "_resolve_kb_path",
+   "file": "src/ui/pages/explanation.py",
+   "line": 32,
+   "sig": "(filename: str) -> str | None"
+  },
+  {
+   "kind": "function",
+   "name": "_get_rag_pipeline",
+   "qname": "_get_rag_pipeline",
+   "file": "src/ui/pages/explanation.py",
+   "line": 49,
+   "sig": "()"
+  },
+  {
+   "kind": "function",
+   "name": "_get_live_anomaly_score",
+   "qname": "_get_live_anomaly_score",
+   "file": "src/ui/pages/explanation.py",
+   "line": 67,
+   "sig": "(segment_id: int, channel: str)"
+  },
+  {
+   "kind": "function",
+   "name": "_refresh_detection_results",
+   "qname": "_refresh_detection_results",
+   "file": "src/ui/pages/explanation.py",
+   "line": 87,
+   "sig": "(max_explanations: int = 20, progress_callback=None)"
+  },
+  {
+   "kind": "function",
+   "name": "_is_garbled_text",
+   "qname": "_is_garbled_text",
+   "file": "src/ui/pages/explanation.py",
+   "line": 111,
+   "sig": "(text: str) -> bool"
+  },
+  {
+   "kind": "function",
+   "name": "_parse_explanation",
+   "qname": "_parse_explanation",
+   "file": "src/ui/pages/explanation.py",
+   "line": 148,
+   "sig": "(explanation: str) -> dict"
+  }
+ ],
+ "edges": [
+  {
+   "src": "file:scripts/gen_ppt_diagrams.py",
+   "tgt": "import:df31829426df482b814cc190ca76405d",
+   "kind": "imports"
+  },
+  {
+   "src": "function:d1b56cff2c71736f4c3923dc1cd6ddfe",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:d1b56cff2c71736f4c3923dc1cd6ddfe",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:5bcfe52e602a31f1b7eef425841c5a2e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f46129a11ea66af6d9355f3d5546b086",
+   "tgt": "function:87a03a1f0df6003b7c8c809819bc6752",
+   "kind": "calls"
+  },
+  {
+   "src": "file:scripts/gen_ppt_diagrams.py",
+   "tgt": "function:d1b56cff2c71736f4c3923dc1cd6ddfe",
+   "kind": "calls"
+  },
+  {
+   "src": "file:scripts/gen_ppt_diagrams.py",
+   "tgt": "function:f46129a11ea66af6d9355f3d5546b086",
+   "kind": "calls"
+  },
+  {
+   "src": "file:scripts/gen_ppt_diagrams.py",
+   "tgt": "function:0a6f46e8e4f4008e1731be9207dab512",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/api/routes/detection.py",
+   "tgt": "file:src/utils/results_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/detection.py",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "imports"
+  },
+  {
+   "src": "function:ac26735a0e21008b06fb11e4b99bf58e",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6535a94c52720b3864e0db735851e613",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "import:c1cdd8e34ee73c3a71ec87fefa08fb26",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "file:src/utils/data_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "file:src/features/segment_features.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "function:2d49de264438bc2b6db538118f0da3f9",
+   "kind": "imports"
+  },
+  {
+   "src": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "calls"
+  },
+  {
+   "src": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "tgt": "function:2d49de264438bc2b6db538118f0da3f9",
+   "kind": "calls"
+  },
+  {
+   "src": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "tgt": "function:4c7071060e4e1df9c934e7e6dcc17dab",
+   "kind": "calls"
+  },
+  {
+   "src": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "tgt": "function:0db1b3224054db2aec8fe1dd9680f4ef",
+   "kind": "calls"
+  },
+  {
+   "src": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "calls"
+  },
+  {
+   "src": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "tgt": "function:c3c7e3f61aae9ba3834e3c7ad0183739",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/evaluation/feature_importance.py",
+   "tgt": "function:827a799cacc200b994a6d9b9ccbedf40",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/experiments/baseline_rerun_v2.py",
+   "tgt": "import:b18b9ce284bab96104525226d052871e",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/experiments/baseline_rerun_v2.py",
+   "tgt": "file:src/utils/data_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/experiments/baseline_rerun_v2.py",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/experiments/fair_comparison.py",
+   "tgt": "file:src/utils/data_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/experiments/fair_comparison.py",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/experiments/fair_comparison.py",
+   "tgt": "function:dcd311d3a09fe319660370a56c8551f4",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/experiments/fair_comparison.py",
+   "tgt": "function:8d10c5f0a3a556289b9f50b5c5fb71f4",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/features/extract_segments_18d.py",
+   "tgt": "import:ed91c1135ce659e0d9aff9bc2a47a149",
+   "kind": "imports"
+  },
+  {
+   "src": "function:0867da354fb7b1716a4a153449f86647",
+   "tgt": "function:aac74eecec5ea6a09665b6639a99b9ed",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dcf3fc47b4318eae3b8439f66dda24eb",
+   "tgt": "function:aac74eecec5ea6a09665b6639a99b9ed",
+   "kind": "calls"
+  },
+  {
+   "src": "function:9885991393c437077d81284254c60fd5",
+   "tgt": "function:aac74eecec5ea6a09665b6639a99b9ed",
+   "kind": "calls"
+  },
+  {
+   "src": "function:45ad54b0db571976dedd4601f2661647",
+   "tgt": "function:aac74eecec5ea6a09665b6639a99b9ed",
+   "kind": "calls"
+  },
+  {
+   "src": "function:1b86bfe81d714e036b11863005633092",
+   "tgt": "function:e25735a73515b8dccbc6e6dc799b0093",
+   "kind": "calls"
+  },
+  {
+   "src": "function:1b86bfe81d714e036b11863005633092",
+   "tgt": "function:66e3722e61f05a0960b9bb0c838d968f",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e41d1e258640733b73c912700a8f9f1a",
+   "tgt": "function:1b86bfe81d714e036b11863005633092",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e41d1e258640733b73c912700a8f9f1a",
+   "tgt": "function:25e54117ce126ed9012dac330836e34d",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/features/extract_segments_18d.py",
+   "tgt": "function:e41d1e258640733b73c912700a8f9f1a",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "file:src/utils/data_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "function:dcd311d3a09fe319660370a56c8551f4",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "function:8d10c5f0a3a556289b9f50b5c5fb71f4",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "imports"
+  },
+  {
+   "src": "function:2d49de264438bc2b6db538118f0da3f9",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2d49de264438bc2b6db538118f0da3f9",
+   "tgt": "function:dcd311d3a09fe319660370a56c8551f4",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2d49de264438bc2b6db538118f0da3f9",
+   "tgt": "function:8d10c5f0a3a556289b9f50b5c5fb71f4",
+   "kind": "calls"
+  },
+  {
+   "src": "function:5da74d2caab0edc0e86885b2017f2486",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "calls"
+  },
+  {
+   "src": "function:5da74d2caab0edc0e86885b2017f2486",
+   "tgt": "function:dcd311d3a09fe319660370a56c8551f4",
+   "kind": "calls"
+  },
+  {
+   "src": "function:5da74d2caab0edc0e86885b2017f2486",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "function:2d49de264438bc2b6db538118f0da3f9",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/features/segment_features.py",
+   "tgt": "function:5da74d2caab0edc0e86885b2017f2486",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/integration/__init__.py",
+   "tgt": "import:b6dcaeb0b5ab5eecead33e7eac1441ce",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/__init__.py",
+   "tgt": "class:bb5cd71464a3ac5c65bd6d703a158b92",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/__init__.py",
+   "tgt": "method:be8f15e86e09dee1225e087da0ceb839",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "import:afae511b92a8b4a6d123982eaa4f51b7",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "file:src/utils/data_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:8605093b8e0534c0cceaa4cafa4316af",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "file:src/utils/constants.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "variable:b6d3b921ed8ff5e19b0d2ac45758adf1",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "variable:bc8d7e2f98be835a944aaff0e26d1daf",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "file:src/utils/stat_rules.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:54665f026a7b74c2c7aa55e95ee685ad",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:0b63e81d64875190b5542d81876bb967",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "file:src/features/segment_features.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:2d49de264438bc2b6db538118f0da3f9",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "file:src/rag/pipeline.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "imports"
+  },
+  {
+   "src": "method:766c7332f7dd20e2103c4ac05a78ef1b",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e90d6c8bf1caf26fb9576c5f3ad697b2",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e90d6c8bf1caf26fb9576c5f3ad697b2",
+   "tgt": "method:9911ad904b4ad04d6ca2b86bf2c493e5",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "function:8605093b8e0534c0cceaa4cafa4316af",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "function:54665f026a7b74c2c7aa55e95ee685ad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "function:0b63e81d64875190b5542d81876bb967",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "method:39aae596d800a5e80aa99c32411c53f7",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "method:50026e88be97870bc71127322eeb9f9c",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "method:5c2f41f2ec8d146e8baacb3e84b171d8",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "method:511569942c55ed35bc38881d7f63fda2",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "method:4021ff88c195a5a752079ec0bc0f56ab",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "method:feda1e53d2da1b1fc89183725e186d2c",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "tgt": "class:904624a87c94f87ab972221326ebaaf6",
+   "kind": "instantiates"
+  },
+  {
+   "src": "method:50026e88be97870bc71127322eeb9f9c",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "calls"
+  },
+  {
+   "src": "method:511569942c55ed35bc38881d7f63fda2",
+   "tgt": "method:429f488b50b9582193a43564212a343c",
+   "kind": "calls"
+  },
+  {
+   "src": "method:84120f765a1f5cd0497c68d227a02bc9",
+   "tgt": "method:e90d6c8bf1caf26fb9576c5f3ad697b2",
+   "kind": "calls"
+  },
+  {
+   "src": "method:84120f765a1f5cd0497c68d227a02bc9",
+   "tgt": "method:6f696d8504509c62d3c6fe27bc12e79a",
+   "kind": "calls"
+  },
+  {
+   "src": "method:84120f765a1f5cd0497c68d227a02bc9",
+   "tgt": "method:90be79d110bc558d50c22db18e63967b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:84120f765a1f5cd0497c68d227a02bc9",
+   "tgt": "class:f04501189d47fe5eb9484c7b2b1c20e7",
+   "kind": "instantiates"
+  },
+  {
+   "src": "method:be8f15e86e09dee1225e087da0ceb839",
+   "tgt": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "kind": "calls"
+  },
+  {
+   "src": "method:be8f15e86e09dee1225e087da0ceb839",
+   "tgt": "method:e90d6c8bf1caf26fb9576c5f3ad697b2",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2968881e4c261002e449aaca9df54eb8",
+   "tgt": "method:84120f765a1f5cd0497c68d227a02bc9",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2968881e4c261002e449aaca9df54eb8",
+   "tgt": "class:9fcd8e2234a4d08f276ff4c2e99033f8",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:2968881e4c261002e449aaca9df54eb8",
+   "tgt": "class:9fcd8e2234a4d08f276ff4c2e99033f8",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:25d1d844012f3bb9d8a6e37e33fb5595",
+   "tgt": "class:bb5cd71464a3ac5c65bd6d703a158b92",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:25d1d844012f3bb9d8a6e37e33fb5595",
+   "tgt": "method:be8f15e86e09dee1225e087da0ceb839",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/integration/anomaly_rag_pipeline.py",
+   "tgt": "method:bbfa2acd8efae3fffcf87b05074d0a8b",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:23c679f5e3f52c93c289282f34350c06",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "class:810f9b002a5e36640721081da45f1e61",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:e93f9ad077be34580b17c64f0f693bff",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:2d33580b893c0ad8bc6ff9a0ad4b1cc2",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "class:06e113d59a15f78e5eafe7ecd61aa42f",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:dc3c38513f967ed8f4b2f7d86a66d9c9",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:1d0fe56edfd7748b0548d831b736be07",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "class:732c67588c0e693a6e224febc9277273",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:ebc4d790dcf4d91e81239eea83951810",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "method:772ebd9ba6bcd56b3e747e061c6c8436",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "method:78ca2abcbcb9e857cef010b6a80be640",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "import:bc9b92df3197a8fc85c956393f73f601",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "function:62db88f59a97edc0e9a599f83d785a27",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/__init__.py",
+   "tgt": "method:90be79d110bc558d50c22db18e63967b",
+   "kind": "imports"
+  },
+  {
+   "src": "method:0e2104d16db07aec5d28d7d3e72d62fa",
+   "tgt": "method:2e95f8e2c59cc8229a538001826295aa",
+   "kind": "calls"
+  },
+  {
+   "src": "method:0e2104d16db07aec5d28d7d3e72d62fa",
+   "tgt": "method:25a3e48d1c975272d0462f49c562d1c7",
+   "kind": "calls"
+  },
+  {
+   "src": "method:0e2104d16db07aec5d28d7d3e72d62fa",
+   "tgt": "method:e27c620e1a3d1e3721853ad673a900bc",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "tgt": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "kind": "calls"
+  },
+  {
+   "src": "method:52f2e765e78391a81eabeb65ff7fa3f6",
+   "tgt": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e1d846c2d53c6d28ce645f151adfea12",
+   "tgt": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e1d846c2d53c6d28ce645f151adfea12",
+   "tgt": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "kind": "calls"
+  },
+  {
+   "src": "method:709caaa2da87caba4a8ebe3b11189eb9",
+   "tgt": "method:709caaa2da87caba4a8ebe3b11189eb9",
+   "kind": "calls"
+  },
+  {
+   "src": "method:ae53a8bc861b01180c67aaff66c07f02",
+   "tgt": "method:43057ecef322cf428c1b11a19893f179",
+   "kind": "calls"
+  },
+  {
+   "src": "method:490cdaff6a7913dae92f72651f9ece10",
+   "tgt": "method:709caaa2da87caba4a8ebe3b11189eb9",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:23c679f5e3f52c93c289282f34350c06",
+   "tgt": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/rag/embedding.py",
+   "tgt": "method:709caaa2da87caba4a8ebe3b11189eb9",
+   "kind": "calls"
+  },
+  {
+   "src": "method:21959f802ba616f84b9e05ec13b5b450",
+   "tgt": "method:ad99c2248b304c393092643f13011bd1",
+   "kind": "calls"
+  },
+  {
+   "src": "method:4fe701855f02256c0056a0dfb79851a9",
+   "tgt": "method:b27737a7e3b5b672821f9f53c228e6a9",
+   "kind": "calls"
+  },
+  {
+   "src": "method:4fe701855f02256c0056a0dfb79851a9",
+   "tgt": "method:4cc2323656250c166140adff611649d4",
+   "kind": "calls"
+  },
+  {
+   "src": "method:4fe701855f02256c0056a0dfb79851a9",
+   "tgt": "method:e4c014f9ce54d026a747a9d6df34388c",
+   "kind": "calls"
+  },
+  {
+   "src": "method:666989f32e294ae5c3a4357ce079e579",
+   "tgt": "method:4fe701855f02256c0056a0dfb79851a9",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dc3c38513f967ed8f4b2f7d86a66d9c9",
+   "tgt": "class:06e113d59a15f78e5eafe7ecd61aa42f",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:1d0fe56edfd7748b0548d831b736be07",
+   "tgt": "function:dc3c38513f967ed8f4b2f7d86a66d9c9",
+   "kind": "calls"
+  },
+  {
+   "src": "function:1d0fe56edfd7748b0548d831b736be07",
+   "tgt": "method:4fe701855f02256c0056a0dfb79851a9",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "class:810f9b002a5e36640721081da45f1e61",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "function:e93f9ad077be34580b17c64f0f693bff",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "class:06e113d59a15f78e5eafe7ecd61aa42f",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "function:dc3c38513f967ed8f4b2f7d86a66d9c9",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "class:732c67588c0e693a6e224febc9277273",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/pipeline.py",
+   "tgt": "function:ebc4d790dcf4d91e81239eea83951810",
+   "kind": "imports"
+  },
+  {
+   "src": "method:c8864cd1ab57ba36eabeeab1d2dc559f",
+   "tgt": "method:3109643289daa8309c89f24381210093",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c8864cd1ab57ba36eabeeab1d2dc559f",
+   "tgt": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c8864cd1ab57ba36eabeeab1d2dc559f",
+   "tgt": "function:e93f9ad077be34580b17c64f0f693bff",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c8864cd1ab57ba36eabeeab1d2dc559f",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c8864cd1ab57ba36eabeeab1d2dc559f",
+   "tgt": "function:dc3c38513f967ed8f4b2f7d86a66d9c9",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c8864cd1ab57ba36eabeeab1d2dc559f",
+   "tgt": "function:ebc4d790dcf4d91e81239eea83951810",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "tgt": "method:d22d8d52f200ebe83a0f55b4cc41e711",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "tgt": "method:3cd21f5b9980eb06f98d265db6cdb648",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "tgt": "method:013f613f76639c347c78c975bc1c8e39",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "tgt": "method:42cecb9d803b102bb2be12f42b708d46",
+   "kind": "calls"
+  },
+  {
+   "src": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "tgt": "method:4fe701855f02256c0056a0dfb79851a9",
+   "kind": "calls"
+  },
+  {
+   "src": "method:90be79d110bc558d50c22db18e63967b",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:916b487adaed35cb94288711429efdab",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e1639fe17a69281af2396f487eb17f6d",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:f3a35b2ef058cfe71705200cbb8ab6d0",
+   "tgt": "method:e02a0b4b955bfa548b91d75282ee4bef",
+   "kind": "calls"
+  },
+  {
+   "src": "method:9911ad904b4ad04d6ca2b86bf2c493e5",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:0a1c802b1f3611f3a74ad48de7cdc5ba",
+   "tgt": "method:0a1c802b1f3611f3a74ad48de7cdc5ba",
+   "kind": "calls"
+  },
+  {
+   "src": "method:0a1c802b1f3611f3a74ad48de7cdc5ba",
+   "tgt": "method:0a1c802b1f3611f3a74ad48de7cdc5ba",
+   "kind": "calls"
+  },
+  {
+   "src": "method:86a036b57fe55c8021ae819607f732b4",
+   "tgt": "method:86a036b57fe55c8021ae819607f732b4",
+   "kind": "calls"
+  },
+  {
+   "src": "function:7145094156ce60da4496ee79434bb4c0",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:62db88f59a97edc0e9a599f83d785a27",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "function:62db88f59a97edc0e9a599f83d785a27",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "function:019d28b5a8cfa830c91334c105432b23",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "function:019d28b5a8cfa830c91334c105432b23",
+   "tgt": "method:90be79d110bc558d50c22db18e63967b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:11346f516c6a5c50645ad5dcd1713a05",
+   "tgt": "method:62147d670d31434bc818fe522db9129e",
+   "kind": "calls"
+  },
+  {
+   "src": "method:78ca2abcbcb9e857cef010b6a80be640",
+   "tgt": "method:6ef4d59828c3f98a891c88edc4c31c07",
+   "kind": "calls"
+  },
+  {
+   "src": "method:1ffc0c07b8b7546eb15546f4955c950a",
+   "tgt": "method:08b9a576223e1988cb0e5617016d9786",
+   "kind": "calls"
+  },
+  {
+   "src": "function:ebc4d790dcf4d91e81239eea83951810",
+   "tgt": "class:732c67588c0e693a6e224febc9277273",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:26885b4738c29472c5e7367840fd781a",
+   "tgt": "function:26885b4738c29472c5e7367840fd781a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:26885b4738c29472c5e7367840fd781a",
+   "tgt": "function:ebc4d790dcf4d91e81239eea83951810",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e6cbab22212abc451423f786d361b9a3",
+   "tgt": "function:e6cbab22212abc451423f786d361b9a3",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e6cbab22212abc451423f786d361b9a3",
+   "tgt": "function:ebc4d790dcf4d91e81239eea83951810",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/rag/prompts.py",
+   "tgt": "method:772ebd9ba6bcd56b3e747e061c6c8436",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/rag/prompts.py",
+   "tgt": "method:d8ed2372f0d395bdfb5310283ad7ba80",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/rag/vectorstore.py",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/rag/vectorstore.py",
+   "tgt": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "kind": "imports"
+  },
+  {
+   "src": "method:6c6e2689b7fa6c1b12b773328c24b8df",
+   "tgt": "method:a70576a448e3e86564fc1dca7788ce27",
+   "kind": "calls"
+  },
+  {
+   "src": "method:6c6e2689b7fa6c1b12b773328c24b8df",
+   "tgt": "function:a8906ca18fa5474f1fc1469d9bd58cd5",
+   "kind": "calls"
+  },
+  {
+   "src": "method:6c6e2689b7fa6c1b12b773328c24b8df",
+   "tgt": "method:e55269fc9af6eeee67e4819085142867",
+   "kind": "calls"
+  },
+  {
+   "src": "method:206fc6e4ed999629559c66ad85534048",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e02a0b4b955bfa548b91d75282ee4bef",
+   "tgt": "method:206fc6e4ed999629559c66ad85534048",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e02a0b4b955bfa548b91d75282ee4bef",
+   "tgt": "method:8af63fbcbd54cdc5413041bd4e9e5e49",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e02a0b4b955bfa548b91d75282ee4bef",
+   "tgt": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e02a0b4b955bfa548b91d75282ee4bef",
+   "tgt": "method:ddb260ba5bef4744f0f08a3114776c78",
+   "kind": "calls"
+  },
+  {
+   "src": "method:e02a0b4b955bfa548b91d75282ee4bef",
+   "tgt": "method:49c7a59b9666ef72987ea9816d4811b4",
+   "kind": "calls"
+  },
+  {
+   "src": "method:001d9a753ad005219c8aba2c71cd164d",
+   "tgt": "method:e75d41f024ca49d6f2e1411eced07ac3",
+   "kind": "calls"
+  },
+  {
+   "src": "method:001d9a753ad005219c8aba2c71cd164d",
+   "tgt": "method:001d9a753ad005219c8aba2c71cd164d",
+   "kind": "calls"
+  },
+  {
+   "src": "method:d22d8d52f200ebe83a0f55b4cc41e711",
+   "tgt": "method:001d9a753ad005219c8aba2c71cd164d",
+   "kind": "calls"
+  },
+  {
+   "src": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:bf2bfad4649e9d29a6d25148cc2edbc5",
+   "tgt": "method:709caaa2da87caba4a8ebe3b11189eb9",
+   "kind": "calls"
+  },
+  {
+   "src": "method:43057ecef322cf428c1b11a19893f179",
+   "tgt": "method:43057ecef322cf428c1b11a19893f179",
+   "kind": "calls"
+  },
+  {
+   "src": "method:43057ecef322cf428c1b11a19893f179",
+   "tgt": "method:43057ecef322cf428c1b11a19893f179",
+   "kind": "calls"
+  },
+  {
+   "src": "method:43057ecef322cf428c1b11a19893f179",
+   "tgt": "method:ae53a8bc861b01180c67aaff66c07f02",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e93f9ad077be34580b17c64f0f693bff",
+   "tgt": "class:810f9b002a5e36640721081da45f1e61",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:2d33580b893c0ad8bc6ff9a0ad4b1cc2",
+   "tgt": "function:e93f9ad077be34580b17c64f0f693bff",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2d33580b893c0ad8bc6ff9a0ad4b1cc2",
+   "tgt": "method:001d9a753ad005219c8aba2c71cd164d",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "file:src/rag/pipeline.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "file:src/ui/pages/detection.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "file:src/ui/pages/dashboard.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "file:src/ui/pages/explanation.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "function:77812fef591ac016c6603a9e8e4e784b",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/app.py",
+   "tgt": "function:77812fef591ac016c6603a9e8e4e784b",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/ui/pages/dashboard.py",
+   "tgt": "file:src/utils/constants.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/dashboard.py",
+   "tgt": "variable:55fe3abc2fe0302ce9099dfdccc108ab",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/dashboard.py",
+   "tgt": "variable:e1599b3813c2be00952ee2ee737855f7",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/dashboard.py",
+   "tgt": "variable:bf42e8077638cc7238bbfdd317bc7e7d",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/dashboard.py",
+   "tgt": "file:src/utils/results_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "function:51a71f69bec51e046a802aa506dc072c",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:51a71f69bec51e046a802aa506dc072c",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:51a71f69bec51e046a802aa506dc072c",
+   "tgt": "function:8605093b8e0534c0cceaa4cafa4316af",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f3924084ab65a29b5da8d7585af7c8c3",
+   "tgt": "function:8605093b8e0534c0cceaa4cafa4316af",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6870dd4d285e2081cf9188f5005403f1",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:bf8e115807fd687702f83aa8d85ebab7",
+   "tgt": "function:51a71f69bec51e046a802aa506dc072c",
+   "kind": "calls"
+  },
+  {
+   "src": "function:bf8e115807fd687702f83aa8d85ebab7",
+   "tgt": "function:f3924084ab65a29b5da8d7585af7c8c3",
+   "kind": "calls"
+  },
+  {
+   "src": "function:bf8e115807fd687702f83aa8d85ebab7",
+   "tgt": "function:6870dd4d285e2081cf9188f5005403f1",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/ui/pages/detection.py",
+   "tgt": "file:src/utils/results_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "function:748bea3a8d2f9bfd4bebd1217fa0395e",
+   "tgt": "function:c7b5396a986d24cd8d60837e3c10e20b",
+   "kind": "calls"
+  },
+  {
+   "src": "function:748bea3a8d2f9bfd4bebd1217fa0395e",
+   "tgt": "function:c7b5396a986d24cd8d60837e3c10e20b",
+   "kind": "calls"
+  },
+  {
+   "src": "function:748bea3a8d2f9bfd4bebd1217fa0395e",
+   "tgt": "function:d2b14372ef37b88b77c70092d9bfd571",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/ui/pages/explanation.py",
+   "tgt": "import:b92d8b38cd8e968767cc37379e3492aa",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/explanation.py",
+   "tgt": "file:src/utils/constants.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/explanation.py",
+   "tgt": "variable:55fe3abc2fe0302ce9099dfdccc108ab",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/explanation.py",
+   "tgt": "variable:e1599b3813c2be00952ee2ee737855f7",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/ui/pages/explanation.py",
+   "tgt": "file:src/utils/results_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "function:353fd536d3d27c9b7cff171f5b2af399",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "function:353fd536d3d27c9b7cff171f5b2af399",
+   "tgt": "method:9911ad904b4ad04d6ca2b86bf2c493e5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:9a8a0cc5bc534f018bdab224d35fba1e",
+   "tgt": "class:bb5cd71464a3ac5c65bd6d703a158b92",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:9a8a0cc5bc534f018bdab224d35fba1e",
+   "tgt": "method:5cf8561f755f4507db6912b7d8069aa8",
+   "kind": "calls"
+  },
+  {
+   "src": "function:14725732c5c37a8314688696974049fa",
+   "tgt": "class:bb5cd71464a3ac5c65bd6d703a158b92",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:14725732c5c37a8314688696974049fa",
+   "tgt": "method:be8f15e86e09dee1225e087da0ceb839",
+   "kind": "calls"
+  },
+  {
+   "src": "function:14725732c5c37a8314688696974049fa",
+   "tgt": "method:43057ecef322cf428c1b11a19893f179",
+   "kind": "calls"
+  },
+  {
+   "src": "function:cb7a34c47557a5e9a406f1b5256755c4",
+   "tgt": "function:c441eded29e6d48e9b2d125171e77042",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2589efa5d39a9bba086d90abee9421dc",
+   "tgt": "function:aed43dcba0693800f184faf74a0bbf1d",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2589efa5d39a9bba086d90abee9421dc",
+   "tgt": "function:0da81d7034fec4df82b92bbafc57d351",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2589efa5d39a9bba086d90abee9421dc",
+   "tgt": "function:0da81d7034fec4df82b92bbafc57d351",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2589efa5d39a9bba086d90abee9421dc",
+   "tgt": "function:092a9c92acd5b437ea2527dbf6fca3a5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2589efa5d39a9bba086d90abee9421dc",
+   "tgt": "function:cb7a34c47557a5e9a406f1b5256755c4",
+   "kind": "calls"
+  },
+  {
+   "src": "function:2589efa5d39a9bba086d90abee9421dc",
+   "tgt": "function:16b3809eb559afd793e05e0ee4c97394",
+   "kind": "calls"
+  },
+  {
+   "src": "function:77812fef591ac016c6603a9e8e4e784b",
+   "tgt": "function:353fd536d3d27c9b7cff171f5b2af399",
+   "kind": "calls"
+  },
+  {
+   "src": "function:77812fef591ac016c6603a9e8e4e784b",
+   "tgt": "function:9a8a0cc5bc534f018bdab224d35fba1e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:77812fef591ac016c6603a9e8e4e784b",
+   "tgt": "function:14725732c5c37a8314688696974049fa",
+   "kind": "calls"
+  },
+  {
+   "src": "function:77812fef591ac016c6603a9e8e4e784b",
+   "tgt": "function:2589efa5d39a9bba086d90abee9421dc",
+   "kind": "calls"
+  },
+  {
+   "src": "function:77812fef591ac016c6603a9e8e4e784b",
+   "tgt": "function:e9f6e019128fe630d0523cd849d4eb6d",
+   "kind": "calls"
+  },
+  {
+   "src": "function:77812fef591ac016c6603a9e8e4e784b",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "function:ab10b266e079b9176afaea8f0673863d",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "calls"
+  },
+  {
+   "src": "function:ab10b266e079b9176afaea8f0673863d",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dcd311d3a09fe319660370a56c8551f4",
+   "tgt": "function:bb65730ec547a58bebe20a0f004feb06",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dcd311d3a09fe319660370a56c8551f4",
+   "tgt": "function:5e840b6e7f8582b00f92acc3e2d93bef",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e2a80703aef5eca6ef791bf6d6d75e1f",
+   "tgt": "function:2c69070b517e0f45b9f8ba9d2d87d167",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e2a80703aef5eca6ef791bf6d6d75e1f",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e2a80703aef5eca6ef791bf6d6d75e1f",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "function:0b63e81d64875190b5542d81876bb967",
+   "tgt": "function:5f77aedc6a1230e91fa7c7970c87eeea",
+   "kind": "calls"
+  },
+  {
+   "src": "function:0b63e81d64875190b5542d81876bb967",
+   "tgt": "function:801805ab9a3fb98ca08bf4869e798800",
+   "kind": "calls"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "import:d4121cdaca4e53ba9a9f73f3ea312019",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "file:src/rag/pipeline.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "function:62db88f59a97edc0e9a599f83d785a27",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "method:90be79d110bc558d50c22db18e63967b",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "file:src/rag/embedding.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "file:src/rag/vectorstore.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "class:810f9b002a5e36640721081da45f1e61",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "file:src/rag/llm_client.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "class:06e113d59a15f78e5eafe7ecd61aa42f",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "file:src/rag/prompts.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:tests/test_rag/test_pipeline.py",
+   "tgt": "class:732c67588c0e693a6e224febc9277273",
+   "kind": "imports"
+  },
+  {
+   "src": "method:10769e1c667fa7d8b7e2142116094d50",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "instantiates"
+  },
+  {
+   "src": "method:c438e13fe98ab4ef84227614107b0bcd",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:a1f990f74e3508ad2bae046a495ac35c",
+   "tgt": "method:90be79d110bc558d50c22db18e63967b",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c89d57e7d2de0376baed07c353cedbf8",
+   "tgt": "method:916b487adaed35cb94288711429efdab",
+   "kind": "calls"
+  },
+  {
+   "src": "method:470973975167abfda7cdba646825a2b1",
+   "tgt": "method:e1639fe17a69281af2396f487eb17f6d",
+   "kind": "calls"
+  },
+  {
+   "src": "method:a2589bc5c95e80967d5b50f57bbdb438",
+   "tgt": "method:f3a35b2ef058cfe71705200cbb8ab6d0",
+   "kind": "calls"
+  },
+  {
+   "src": "method:dca6272139d9fbb2cc4d5ce84b71ddfa",
+   "tgt": "method:9911ad904b4ad04d6ca2b86bf2c493e5",
+   "kind": "calls"
+  },
+  {
+   "src": "method:4782ce7baafa5044be102ca2763e1db3",
+   "tgt": "method:0a1c802b1f3611f3a74ad48de7cdc5ba",
+   "kind": "calls"
+  },
+  {
+   "src": "method:19c49c9bc2205fb1d266fb66261f7c62",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:19c49c9bc2205fb1d266fb66261f7c62",
+   "tgt": "method:86a036b57fe55c8021ae819607f732b4",
+   "kind": "calls"
+  },
+  {
+   "src": "method:19c49c9bc2205fb1d266fb66261f7c62",
+   "tgt": "method:0a1c802b1f3611f3a74ad48de7cdc5ba",
+   "kind": "calls"
+  },
+  {
+   "src": "method:7fbdb4de3b4a7023e9f564f1a79a426e",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:7881903b24b960917bf11f962d2bc009",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:7f5137197ce4b7385a41c2b615d9213c",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "instantiates"
+  },
+  {
+   "src": "method:7f5137197ce4b7385a41c2b615d9213c",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c0afcffbdd39ead4d894e42cff353212",
+   "tgt": "class:ac0e8d43f2f3b1ef217298fa01f700fa",
+   "kind": "instantiates"
+  },
+  {
+   "src": "method:c0afcffbdd39ead4d894e42cff353212",
+   "tgt": "method:9911ad904b4ad04d6ca2b86bf2c493e5",
+   "kind": "calls"
+  },
+  {
+   "src": "method:c0afcffbdd39ead4d894e42cff353212",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "method:cb1f548e843eb7284f84369801f6624e",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "method:cb1f548e843eb7284f84369801f6624e",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "method:434fc5462ac6b379d72883ea57186a23",
+   "tgt": "function:62db88f59a97edc0e9a599f83d785a27",
+   "kind": "calls"
+  },
+  {
+   "src": "method:efd2a2c9b7321814f270c797330b93db",
+   "tgt": "method:90be79d110bc558d50c22db18e63967b",
+   "kind": "calls"
+  },
+  {
+   "src": "function:22b9b0281a4a7173d74cfaaf9bd0f16a",
+   "tgt": "function:3535d7508368b8c049b393675ef7d256",
+   "kind": "calls"
+  },
+  {
+   "src": "function:e8623123109f4b071d34ebf13adcdd87",
+   "tgt": "function:3535d7508368b8c049b393675ef7d256",
+   "kind": "calls"
+  },
+  {
+   "src": "function:1883b7c1522d0f9e2e75b64962d312f9",
+   "tgt": "function:3535d7508368b8c049b393675ef7d256",
+   "kind": "calls"
+  },
+  {
+   "src": "function:62f2cd7b51dda052442dadf927c6d5f7",
+   "tgt": "function:3535d7508368b8c049b393675ef7d256",
+   "kind": "calls"
+  },
+  {
+   "src": "file:frontend/src/main.tsx",
+   "tgt": "import:7a14a949efd98d5e0c8e1a38ecd53e82",
+   "kind": "imports"
+  },
+  {
+   "src": "file:frontend/src/main.tsx",
+   "tgt": "import:04c3aa11e1907569af436068bd012403",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "file:src/rag/vectorstore.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "class:810f9b002a5e36640721081da45f1e61",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "file:src/rag/embedding.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "file:src/rag/llm_client.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "class:06e113d59a15f78e5eafe7ecd61aa42f",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "file:src/rag/prompts.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "class:732c67588c0e693a6e224febc9277273",
+   "kind": "imports"
+  },
+  {
+   "src": "function:b721a353155e3ad3d5d002e5449e427c",
+   "tgt": "method:001d9a753ad005219c8aba2c71cd164d",
+   "kind": "calls"
+  },
+  {
+   "src": "function:d01875ed31aeba23e11d8d5652d9308a",
+   "tgt": "class:06e113d59a15f78e5eafe7ecd61aa42f",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:d01875ed31aeba23e11d8d5652d9308a",
+   "tgt": "class:732c67588c0e693a6e224febc9277273",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:d01875ed31aeba23e11d8d5652d9308a",
+   "tgt": "method:d22d8d52f200ebe83a0f55b4cc41e711",
+   "kind": "calls"
+  },
+  {
+   "src": "function:d01875ed31aeba23e11d8d5652d9308a",
+   "tgt": "method:3cd21f5b9980eb06f98d265db6cdb648",
+   "kind": "calls"
+  },
+  {
+   "src": "function:d01875ed31aeba23e11d8d5652d9308a",
+   "tgt": "method:4fe701855f02256c0056a0dfb79851a9",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "function:98046dd4da5e7760e4b1a78a3c10f1aa",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "class:5cdbb3fdb600ab77cb97c6c63596b6be",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "class:810f9b002a5e36640721081da45f1e61",
+   "kind": "instantiates"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "method:23ef08e4dc5d00ea3641cf62edb2326b",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "function:b721a353155e3ad3d5d002e5449e427c",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "function:d01875ed31aeba23e11d8d5652d9308a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "tgt": "function:818d849551d92d866b328ba5a8cc505f",
+   "kind": "calls"
+  },
+  {
+   "src": "file:scripts/run_rag_experiment.py",
+   "tgt": "function:f1c0fdb507d15abeaf0b698c8b82da3c",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/api/main.py",
+   "tgt": "import:22c4385743dcbfb849611cbd05498c3f",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/main.py",
+   "tgt": "file:src/api/routes/__init__.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/main.py",
+   "tgt": "file:src/api/routes/detection.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:frontend/src/main.tsx",
+   "tgt": "file:frontend/src/App.tsx",
+   "kind": "imports"
+  },
+  {
+   "src": "file:frontend/src/App.tsx",
+   "tgt": "import:f9580521439a18596d86da49fd014f52",
+   "kind": "imports"
+  },
+  {
+   "src": "file:frontend/src/App.tsx",
+   "tgt": "constant:37f0a022f871ea447ff84d72e43e9f69",
+   "kind": "imports"
+  },
+  {
+   "src": "function:0c412bac81fb7b9637494582a4647629",
+   "tgt": "function:a9a33b2e10f8a4549194f65186804451",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/api/main.py",
+   "tgt": "file:src/api/routes/dashboard.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "import:ab3ec764bec9a6f20675a8eec27752b0",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "file:src/utils/constants.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "variable:55fe3abc2fe0302ce9099dfdccc108ab",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "variable:e1599b3813c2be00952ee2ee737855f7",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "variable:bf42e8077638cc7238bbfdd317bc7e7d",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "file:src/utils/results_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/dashboard.py",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "imports"
+  },
+  {
+   "src": "function:b20bc9555d51b6982a5c70c27be7dd79",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:b20bc9555d51b6982a5c70c27be7dd79",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:b20bc9555d51b6982a5c70c27be7dd79",
+   "tgt": "function:cfbba5e728026353d97dd569ead02ca6",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6ed6b692be964b79891755fdd0faa755",
+   "tgt": "function:cfbba5e728026353d97dd569ead02ca6",
+   "kind": "calls"
+  },
+  {
+   "src": "function:bf8b65f36aa7f606af9d27c9f6135336",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:bf8b65f36aa7f606af9d27c9f6135336",
+   "tgt": "function:b14a28c7ab89acefc905d0d842de6e89",
+   "kind": "calls"
+  },
+  {
+   "src": "file:src/api/main.py",
+   "tgt": "file:src/api/routes/explanation.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/explanation.py",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/explanation.py",
+   "tgt": "file:src/utils/constants.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/explanation.py",
+   "tgt": "variable:55fe3abc2fe0302ce9099dfdccc108ab",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/explanation.py",
+   "tgt": "file:src/utils/results_loader.py",
+   "kind": "imports"
+  },
+  {
+   "src": "file:src/api/routes/explanation.py",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "imports"
+  },
+  {
+   "src": "function:737d28d3367f0039054a48b5c2b06e47",
+   "tgt": "function:4ff52b59d8994b1b7ea07bf17c4a07b8",
+   "kind": "calls"
+  },
+  {
+   "src": "function:305f4c027ad321cafd490150fdcc3217",
+   "tgt": "function:97cc5c42be95ad063345f75dbcce2bb5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:305f4c027ad321cafd490150fdcc3217",
+   "tgt": "function:3f2e794a55f45fbbcab0278fbfd40a58",
+   "kind": "calls"
+  },
+  {
+   "src": "function:305f4c027ad321cafd490150fdcc3217",
+   "tgt": "function:737d28d3367f0039054a48b5c2b06e47",
+   "kind": "calls"
+  },
+  {
+   "src": "function:305f4c027ad321cafd490150fdcc3217",
+   "tgt": "function:24b203609e7367ecc52a5fe0d0c360df",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dcf03850288a3b3486e64f38589b654b",
+   "tgt": "function:7145094156ce60da4496ee79434bb4c0",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dcf03850288a3b3486e64f38589b654b",
+   "tgt": "method:9911ad904b4ad04d6ca2b86bf2c493e5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:dcf03850288a3b3486e64f38589b654b",
+   "tgt": "method:5575e52dc98a4aae1ad00a5997e3acad",
+   "kind": "calls"
+  },
+  {
+   "src": "function:8333fc5393a80fdcdf3492a684b6870e",
+   "tgt": "function:02622753e0d103f046a694936642a199",
+   "kind": "calls"
+  },
+  {
+   "src": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "tgt": "function:b6c65196187226ad1ec3929a2006450e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "tgt": "function:d967c05774a6d191452c06c8b930503e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "tgt": "function:d967c05774a6d191452c06c8b930503e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:b36da06bb6a76a3e0a0cc2c385fb1666",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:b36da06bb6a76a3e0a0cc2c385fb1666",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:b36da06bb6a76a3e0a0cc2c385fb1666",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:def73cba8fe6f73a5938155815a978f6",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:def73cba8fe6f73a5938155815a978f6",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:def73cba8fe6f73a5938155815a978f6",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6838908b46cc31dbcfc9f121afe98984",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6838908b46cc31dbcfc9f121afe98984",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6838908b46cc31dbcfc9f121afe98984",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6838908b46cc31dbcfc9f121afe98984",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:affaea5268b11c8ddca85daf27cc583f",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:affaea5268b11c8ddca85daf27cc583f",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "tgt": "function:02622753e0d103f046a694936642a199",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "tgt": "function:d967c05774a6d191452c06c8b930503e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "tgt": "function:02622753e0d103f046a694936642a199",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:80365874df0b8f1cb27d39ffad09253d",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:80365874df0b8f1cb27d39ffad09253d",
+   "tgt": "function:8333fc5393a80fdcdf3492a684b6870e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:80365874df0b8f1cb27d39ffad09253d",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:80365874df0b8f1cb27d39ffad09253d",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f19704b8cf36d42d40be472de91598cf",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f19704b8cf36d42d40be472de91598cf",
+   "tgt": "function:8333fc5393a80fdcdf3492a684b6870e",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f19704b8cf36d42d40be472de91598cf",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:f19704b8cf36d42d40be472de91598cf",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:98a41146edfe00e20414bd1911f2a2c3",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:98a41146edfe00e20414bd1911f2a2c3",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:3f59985afdd495462dbbade2d7369917",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:b36da06bb6a76a3e0a0cc2c385fb1666",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:def73cba8fe6f73a5938155815a978f6",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:6838908b46cc31dbcfc9f121afe98984",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:affaea5268b11c8ddca85daf27cc583f",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:6775e9c6579066d8f4e6576a9d66b886",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:80365874df0b8f1cb27d39ffad09253d",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:f19704b8cf36d42d40be472de91598cf",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:98a41146edfe00e20414bd1911f2a2c3",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:8d4d4d15c346995664941dba00a814d5",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:c2a880ee13e6653d041d15a103e5d09a",
+   "kind": "calls"
+  },
+  {
+   "src": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "tgt": "function:74aa3dd538d68ff3b71cbfaf16beebd4",
+   "kind": "calls"
+  },
+  {
+   "src": "file:scripts/start_ui.py",
+   "tgt": "function:a2187366ae5ca85612ee28fabb0cba4b",
+   "kind": "calls"
+  }
+ ]
+}

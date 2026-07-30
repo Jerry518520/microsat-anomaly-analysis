@@ -1,4 +1,5 @@
 """Dashboard API — 实时告警中心数据接口"""
+import json
 import os
 import sys
 import pandas as pd
