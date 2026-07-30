@@ -134,6 +134,5 @@ def get_system_params():
     return {
         "algorithm": "Isolation Forest",
         "dimensions": 18,
-        "window_size": 100,
         "contamination": 0.2,
     }

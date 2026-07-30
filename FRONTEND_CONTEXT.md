@@ -153,7 +153,7 @@ RAG 知识库状态。响应（`RagConfig`）：`status`(`online`|`offline`)、`
 `ChannelF1`：`channel`(str)、`f1`(float)、`precision`(float|null)、`recall`(float|null)。
 
 ### 3.8 GET `/api/detection/system-params`
-算法系统参数。响应：`{ "algorithm": "Isolation Forest", "dimensions": 18, "window_size": 100, "contamination": 0.2 }`。
+算法系统参数。响应：`{ "algorithm": "Isolation Forest", "dimensions": 18, "contamination": 0.2 }`。
 
 ### 3.9 GET `/api/explanation/detail?segment={seg}&channel={ch}`
 单异常完整诊断。响应字段：
