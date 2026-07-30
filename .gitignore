@@ -85,3 +85,7 @@ node-runtime/
 .understand-anything/
 .codegraph/
 *.log
+
+# 论文草稿与参考资料（不入库，本地保留）
+docs/paper/
+docs/papers/
