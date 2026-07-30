@@ -143,7 +143,7 @@
 
 **GET `/system-params`**
 ```json
-{ "algorithm":"Isolation Forest", "dimensions":18, "window_size":100, "contamination":0.2 }
+{ "algorithm":"Isolation Forest", "dimensions":18, "contamination":0.2 }
 ```
 
 ### 3.4 Explanation —— `/api/explanation`
