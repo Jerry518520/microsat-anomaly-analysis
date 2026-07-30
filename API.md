@@ -65,11 +65,12 @@
   "total_rows": 303494,
   "fault_count": 12,
   "total_anomalies": 48,
-  "best_f1": 0.5683,
+  "best_f1": 0.425,
   "throughput": 303494,
   "channel_count": 9
 }
 ```
+> 注：`best_f1` 即 `best_seg_f1`，代码默认 `0.425`（见 `src/api/routes/dashboard.py:45`）；`0.5683` 是 Stage-2 IF 模型 F1，属于 `/detection/experiments`，勿混用。
 
 **GET `/channels`** — 各通道 sparkline + 状态（每通道取最后 500 点）
 ```json
