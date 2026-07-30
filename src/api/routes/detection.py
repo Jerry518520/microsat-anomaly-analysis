@@ -122,10 +122,21 @@ def get_channel_f1():
         return {"channels": rows, "available": True}
 
     per_channel = data.get("per_channel_f1", {})
-    rows = [{"channel": ch, "f1": round(f1, 4), "precision": None, "recall": None}
-            for ch, f1 in per_channel.items()]
-    rows.sort(key=lambda x: x["f1"], reverse=True)
-    return {"channels": rows, "available": True}
+    if per_channel:
+        rows = [{"channel": ch, "f1": round(f1, 4), "precision": None, "recall": None}
+                for ch, f1 in per_channel.items()]
+        rows.sort(key=lambda x: x["f1"], reverse=True)
+        return {"channels": rows, "available": True}
+
+    # 原始格式:顶层即 {channel: {f1, n_test, n_anomaly, strategy}, ...}
+    if all(isinstance(v, dict) and "f1" in v for v in data.values()) and data:
+        rows = [{"channel": ch, "f1": round(info.get("f1", 0), 4),
+                 "precision": info.get("precision"), "recall": info.get("recall")}
+                for ch, info in data.items()]
+        rows.sort(key=lambda x: x["f1"], reverse=True)
+        return {"channels": rows, "available": True}
+
+    return {"channels": [], "available": False}
 
 
 @router.get("/system-params")
