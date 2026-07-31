@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, BarChart3, Crosshair, Satellite } from 'lucide-react';
+import { Activity, FlaskConical, Crosshair, Satellite } from 'lucide-react';
 import { api } from './api/client';
-import type { DiagnosisTarget, SystemStatus } from './api/types';
+import type { AlertItem, DiagnosisTarget, SystemStatus } from './api/types';
+import BootSequence from './components/BootSequence';
+import { sevColor } from './components/severity';
 import DashboardView from './views/DashboardView';
 import DetectionView from './views/DetectionView';
 import ExplanationView from './views/ExplanationView';
 
 type Page = 'dashboard' | 'detection' | 'explanation';
 
-/** UTC 时钟 */
 function useUtcClock() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -16,114 +17,143 @@ function useUtcClock() {
     return () => clearInterval(t);
   }, []);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+  return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`;
 }
 
-const NAV: { key: Page; label: string; icon: React.ReactNode }[] = [
-  { key: 'dashboard', label: '告警中心', icon: <Activity size={19} /> },
-  { key: 'detection', label: '算法实验', icon: <BarChart3 size={19} /> },
-  { key: 'explanation', label: '深度诊断', icon: <Crosshair size={19} /> },
+const NAV: { key: Page; label: string; en: string; icon: React.ReactNode; kbd: string }[] = [
+  { key: 'dashboard', label: '告警中心', en: 'ALERTS', icon: <Activity size={13} />, kbd: '1' },
+  { key: 'detection', label: '算法实验', en: 'BENCH', icon: <FlaskConical size={13} />, kbd: '2' },
+  { key: 'explanation', label: '深度诊断', en: 'DIAG', icon: <Crosshair size={13} />, kbd: '3' },
 ];
 
 export default function App() {
   const [page, setPage] = useState<Page>('dashboard');
   const [target, setTarget] = useState<DiagnosisTarget | null>(null);
   const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [tickerAlerts, setTickerAlerts] = useState<AlertItem[]>([]);
+  const [booted, setBooted] = useState(false);
   const clock = useUtcClock();
 
-  const pollStatus = useCallback(() => {
-    api.dashboard.status().then(setStatus).catch(() => setStatus(null));
-  }, []);
-
   useEffect(() => {
-    pollStatus();
-    const t = setInterval(pollStatus, 30_000);
+    const poll = () => {
+      api.dashboard.status().then(setStatus).catch(() => setStatus(null));
+      api.dashboard.alerts().then(a => setTickerAlerts(a.alerts || [])).catch(() => {});
+    };
+    poll();
+    const t = setInterval(poll, 30_000);
     return () => clearInterval(t);
-  }, [pollStatus]);
+  }, []);
 
   const goDiagnose = useCallback((t: DiagnosisTarget) => {
     setTarget(t);
     setPage('explanation');
   }, []);
 
-  const backendOk = status !== null;
+  // 键盘快捷键 1/2/3
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return;
+      if (e.key === '1') setPage('dashboard');
+      if (e.key === '2') setPage('detection');
+      if (e.key === '3' && target) setPage('explanation');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [target]);
+
+  const apiOk = status !== null;
 
   return (
-    <div className="h-full flex flex-col select-none">
-      <div className="space-backdrop" />
+    <div className="h-full flex flex-col select-none overflow-hidden">
+      <div className="void-backdrop" />
+      {!booted && <BootSequence onDone={() => setBooted(true)} />}
 
-      {/* ===== 顶栏 ===== */}
-      <header className="h-14 shrink-0 flex items-center gap-4 px-4 border-b border-[rgba(148,163,184,0.14)] bg-[rgba(7,11,20,0.85)] backdrop-blur-md relative z-10">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.35)', boxShadow: '0 0 16px rgba(56,189,248,0.15)' }}
-          >
-            <Satellite size={18} className="text-[#38BDF8]" />
-          </div>
-          <div>
-            <div className="font-display font-bold tracking-[0.18em] text-[15px] leading-tight">
-              OPS-SAT <span className="text-[#38BDF8]">遥测异常诊断系统</span>
-            </div>
-            <div className="text-[9px] font-mono tx-3 tracking-[0.3em] uppercase">Telemetry Anomaly Diagnosis · v2.0</div>
+      {/* ===== 顶部控制台 ===== */}
+      <header className="h-[52px] shrink-0 flex items-center gap-4 px-4 border-b border-[rgba(94,234,212,0.14)] bg-[rgba(3,6,12,0.85)] backdrop-blur-md relative z-20">
+        <div className="flex items-center gap-2.5">
+          <Satellite size={17} className="text-[#22d3ee]" style={{ filter: 'drop-shadow(0 0 6px rgba(34,211,238,0.6))' }} />
+          <div className="leading-none">
+            <div className="f-brand text-[13px] font-extrabold tracking-[0.14em] phosphor">OPS-SAT</div>
+            <div className="text-[8px] font-mono tx-3 tracking-[0.32em] mt-0.5">TELEMETRY ANOMALY DECK</div>
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono">
-            <span className={`dot ${status?.segments_available ? 'dot-nominal' : 'dot-offline'}`} />
-            <span className="tx-3">遥测链路</span>
-          </div>
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono">
-            <span className={`dot ${status?.rag_available ? 'dot-nominal' : 'dot-offline'}`} />
-            <span className="tx-3">RAG 引擎</span>
-          </div>
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono">
-            <span className={`dot ${backendOk ? 'dot-nominal' : 'dot-critical'}`} />
-            <span className="tx-3">{backendOk ? 'API 在线' : 'API 断开'}</span>
-          </div>
-          <span className="w-px h-5 bg-[rgba(148,163,184,0.2)]" />
-          <span className="font-mono text-xs text-[#38BDF8] tracking-wider">{clock}</span>
+        {/* 页签 */}
+        <nav className="flex items-center gap-1.5 mx-auto">
+          {NAV.map(n => (
+            <button key={n.key}
+              onClick={() => (n.key !== 'explanation' || target) && setPage(n.key)}
+              className={`console-tab ${page === n.key ? 'on' : ''}`}
+              style={n.key === 'explanation' && !target ? { opacity: 0.35, cursor: 'not-allowed' } : undefined}>
+              {n.icon}
+              <span>{n.label}</span>
+              <span className="hidden lg:inline text-[9px] opacity-60 font-mono">{n.en}</span>
+              <span className="kbd">{n.kbd}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* 状态灯 + 时钟 */}
+        <div className="flex items-center gap-3.5">
+          {([
+            ['TLM', status?.segments_available],
+            ['RAG', status?.rag_available],
+            ['API', apiOk],
+          ] as const).map(([k, ok]) => (
+            <div key={k} className="flex items-center gap-1.5 font-mono text-[9px]">
+              <span className={`lamp ${ok ? 'lamp-nominal' : k === 'API' ? 'lamp-critical' : 'lamp-offline'}`} />
+              <span className="tx-3">{k}</span>
+            </div>
+          ))}
+          <span className="w-px h-4 bg-[rgba(94,234,212,0.2)]" />
+          <span className="font-mono text-[11px] text-[#22d3ee] tracking-widest">{clock} <span className="tx-3 text-[9px]">UTC</span></span>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* ===== 侧边导航 ===== */}
-        <aside className="w-[72px] shrink-0 border-r border-[rgba(148,163,184,0.14)] bg-[rgba(7,11,20,0.6)] flex flex-col items-center py-4 gap-1 z-10">
-          {NAV.map(n => (
-            <button
-              key={n.key}
-              onClick={() => setPage(n.key)}
-              className={`nav-btn ${page === n.key ? 'active' : ''}`}
-              disabled={n.key === 'explanation' && !target}
-              style={n.key === 'explanation' && !target ? { opacity: 0.35, cursor: 'not-allowed' } : undefined}
-            >
-              {n.icon}
-              <span>{n.label}</span>
-            </button>
+      {/* ===== 主区 ===== */}
+      <main className="flex-1 min-h-0 p-3 relative z-10">
+        {page === 'dashboard' && <DashboardView onDiagnose={goDiagnose} />}
+        {page === 'detection' && <DetectionView />}
+        {page === 'explanation' &&
+          (target ? (
+            <ExplanationView target={target} onBack={() => setPage('dashboard')} />
+          ) : (
+            <div className="h-full flex items-center justify-center font-mono text-[11px] tx-3">
+              请先在告警中心选择一条告警进行深度诊断
+            </div>
           ))}
-        </aside>
+      </main>
 
-        {/* ===== 内容区 ===== */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-[1680px] mx-auto p-5 md:p-6">
-            {page === 'dashboard' && <DashboardView onDiagnose={goDiagnose} />}
-            {page === 'detection' && <DetectionView />}
-            {page === 'explanation' &&
-              (target ? (
-                <ExplanationView target={target} onBack={() => setPage('dashboard')} />
-              ) : (
-                <div className="panel p-10 text-center text-sm tx-3">请先在告警中心选择一条告警进行深度诊断</div>
+      {/* ===== 底部 ticker ===== */}
+      <footer className="h-7 shrink-0 flex items-center border-t border-[rgba(94,234,212,0.14)] bg-[rgba(3,6,12,0.9)] overflow-hidden relative z-20">
+        <div className="shrink-0 px-3 h-full flex items-center border-r border-[rgba(94,234,212,0.14)] font-mono text-[9px] tracking-[0.2em] text-[#22d3ee]">
+          LIVE FEED
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {tickerAlerts.length > 0 ? (
+            <div className="ticker-track">
+              {[0, 1].map(dup => (
+                <span key={dup} className="inline-flex">
+                  {tickerAlerts.slice(0, 30).map((a, i) => (
+                    <span key={`${dup}-${i}`} className="inline-flex items-center font-mono text-[10px] tx-3 mx-5">
+                      <span className="w-1.5 h-1.5 rounded-full mr-2" style={{ background: sevColor(a.severity) }} />
+                      SEG #{a.segment} · {a.channel} · {a.anomaly_score.toFixed(3)} —
+                      <span className="tx-2 ml-1">{a.summary.slice(0, 40)}…</span>
+                    </span>
+                  ))}
+                </span>
               ))}
-          </div>
-        </main>
-      </div>
-
-      {/* ===== 底栏 ===== */}
-      <footer className="h-7 shrink-0 flex items-center justify-between px-4 text-[10px] font-mono tx-3 border-t border-[rgba(148,163,184,0.14)] bg-[rgba(7,11,20,0.85)]">
-        <span>ESA OPS-SAT MISSION CONTROL · 18-DAY TELEMETRY</span>
-        <span>ISOLATION FOREST × RAG · F1 0.5683</span>
+            </div>
+          ) : (
+            <span className="font-mono text-[10px] tx-3 px-4">AWAITING TELEMETRY…</span>
+          )}
+        </div>
+        <div className="shrink-0 px-3 h-full hidden md:flex items-center border-l border-[rgba(94,234,212,0.14)] font-mono text-[9px] tx-3">
+          IF × RAG · F1 0.5683
+        </div>
       </footer>
+
+      <div className="crt-overlay" />
     </div>
   );
 }
