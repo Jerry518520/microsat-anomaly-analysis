@@ -9,6 +9,7 @@ import type {
   ExplanationDetail,
   RagConfig,
   RagQueryResponse,
+  StreamState,
   SystemParams,
   SystemStatus,
   WaveformData,
@@ -16,6 +17,16 @@ import type {
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(path);
+  if (!res.ok) throw new Error(`API ${path} 返回 ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) throw new Error(`API ${path} 返回 ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -53,5 +64,12 @@ export const api = {
       if (!res.ok) throw new Error(`RAG 问答返回 ${res.status}`);
       return res.json() as Promise<RagQueryResponse>;
     },
+  },
+
+  stream: {
+    state: () => get<StreamState>('/api/stream/state'),
+    replayStart: (speed: number) =>
+      post<{ mode: string; speed: number }>('/api/stream/replay/start', { speed }),
+    replayStop: () => post<{ mode: string }>('/api/stream/replay/stop', {}),
   },
 };

@@ -202,6 +202,56 @@
 
 ---
 
+### 3.5 Stream —— `/api/stream`（实时流模式,LIVE）
+
+实时链路:遥测帧 → 每通道 200 点滑窗 → 18 维特征(与离线段级特征同构)→
+per-channel IsolationForest 连续判分 → 越限(训练集分数 95 分位数 τ95)生成告警。
+模型在首次调用时从官方特征 CSV 训练并缓存到 `data/models/per_channel_iforest.joblib`。
+
+> 注:OPS-SAT 已于 2024-05-22 再入,不存在其真实实时流。LIVE 模式的数据源是
+> `segments.csv` 按真实时间戳的倍速回放(界面须标注 SIMULATED LIVE);
+> `/ingest` 是留给未来真实数据源的通用接入口。高倍速回放下判分按墙钟抽稀
+> (每通道 ≥0.5s 一次),`stats.scored_points/total_points` 即真实判分覆盖率。
+> 实时告警不带 RAG 解释(`anomaly_type: "unclassified (live)"`)。
+
+**GET `/state`** — 流状态快照(首次调用触发模型训练,耗时数秒)
+```json
+{
+  "mode": "replay", "speed": 300, "sim_ts": 1654060800.0, "models_ready": true,
+  "window": 200, "stride": 10,
+  "channels": { "CADC0872": { "model": "ready", "window_fill": 200,
+    "last_ts": 1654060800.0, "last_value": -1.5e-05, "score": 0.28, "severity": "warning" } },
+  "alerts": [ { "segment": "LIVE-0001", "channel": "CADC0872", "channel_label": "磁力计 X轴",
+    "anomaly_score": 0.72, "severity": "warning", "raw_score": 0.2824,
+    "first_ts": 1654060800.0, "last_ts": 1654060810.0, "hits": 3,
+    "anomaly_type": "unclassified (live)", "summary": "【实时】磁力计 X轴 滑窗判分 ..." } ],
+  "stats": { "total_points": 45864, "scored_points": 503, "alerts": 26 }
+}
+```
+
+**POST `/replay/start`** — 开始回放(请求体 `{"speed": 300}`,范围 1~2000)
+**POST `/replay/stop`** — 停止回放
+
+**POST `/ingest`** — 通用实时接入(回放进行中返回拒绝)
+请求体：
+```json
+{ "frames": [ { "ts": 1654060800.0, "channel": "CADC0872", "value": -1.5e-05 } ] }
+```
+响应：`{ "accepted": 1, "rejected": 0 }`
+
+**WS `/ws`** — 实时推送(开发环境经 Vite 代理,需 `ws: true`)
+连接即发 `{ "type": "snapshot", "state": <同 GET /state> }`,
+随后每 0.5s 推批量消息:
+```json
+{ "type": "batch", "sim_ts": 1654060800.0, "mode": "replay", "speed": 300,
+  "points": { "CADC0872": [[1654060800.0, -1.5e-05]] },
+  "scores": { "CADC0872": { "ts": 1654060800.0, "score": 0.28, "severity": "warning" } },
+  "alerts": [ { "action": "new|update|closed", "alert": { "segment": "LIVE-0001", "...": "..." } } ],
+  "stats": { "total_points": 45864, "scored_points": 503, "alerts": 26 } }
+```
+
+---
+
 ## 4. 队友本地跑后端（联调用）
 
 1. 建虚拟环境并装依赖：

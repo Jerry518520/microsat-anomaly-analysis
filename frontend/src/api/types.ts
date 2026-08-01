@@ -21,6 +21,8 @@ export interface ChannelInfo {
   status: Severity;
   sparkline_values: number[];
   anomaly_indices: number[];
+  /** LIVE 模式: 当前状态来自增长段预览分(非正式判定) */
+  provisional?: boolean;
 }
 
 export interface AlertItem {
@@ -121,4 +123,57 @@ export interface DiagnosisTarget {
   segment: string;
   score?: number;
   channelLabel?: string;
+}
+
+// ===== 实时流(LIVE 模式)契约 — 对齐 /api/stream =====
+
+export interface LiveChannelState {
+  model: 'ready' | 'unavailable';
+  open_segment_len: number;
+  last_ts: number | null;
+  last_value: number | null;
+  score: number | null;
+  severity: Severity;
+  /** true = 增长段预览分(段未闭合,非正式判定); false = 段闭合 Stage 2 正式判定 */
+  provisional: boolean;
+}
+
+export interface LiveAlert extends AlertItem {
+  first_ts: number;
+  last_ts: number;
+  raw_score: number;
+  hits: number;
+  closed_ts?: number;
+}
+
+export interface StreamStats {
+  total_points: number;
+  /** 段闭合正式判定次数(Stage 2) */
+  judged_segments: number;
+  /** 增长段预览判分次数(非正式) */
+  preview_scores: number;
+  alerts: number;
+}
+
+export interface StreamState {
+  mode: 'idle' | 'replay' | 'live';
+  speed: number;
+  sim_ts: number | null;
+  models_ready: boolean;
+  /** 判定方法说明(Stage 2, 与 ipynb 一致) */
+  method: string;
+  channels: Record<string, LiveChannelState>;
+  alerts: LiveAlert[];
+  stats: StreamStats;
+}
+
+export interface StreamBatch {
+  type: 'batch';
+  sim_ts: number | null;
+  mode: 'idle' | 'replay' | 'live';
+  speed: number;
+  points: Record<string, [number, number][]>;
+  scores: Record<string, { ts: number; score: number; severity: Severity; provisional: boolean }>;
+  alerts: { action: 'new' | 'update' | 'closed'; alert: LiveAlert }[];
+  stats: StreamStats;
 }

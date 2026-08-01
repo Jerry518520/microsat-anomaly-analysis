@@ -57,6 +57,9 @@ export default function ChannelCell({ data, index, onClick }: { data: ChannelInf
       <div ref={ref} className="w-full" style={{ height: 34 }} />
       <div className="flex items-center justify-between text-[9px] font-mono">
         <span className="tx-3 truncate mr-1">{data.label}</span>
+        {data.provisional && (
+          <span className="shrink-0 mr-1 px-1 rounded border border-[rgba(251,191,36,0.4)] text-[#fbbf24]" title="段未闭合 · 增长段预览分,非正式判定">预览</span>
+        )}
         <span style={{ color }}>{(data.anomaly_rate * 100).toFixed(0)}%</span>
       </div>
     </button>

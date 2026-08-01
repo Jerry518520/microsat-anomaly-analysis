@@ -14,7 +14,8 @@
     "plotly.js-dist": "^2.35.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^10.1.0",
+    "satellite.js": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

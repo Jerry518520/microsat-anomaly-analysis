@@ -9,7 +9,7 @@ if PROJECT_ROOT not in sys.path:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routes import dashboard, detection, explanation
+from src.api.routes import dashboard, detection, explanation, stream
 
 app = FastAPI(
     title="OPS-SAT Telemetry API",
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(detection.router, prefix="/api/detection", tags=["Detection"])
 app.include_router(explanation.router, prefix="/api/explanation", tags=["Explanation"])
+app.include_router(stream.router, prefix="/api/stream", tags=["Stream"])
 
 
 @app.get("/api/health")
