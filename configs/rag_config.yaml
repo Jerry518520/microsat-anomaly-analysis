@@ -89,19 +89,22 @@ retrieval:
   max_tokens: 2000          # 检索内容最大 token 数
   
   # 混合检索策略
-  hybrid_search: true       # 是否启用混合检索（关键词+向量）
+  hybrid_search: true      # 是否启用混合检索（关键词+向量）
   keyword_weight: 0.3       # 关键词检索权重
   vector_weight: 0.7        # 向量检索权重
 
 # ========== LLM API 配置 ==========
 llm:
-  # 火山引擎 Ark 平台配置
-  provider: "volcengine"
-  api_base: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
-  model: "deepseek-v3-2-251201"
+  # 切换为 DeepSeek 官方 OpenAI 兼容端点
+  # 原因：① 火山方舟模型 deepseek-v3-2-251201 已不可访问（404 InvalidEndpointOrModel.NotFound）；
+  #       ② 提供的 DEEPSEEK_API_KEY（sk- 开头）为 DeepSeek 官方平台密钥，无法在 Ark 端点认证（401 API key format is incorrect）。
+  # 密钥经 .env 的 DEEPSEEK_API_KEY 注入，本文件不含任何明文密钥。
+  provider: "deepseek"
+  api_base: "https://api.deepseek.com/v1/chat/completions"
+  model: "deepseek-chat"
   
   # API 认证（从环境变量读取）
-  api_key_env: "VOLCENGINE_API_KEY"  # 环境变量名
+  api_key_env: "DEEPSEEK_API_KEY"  # 环境变量名
   
   # 请求参数
   temperature: 0.1          # 温度（低值保证确定性）
