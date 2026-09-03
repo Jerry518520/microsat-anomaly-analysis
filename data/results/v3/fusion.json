@@ -1,0 +1,546 @@
+{
+  "name": "fusion",
+  "meta": {
+    "timestamp": "2026-09-03T21:28:37",
+    "git_commit": "2729c15df63883b074af6ebfbc920e8aac0f4589",
+    "git_dirty": true,
+    "python": "3.13.13",
+    "sklearn": "1.8.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "random_state": 42,
+    "data_file": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
+    "data_sha256": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "script": "scripts/fusion_v3.py",
+    "split_spec": "official_train -> 80% fit / 20% val, official_test = final eval only",
+    "split": "official_train -> 80% fit / 20% val, official_test = final eval only"
+  },
+  "results": {
+    "setup": {
+      "algorithm": "Isolation Forest + 分段检验（段级）",
+      "rule_score": "nv = 每段违规特征数 (0~18)，连续严重度",
+      "if_score": "-decision_function (连续异常分，按通道)",
+      "normalization": "min/max 在 fit 上算，不泄露 val/test",
+      "ref_repro_note": "参考四组应复现 ablation: rule .5882 / if .5612 / AND .6038 / OR .5545",
+      "iron_rule": "k,c,w,τ,门控,LR阈值一律只在 val 选；test 只评估一次；CI 仅最终评估给"
+    },
+    "selection": {
+      "best_k": 2,
+      "best_contamination_per_channel": {
+        "CADC0872": 0.35,
+        "CADC0892": 0.05,
+        "CADC0874": 0.5,
+        "CADC0884": 0.05,
+        "CADC0873": 0.35,
+        "CADC0886": null,
+        "CADC0888": 0.45,
+        "CADC0894": 0.15,
+        "CADC0890": null
+      },
+      "soft_global": {
+        "w": 0.1,
+        "tau": 0.15,
+        "val_f1": 0.5673758865248227
+      },
+      "soft_perchannel_params": {
+        "CADC0872": {
+          "w": 0.0,
+          "tau": 0.15,
+          "val_f1": 0.5853658536585366
+        },
+        "CADC0873": {
+          "w": 0.7,
+          "tau": 0.25,
+          "val_f1": 0.7058823529411765
+        },
+        "CADC0874": {
+          "w": 0.5,
+          "tau": 0.1,
+          "val_f1": 0.5294117647058824
+        },
+        "CADC0884": {
+          "w": 0.0,
+          "tau": 0.0,
+          "val_f1": 0.0
+        },
+        "CADC0886": {
+          "w": 0.0,
+          "tau": 0.0,
+          "val_f1": 1.0
+        },
+        "CADC0888": {
+          "w": 0.2,
+          "tau": 0.15,
+          "val_f1": 0.7777777777777778
+        },
+        "CADC0890": {
+          "w": 0.0,
+          "tau": 0.0,
+          "val_f1": 0.8
+        },
+        "CADC0892": {
+          "w": 0.0,
+          "tau": 0.05,
+          "val_f1": 0.7692307692307693
+        },
+        "CADC0894": {
+          "w": 0.2,
+          "tau": 0.35,
+          "val_f1": 0.5
+        }
+      },
+      "gate_perchannel_choice": {
+        "CADC0872": {
+          "op": "rule",
+          "val_f1": 0.5853658536585366
+        },
+        "CADC0873": {
+          "op": "AND",
+          "val_f1": 0.7272727272727273
+        },
+        "CADC0874": {
+          "op": "if",
+          "val_f1": 0.4666666666666667
+        },
+        "CADC0884": {
+          "op": "rule",
+          "val_f1": 0.0
+        },
+        "CADC0886": {
+          "op": "rule",
+          "val_f1": 1.0
+        },
+        "CADC0888": {
+          "op": "rule",
+          "val_f1": 0.6666666666666666
+        },
+        "CADC0890": {
+          "op": "rule",
+          "val_f1": 0.0
+        },
+        "CADC0892": {
+          "op": "if",
+          "val_f1": 0.6666666666666666
+        },
+        "CADC0894": {
+          "op": "if",
+          "val_f1": 0.5
+        }
+      },
+      "soft_calibrated": {
+        "tau": 0.2,
+        "val_f1": 0.5341614906832298,
+        "lr_coef": [
+          2.609443417346641,
+          1.9223490073217904
+        ]
+      }
+    },
+    "methods": {
+      "rule_only": {
+        "val": {
+          "f1": 0.5652173913043478,
+          "precision": 0.527027027027027,
+          "recall": 0.609375,
+          "mcc": 0.4479336239458176,
+          "tn": 220,
+          "fp": 35,
+          "fn": 25,
+          "tp": 39,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 74,
+          "f1_ci95": [
+            0.45636350177654955,
+            0.6621706081081081
+          ],
+          "false_alarm_ratio": 0.47297297297297297,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.5882352941176471,
+          "precision": 0.528169014084507,
+          "recall": 0.6637168141592921,
+          "mcc": 0.46490027228403336,
+          "tn": 349,
+          "fp": 67,
+          "fn": 38,
+          "tp": 75,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 142,
+          "f1_ci95": [
+            0.5166598360655739,
+            0.6556083793908647
+          ],
+          "false_alarm_ratio": 0.47183098591549294,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "if_only": {
+        "val": {
+          "f1": 0.5802469135802469,
+          "precision": 0.47959183673469385,
+          "recall": 0.734375,
+          "mcc": 0.4638707993874294,
+          "tn": 204,
+          "fp": 51,
+          "fn": 17,
+          "tp": 47,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 98,
+          "f1_ci95": [
+            0.48320990511455686,
+            0.6666666666666666
+          ],
+          "false_alarm_ratio": 0.5204081632653061,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.5611510791366906,
+          "precision": 0.4727272727272727,
+          "recall": 0.6902654867256637,
+          "mcc": 0.425653733510182,
+          "tn": 329,
+          "fp": 87,
+          "fn": 35,
+          "tp": 78,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 165,
+          "f1_ci95": [
+            0.4962872628726287,
+            0.6242475810764817
+          ],
+          "false_alarm_ratio": 0.5272727272727272,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "if_and_rule": {
+        "val": {
+          "f1": 0.5806451612903226,
+          "precision": 0.6,
+          "recall": 0.5625,
+          "mcc": 0.47999321007386253,
+          "tn": 231,
+          "fp": 24,
+          "fn": 28,
+          "tp": 36,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 60,
+          "f1_ci95": [
+            0.46599683901557915,
+            0.6805629432624114
+          ],
+          "false_alarm_ratio": 0.4,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.6037735849056604,
+          "precision": 0.6464646464646465,
+          "recall": 0.5663716814159292,
+          "mcc": 0.5067510419402116,
+          "tn": 381,
+          "fp": 35,
+          "fn": 49,
+          "tp": 64,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 99,
+          "f1_ci95": [
+            0.5256999201915403,
+            0.6739455592716462
+          ],
+          "false_alarm_ratio": 0.35353535353535354,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "if_or_rule": {
+        "val": {
+          "f1": 0.5681818181818182,
+          "precision": 0.44642857142857145,
+          "recall": 0.78125,
+          "mcc": 0.45148068104775185,
+          "tn": 193,
+          "fp": 62,
+          "fn": 14,
+          "tp": 50,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 112,
+          "f1_ci95": [
+            0.47737411487018094,
+            0.6490111084988832
+          ],
+          "false_alarm_ratio": 0.5535714285714286,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.5545171339563862,
+          "precision": 0.42788461538461536,
+          "recall": 0.7876106194690266,
+          "mcc": 0.42084141557089044,
+          "tn": 297,
+          "fp": 119,
+          "fn": 24,
+          "tp": 89,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 208,
+          "f1_ci95": [
+            0.4951736652764955,
+            0.6135004182933631
+          ],
+          "false_alarm_ratio": 0.5721153846153846,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "soft_global": {
+        "val": {
+          "f1": 0.5673758865248227,
+          "precision": 0.5194805194805194,
+          "recall": 0.625,
+          "mcc": 0.44911706380436567,
+          "tn": 218,
+          "fp": 37,
+          "fn": 24,
+          "tp": 40,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 77,
+          "f1_ci95": [
+            0.464,
+            0.6619765892653217
+          ],
+          "false_alarm_ratio": 0.4805194805194805,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.5859375,
+          "precision": 0.5244755244755245,
+          "recall": 0.6637168141592921,
+          "mcc": 0.4616532458432342,
+          "tn": 348,
+          "fp": 68,
+          "fn": 38,
+          "tp": 75,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 143,
+          "f1_ci95": [
+            0.5142334494773518,
+            0.6539959690099775
+          ],
+          "false_alarm_ratio": 0.4755244755244755,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "soft_perchannel": {
+        "val": {
+          "f1": 0.5568181818181818,
+          "precision": 0.4375,
+          "recall": 0.765625,
+          "mcc": 0.4350809614788344,
+          "tn": 192,
+          "fp": 63,
+          "fn": 15,
+          "tp": 49,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 112,
+          "f1_ci95": [
+            0.4624277456647399,
+            0.6448423707440101
+          ],
+          "false_alarm_ratio": 0.5625,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.5573770491803278,
+          "precision": 0.4427083333333333,
+          "recall": 0.7522123893805309,
+          "mcc": 0.4219162648799628,
+          "tn": 309,
+          "fp": 107,
+          "fn": 28,
+          "tp": 85,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 192,
+          "f1_ci95": [
+            0.48857572284553824,
+            0.6204830394282032
+          ],
+          "false_alarm_ratio": 0.5572916666666666,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "gate_perchannel": {
+        "val": {
+          "f1": 0.6029411764705882,
+          "precision": 0.5694444444444444,
+          "recall": 0.640625,
+          "mcc": 0.4972329265174972,
+          "tn": 224,
+          "fp": 31,
+          "fn": 23,
+          "tp": 41,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 72,
+          "f1_ci95": [
+            0.49624060150375937,
+            0.6911926563078061
+          ],
+          "false_alarm_ratio": 0.4305555555555556,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.628099173553719,
+          "precision": 0.5891472868217055,
+          "recall": 0.672566371681416,
+          "mcc": 0.5203397824308038,
+          "tn": 363,
+          "fp": 53,
+          "fn": 37,
+          "tp": 76,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 129,
+          "f1_ci95": [
+            0.5540672716404934,
+            0.6942259163459719
+          ],
+          "false_alarm_ratio": 0.4108527131782946,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      },
+      "soft_calibrated": {
+        "val": {
+          "f1": 0.5341614906832298,
+          "precision": 0.44329896907216493,
+          "recall": 0.671875,
+          "mcc": 0.4005527085178492,
+          "tn": 201,
+          "fp": 54,
+          "fn": 21,
+          "tp": 43,
+          "n": 319,
+          "n_anomaly_true": 64,
+          "n_anomaly_pred": 97,
+          "f1_ci95": [
+            0.4375,
+            0.6236005171299288
+          ],
+          "false_alarm_ratio": 0.5567010309278351,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        },
+        "test": {
+          "f1": 0.5333333333333333,
+          "precision": 0.4418604651162791,
+          "recall": 0.672566371681416,
+          "mcc": 0.386554253594911,
+          "tn": 320,
+          "fp": 96,
+          "fn": 37,
+          "tp": 76,
+          "n": 529,
+          "n_anomaly_true": 113,
+          "n_anomaly_pred": 172,
+          "f1_ci95": [
+            0.4638730643230229,
+            0.5985766423357665
+          ],
+          "false_alarm_ratio": 0.5581395348837209,
+          "bootstrap": {
+            "n_boot": 1000,
+            "seed": 42,
+            "metric": "f1",
+            "ci": 0.95
+          }
+        }
+      }
+    },
+    "best_method_test": "gate_perchannel",
+    "best_test_f1": 0.628099173553719,
+    "method": "Fusion strategy comparison (rule + IF)",
+    "note": "8 种融合策略对比；引入规则连续严重度 nv 与 IF 连续异常分 -decision_function，覆盖软加权/逐通道门控/逻辑回归校准。超参全部 val 选，test 一次评估。"
+  }
+}
