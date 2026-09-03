@@ -193,10 +193,12 @@ def main():
             "status": "实测",
         },
         "post_fix": None,
-        "post_fix_note": "API Key 已配置且通过鉴权（/models 返回 200），"
-                         "但该账号下无任何可用推理接入点，全部模型 chat 请求均返回 "
-                         "HTTP 404 InvalidEndpointOrModel.NotFound，无法重新生成。"
-                         "因此修复后的命中率未验证，严禁编造。",
+        "post_fix_note": "用户本次提供的 DEEPSEEK_API_KEY 在 Ark 端点返回 HTTP 401"
+                         "（非有效 Ark 密钥或已失效）；配置中的 model "
+                         "`deepseek-v3-2-251201` 在可用密钥下返回 HTTP 404"
+                         " InvalidEndpointOrModel.NotFound。即当前无任何可用推理接入点，"
+                         "无法重新生成，修复后结构命中率未验证。post_fix 必须保持 null，"
+                         "严禁编造修复后数字。",
         "static_verification": {
             "system_prompt_len": live.get("system_prompt_len"),
             "default_system_prompt_len": live.get("default_system_prompt_len"),

@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "timestamp": "2026-09-03T19:41:26",
+    "git_commit": "662b7550121972339332ce65d8262e22d4e1cfb8",
+    "git_commit_short": "662b755",
+    "git_branch": "main",
+    "git_dirty_files": [
+      "M frontend/package-lock.json",
+      " M scripts/eval_rag_v3.py",
+      "?? data/results/v3/smoke_rule_only.json",
+      "?? data/results/v3/smoke_rule_only_20260903_192409.json"
+    ],
+    "python": "3.13.13",
+    "platform": "Windows-11-10.0.26100-SP0",
+    "data_file": "data/results/anomaly_rag_results.json",
+    "data_sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+    "data_n": 200,
+    "script": "scripts/eval_rag_v3.py",
+    "random_state": null,
+    "note": "本评估为确定性字符串匹配统计，不涉及随机性，无需 random_state"
+  },
+  "defect": {
+    "location": "src/rag/prompts.py:91（原） + configs/rag_config.yaml:118（原）",
+    "root_cause": "dict.get(key, default) 仅在键不存在时返回 default；配置中 system_prompt 键存在但值为空串，故默认提示词永不生效",
+    "downstream_effect": "src/rag/llm_client.py:121 的 `if system_prompt:` 对空串为假，连 system 消息都不发送，prompts.py 的 7 段式防幻觉+溯源提示词一行都未送达模型",
+    "fix": "prompts.py 三处 dict.get(k, default) 统一改为 `get(k) or default`（空值同样回落）；configs/rag_config.yaml 删除 system_prompt: \"\" 并修正误导性注释"
+  },
+  "pre_fix": {
+    "system_prompt_len": 0,
+    "system_prompt_len_source": "data/results/v3/_probe_before.txt（由 scripts/probe_prompt_v3.py 产出）",
+    "system_prompt_sha256_32": "e3b0c44298fc1c149afbf4c8996fb924",
+    "system_prompt_sha256_32_note": "e3b0c442... 是空字符串的 SHA256，证明修复前确实为空",
+    "marker_hit_rates": {
+      "【来源】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      },
+      "【紧急程度】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      },
+      "【建议措施】": {
+        "hit": 29,
+        "total": 200,
+        "rate": 0.145
+      }
+    },
+    "marker_hit_rates_all_7": {
+      "【通道定位】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      },
+      "【异常类型】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      },
+      "【可能原因】": {
+        "hit": 5,
+        "total": 200,
+        "rate": 0.025
+      },
+      "【影响评估】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      },
+      "【建议措施】": {
+        "hit": 29,
+        "total": 200,
+        "rate": 0.145
+      },
+      "【紧急程度】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      },
+      "【来源】": {
+        "hit": 0,
+        "total": 200,
+        "rate": 0.0
+      }
+    },
+    "n_full_7_markers": 0,
+    "n_full_key_markers": 0,
+    "n_failed_generation": 0,
+    "status": "实测"
+  },
+  "post_fix": null,
+  "post_fix_note": "用户本次提供的 DEEPSEEK_API_KEY 在 Ark 端点返回 HTTP 401（非有效 Ark 密钥或已失效）；配置中的 model `deepseek-v3-2-251201` 在可用密钥下返回 HTTP 404 InvalidEndpointOrModel.NotFound。即当前无任何可用推理接入点，无法重新生成，修复后结构命中率未验证。post_fix 必须保持 null，严禁编造修复后数字。",
+  "static_verification": {
+    "system_prompt_len": 748,
+    "default_system_prompt_len": 748,
+    "equals_default": true,
+    "system_prompt_sha256_32": "b035610f9cfa1583a961c8a59055a9ed",
+    "head_200": "你是OPS-SAT微小卫星遥测异常诊断专家，面向地面测控站运维人员。\n\n## 专业知识\n- OPS-SAT：ESA立方星实验平台，搭载磁力计、光电二极管、温度/电流电压传感器\n- 磁力计（CADC0872-0874，X/Y/Z）：反映姿态与外部磁场\n- 光电二极管（CADC0884-0894，1-6号）：太阳敏感器，用于姿态确定\n- 异常类型：数值跳变、持续偏离、周期性波动、噪声增大、数据缺失、尖",
+    "user_template_len": 124,
+    "citation_format_len": 38,
+    "status": "实测（静态，不调用 API）",
+    "note": "user_template / citation_format 在配置中均为非空值（124 / 38 字符），历史上未触发该缺陷；但同为 dict.get(k, default) 模式，属潜在同源风险，已一并修复。修复后二者仍取配置值（未被默认值覆盖），副作用为零。"
+  },
+  "retrieval": {
+    "n": 200,
+    "n_with_sources": 200,
+    "sources_per_record_min": 5,
+    "sources_per_record_max": 5,
+    "sources_per_record_mean": 5.0,
+    "n_full_5_sources": 200,
+    "retrieval_time_median_s": 0.025,
+    "retrieval_time_mean_s": 0.0567,
+    "generation_time_median_s": 20.0143,
+    "note": "检索与生成耗时均直接取自 anomaly_rag_results.json 的 retrieval_time / generation_time 字段，属实测值"
+  },
+  "conclusion": {
+    "verified": [
+      "修复前 system_prompt 长度 = 0（SHA256 为空串哈希）",
+      "修复后 system_prompt 长度 = 748，与 default_system_prompt 逐字节一致",
+      "修复前 200 条：来源 0/200、紧急程度 0/200、建议措施 29/200 (14.5%)",
+      "检索侧正常：200/200 均有来源，检索中位耗时见 retrieval 字段"
+    ],
+    "unverified": [
+      "修复后重新生成的结构命中率 —— 未验证（无可用推理接入点）",
+      "修复对诊断质量（人工评分/事实一致性）的影响 —— 未验证"
+    ]
+  }
+}
