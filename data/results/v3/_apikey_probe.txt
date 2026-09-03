@@ -1,0 +1,15 @@
+============================================================
+API Key 探测（不输出 Key 原文）
+============================================================
+provider/model : volcengine / deepseek-v3-2-251201
+api_base       : https://ark.cn-beijing.volces.com/api/v3/chat/completions
+key_env 变量名 : VOLCENGINE_API_KEY
+Key 来源       : 已配置
+Key 长度       : 46 字符（不输出内容）
+Key 是否含空白 : False
+HTTP 状态码    : 404
+/models 状态码  : 200（用于区分 Key 无效 vs 模型ID无效）
+
+>>> 结论：Key 已通过鉴权，但模型 ID 不可用（HTTP 404 InvalidEndpointOrModel.NotFound）
+          即：Key 本身有效；配置文件中的 model 字段在火山方舟上不存在或无权限。
+============================================================

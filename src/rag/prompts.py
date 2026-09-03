@@ -88,9 +88,14 @@ class PromptTemplates:
 
         self.default_citation_format = "[{document_name} p.{page_number}]"
 
-        self.system_prompt = self.prompt_config.get("system_prompt", self.default_system_prompt)
-        self.user_template = self.prompt_config.get("user_template", self.default_user_template)
-        self.citation_format = self.prompt_config.get("citation_format", self.default_citation_format)
+        # 注意：必须用 `or` 而非 dict.get 的默认值参数。
+        # dict.get(key, default) 仅在"键不存在"时返回 default；
+        # 当键存在但值为空串时（如 system_prompt: ""），get 会返回空串，
+        # 导致精心设计的默认提示词被静默吞掉，且下游 `if system_prompt:` 判定为假，
+        # 连 system 消息都不会发送给模型。此处统一改为"空值也回落"。
+        self.system_prompt = self.prompt_config.get("system_prompt") or self.default_system_prompt
+        self.user_template = self.prompt_config.get("user_template") or self.default_user_template
+        self.citation_format = self.prompt_config.get("citation_format") or self.default_citation_format
 
         logger.info("Prompt 模板管理器初始化完成")
 

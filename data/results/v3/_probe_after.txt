@@ -1,0 +1,34 @@
+============================================================
+PromptTemplates 静态探测
+============================================================
+system_prompt   长度 = 748
+user_template   长度 = 124
+citation_format 长度 = 38
+
+default_system_prompt   长度 = 748
+default_user_template   长度 = 135
+default_citation_format 长度 = 33
+
+--- 判定 ---
+system_prompt 为空            : False
+system_prompt == default       : True
+user_template 为空            : False
+user_template == default       : False
+citation_format 为空          : False
+citation_format == default     : False
+
+--- system_prompt 前 200 字 ---
+你是OPS-SAT微小卫星遥测异常诊断专家，面向地面测控站运维人员。
+
+## 专业知识
+- OPS-SAT：ESA立方星实验平台，搭载磁力计、光电二极管、温度/电流电压传感器
+- 磁力计（CADC0872-0874，X/Y/Z）：反映姿态与外部磁场
+- 光电二极管（CADC0884-0894，1-6号）：太阳敏感器，用于姿态确定
+- 异常类型：数值跳变、持续偏离、周期性波动、噪声增大、数据缺失、尖
+
+--- SHA256（前32位）---
+system_prompt              = b035610f9cfa1583a961c8a59055a9ed
+default_system_prompt      = b035610f9cfa1583a961c8a59055a9ed
+user_template              = 84413889fa1fb9fb404624bda4f40c8f
+citation_format            = 04c44cb805879422bf75622b5cd2af4d
+============================================================

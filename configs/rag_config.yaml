@@ -114,9 +114,13 @@ llm:
 
 # ========== Prompt 模板配置 ==========
 prompt:
-  # 系统提示词（留空则使用代码中的默认详细 prompt）
-  system_prompt: ""
-  
+  # 系统提示词：不设置本键（或设为空串）时，使用 `src/rag/prompts.py`
+  # 中的 default_system_prompt（7 段式防幻觉+溯源提示词，748 字）。
+  # 历史缺陷说明：此处曾写 `system_prompt: ""`，而代码原用
+  # `dict.get("system_prompt", default)`，dict.get 仅在键不存在时才返回默认值，
+  # 键存在且为空串时会返回空串，导致默认提示词被静默吞掉、system 消息根本未发送。
+  # 代码已改为 `get(...) or default`（空值同样回落），本键也从配置中移除。
+  # 若需自定义，请直接填写完整提示词文本。
   # 用户提示词模板
   user_template: |
     请分析以下卫星遥测通道异常的可能原因：
