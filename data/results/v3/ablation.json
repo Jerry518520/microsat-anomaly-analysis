@@ -1,8 +1,8 @@
 {
   "name": "ablation",
   "meta": {
-    "timestamp": "2026-09-03T19:55:44",
-    "git_commit": "658b37c909dcb424974adfc75bdf243842aebb38",
+    "timestamp": "2026-09-03T20:15:43",
+    "git_commit": "bebc6b14822a873450937623f251dd2fabaac8df",
     "git_dirty": true,
     "python": "3.13.13",
     "sklearn": "1.8.0",
