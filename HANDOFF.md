@@ -15,11 +15,11 @@
 ## 1. 获取代码
 
 ```bash
-git clone -b dev https://github.com/Jerry518520/microsat-anomaly-analysis.git
+git clone -b main https://github.com/Jerry518520/microsat-anomaly-analysis.git
 cd microsat-anomaly-analysis
 ```
 
-> ⚠️ 代码都在 **`dev`** 分支，默认 `main` 分支不含最新内容，务必 `clone -b dev` 或克隆后 `git checkout dev`。
+> ⚠️ 代码都在 **`main`** 分支，务必 `clone -b main` 或克隆后 `git checkout main`。
 
 ---
 

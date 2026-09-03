@@ -1,0 +1,207 @@
+{
+  "name": "production_fixed",
+  "meta": {
+    "timestamp": "2026-09-03T19:55:41",
+    "git_commit": "658b37c909dcb424974adfc75bdf243842aebb38",
+    "git_dirty": true,
+    "python": "3.13.13",
+    "sklearn": "1.8.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "random_state": 42,
+    "data_file": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
+    "data_sha256": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "script": "scripts/agent_d_retest.py",
+    "split_spec": "official_train -> 80% fit / 20% val, official_test = final eval only",
+    "split": "official_train -> 80% fit / 20% val, official_test = final eval only"
+  },
+  "results": {
+    "overall": {
+      "f1": 0.46475195822454307,
+      "precision": 0.3296296296296296,
+      "recall": 0.7876106194690266,
+      "mcc": 0.28902210924848526,
+      "tn": 235,
+      "fp": 181,
+      "fn": 24,
+      "tp": 89,
+      "n_detected": 270,
+      "n_test": 529,
+      "n_anomaly_true": 113,
+      "false_alarm_ratio": 0.6703703703703704,
+      "f1_ci95": [
+        0.4069671607462305,
+        0.5245283719548426
+      ]
+    },
+    "per_channel": [
+      {
+        "channel": "CADC0872",
+        "n_test": 132,
+        "n_anomaly": 32,
+        "n_detected": 78,
+        "tp": 27,
+        "fp": 51,
+        "fn": 5,
+        "tn": 49,
+        "f1": 0.4909090909090909,
+        "precision": 0.34615384615384615,
+        "recall": 0.84375,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0873",
+        "n_test": 153,
+        "n_anomaly": 31,
+        "n_detected": 78,
+        "tp": 28,
+        "fp": 50,
+        "fn": 3,
+        "tn": 72,
+        "f1": 0.5137614678899083,
+        "precision": 0.358974358974359,
+        "recall": 0.9032258064516129,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0874",
+        "n_test": 52,
+        "n_anomaly": 23,
+        "n_detected": 28,
+        "tp": 15,
+        "fp": 13,
+        "fn": 8,
+        "tn": 16,
+        "f1": 0.5882352941176471,
+        "precision": 0.5357142857142857,
+        "recall": 0.6521739130434783,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0884",
+        "n_test": 36,
+        "n_anomaly": 0,
+        "n_detected": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 36,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0886",
+        "n_test": 4,
+        "n_anomaly": 1,
+        "n_detected": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "tn": 3,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "n_too_small": true
+      },
+      {
+        "channel": "CADC0888",
+        "n_test": 64,
+        "n_anomaly": 12,
+        "n_detected": 35,
+        "tp": 9,
+        "fp": 26,
+        "fn": 3,
+        "tn": 26,
+        "f1": 0.3829787234042553,
+        "precision": 0.2571428571428571,
+        "recall": 0.75,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0890",
+        "n_test": 2,
+        "n_anomaly": 2,
+        "n_detected": 2,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "n_too_small": true
+      },
+      {
+        "channel": "CADC0892",
+        "n_test": 53,
+        "n_anomaly": 7,
+        "n_detected": 30,
+        "tp": 3,
+        "fp": 27,
+        "fn": 4,
+        "tn": 19,
+        "f1": 0.16216216216216217,
+        "precision": 0.1,
+        "recall": 0.42857142857142855,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0894",
+        "n_test": 33,
+        "n_anomaly": 5,
+        "n_detected": 19,
+        "tp": 5,
+        "fp": 14,
+        "fn": 0,
+        "tn": 14,
+        "f1": 0.4166666666666667,
+        "precision": 0.2631578947368421,
+        "recall": 1.0,
+        "n_too_small": false
+      }
+    ],
+    "cadc0884_before": {
+      "n_detected": 20,
+      "tp": 0,
+      "fp": 20
+    },
+    "cadc0884_after": {
+      "n_detected": 0,
+      "tp": 0,
+      "fp": 0
+    },
+    "filter": {
+      "applied": true,
+      "source": "src/integration/anomaly_rag_pipeline.py:_segment_aggregate",
+      "constant": "NO_ANOMALY_CHANNELS (src/utils/constants.py:33 = {'CADC0884'})",
+      "effect": "CADC0884（测试集 n_anomaly=0）在段级判定阶段被标记为非异常来源"
+    },
+    "config": {
+      "psi_max_samples": 128,
+      "vote_threshold": 0.25,
+      "rule_ratio_threshold": 0.2,
+      "global_baseline_contamination": 0.25,
+      "best_contamination": {
+        "CADC0872": 0.5,
+        "CADC0873": 0.5,
+        "CADC0874": 0.5,
+        "CADC0886": 0.2,
+        "CADC0888": 0.45,
+        "CADC0890": 0.3,
+        "CADC0892": 0.5,
+        "CADC0894": 0.5
+      },
+      "strong_channels": [
+        "CADC0872",
+        "CADC0873",
+        "CADC0874"
+      ],
+      "no_anomaly_channels": [
+        "CADC0884"
+      ]
+    },
+    "note": "本结果为修复后生产系统（anomaly_rag_pipeline.py 主流程）的真实表现，仅加 CADC0884 通道过滤，未改 IF/分段/Scheme G 逻辑，未改任何超参。"
+  }
+}

@@ -163,7 +163,7 @@ def get_alerts():
 def get_system_status():
     """系统健康状态"""
     segments_path = os.path.join(PROJECT_ROOT, "data", "raw", "segments.csv")
-    faiss_path = os.path.join(PROJECT_ROOT, "data", "faiss_index", "index.faiss")
+    faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
     rag_error = None
     rag_available = os.path.exists(faiss_path)
 

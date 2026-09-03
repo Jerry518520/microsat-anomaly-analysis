@@ -25,7 +25,7 @@
 
 ## 🚀 队友部署指南（分发版 · 必读）
 
-> 本仓库**工作分支是 `dev`**，默认 `main` 仅含初始化空壳。**克隆务必加 `-b dev`**，否则拿到的是空项目。
+> 本仓库**工作分支是 `main`**。**克隆务必加 `-b main`**，否则可能拿到旧分支的空项目。
 
 ### 前置要求
 - **NVIDIA 显卡 + CUDA 11.8+**（本项目锁死 `faiss-gpu`，无 GPU 无法安装/运行；向量检索走 GPU）
@@ -33,9 +33,9 @@
 - **Node.js 18+**（仅前端开发需要）
 - Git
 
-### 第 1 步：克隆（必须 `-b dev`）
+### 第 1 步：克隆（必须 `-b main`）
 ```bash
-git clone -b dev https://github.com/Jerry518520/microsat-anomaly-analysis.git
+git clone -b main https://github.com/Jerry518520/microsat-anomaly-analysis.git
 cd microsat-anomaly-analysis
 ```
 

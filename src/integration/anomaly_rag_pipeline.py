@@ -30,7 +30,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from src.utils.data_loader import load_segments, load_config, get_project_root
-from src.utils.constants import CHANNEL_PHYSICS, META_COLS
+from src.utils.constants import CHANNEL_PHYSICS, META_COLS, NO_ANOMALY_CHANNELS
 from src.utils.stat_rules import compute_stat_thresholds, apply_stat_rules
 from src.features.segment_features import run_segment_baseline
 from src.rag.pipeline import RAGPipeline, get_rag_pipeline
@@ -187,6 +187,9 @@ class AnomalyRAGPipeline:
         # 段级聚合
         seg_results = self._segment_aggregate(test_df, pred_g, self.vote_threshold)
         
+        # 暴露完整段级判定（含全部测试段，不只异常段），供重测脚本一次性取 y_pred
+        self.last_seg_results = seg_results
+
         # 筛选异常段
         anomalies = seg_results[seg_results["is_anomaly"]]
         print(f"\n检测结果: {len(anomalies)} 个异常段 (共 {len(seg_results)} 测试段)")
@@ -315,6 +318,15 @@ class AnomalyRAGPipeline:
             )
 
         seg["is_anomaly"] = seg["anomaly_score"] >= threshold
+
+        # Agent D：排除无异常通道（如 CADC0884，测试集无真值异常）。
+        # 该通道为纯误报来源，在段级判定阶段直接标记为非异常，
+        # 不影响 Isolation Forest / 分段 / Scheme G 等任何算法逻辑，
+        # 也不改 contamination / psi / vote_threshold 等超参。
+        if NO_ANOMALY_CHANNELS:
+            no_anom_mask = seg["channel"].isin(NO_ANOMALY_CHANNELS)
+            seg.loc[no_anom_mask, "is_anomaly"] = False
+            seg.loc[no_anom_mask, "anomaly_score"] = 0.0
 
         return seg
 

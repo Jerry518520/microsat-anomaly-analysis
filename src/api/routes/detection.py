@@ -29,7 +29,7 @@ def get_rag_config():
                 doc_count[ext] += 1
 
     chunk_count = None
-    faiss_path = os.path.join(PROJECT_ROOT, "data", "faiss_index", "index.faiss")
+    faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
     if os.path.exists(faiss_path):
         try:
             import faiss
