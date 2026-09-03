@@ -247,6 +247,18 @@ def evaluate(y_true, y_pred, n_boot=1000, seed=42):
 
 # ---------------------------------------------------------------- save_result
 
+def _unique_backup_path(name: str) -> str:
+    """生成一个不会与已有文件冲突的备份路径（带秒级时间戳，冲突则追加序号）。"""
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base = os.path.join(RESULTS_DIR, f"{name}_{stamp}.json")
+    if not os.path.exists(base):
+        return base
+    i = 1
+    while os.path.exists(os.path.join(RESULTS_DIR, f"{name}_{stamp}_{i}.json")):
+        i += 1
+    return os.path.join(RESULTS_DIR, f"{name}_{stamp}_{i}.json")
+
+
 def save_result(result: dict, name: str, extra: dict = None):
     """把结果写入 data/results/v3/{name}.json，自动注入 meta 溯源块。
 
