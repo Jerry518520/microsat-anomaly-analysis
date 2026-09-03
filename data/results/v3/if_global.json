@@ -1,0 +1,302 @@
+{
+  "name": "if_global",
+  "meta": {
+    "timestamp": "2026-09-03T19:57:01",
+    "git_commit": "47ad3676d0439669739292f6f4f9fd6d795fb2e1",
+    "git_dirty": true,
+    "python": "3.13.13",
+    "sklearn": "1.8.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "random_state": 42,
+    "data_file": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
+    "data_sha256": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "script": "scripts/rerun_baselines_v3.py",
+    "split_spec": "official_train -> 80% fit / 20% val, official_test = final eval only",
+    "split": "official_train -> 80% fit / 20% val, official_test = final eval only"
+  },
+  "results": {
+    "f1": 0.410958904109589,
+    "precision": 0.2976190476190476,
+    "recall": 0.6637168141592921,
+    "mcc": 0.19550289944353144,
+    "tn": 239,
+    "fp": 177,
+    "fn": 38,
+    "tp": 75,
+    "n": 529,
+    "n_anomaly_true": 113,
+    "n_anomaly_pred": 252,
+    "f1_ci95": [
+      0.35040126699864466,
+      0.47440035938903863
+    ],
+    "false_alarm_ratio": 0.7023809523809523,
+    "bootstrap": {
+      "n_boot": 1000,
+      "seed": 42,
+      "metric": "f1",
+      "ci": 0.95
+    },
+    "method": "IF-global",
+    "method_code": "IF-global",
+    "model": "IsolationForest",
+    "model_scope": "global (所有 18 维特征 + 所有通道混在一起，单一模型)",
+    "n_estimators": 200,
+    "hyperparam": "contamination c",
+    "c_grid": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5
+    ],
+    "best_c": 0.45,
+    "val_f1_at_best_c": 0.3867924528301887,
+    "val_c_detail": {
+      "0.05": 0.10810810810810811,
+      "0.1": 0.25806451612903225,
+      "0.15": 0.26548672566371684,
+      "0.2": 0.25196850393700787,
+      "0.25": 0.2777777777777778,
+      "0.3": 0.2909090909090909,
+      "0.35": 0.33519553072625696,
+      "0.4": 0.36180904522613067,
+      "0.45": 0.3867924528301887,
+      "0.5": 0.38095238095238093
+    },
+    "model_fit_on": "fit_df (所有通道 18 维特征)",
+    "evaluated_on": "test_df (官方 test, 529)",
+    "feature_count": 18,
+    "per_channel_test": {
+      "CADC0872": {
+        "f1": 0.5384615384615384,
+        "precision": 0.7,
+        "recall": 0.4375,
+        "mcc": 0.4511988000237336,
+        "tn": 94,
+        "fp": 6,
+        "fn": 18,
+        "tp": 14,
+        "n": 132,
+        "n_anomaly_true": 32,
+        "n_anomaly_pred": 20,
+        "f1_ci95": [
+          0.3477511244377811,
+          0.6809350503919372
+        ],
+        "false_alarm_ratio": 0.3,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0873": {
+        "f1": 0.5925925925925926,
+        "precision": 0.6956521739130435,
+        "recall": 0.5161290322580645,
+        "mcc": 0.5159446609769239,
+        "tn": 115,
+        "fp": 7,
+        "fn": 15,
+        "tp": 16,
+        "n": 153,
+        "n_anomaly_true": 31,
+        "n_anomaly_pred": 23,
+        "f1_ci95": [
+          0.42857142857142855,
+          0.7324178403755869
+        ],
+        "false_alarm_ratio": 0.30434782608695654,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0874": {
+        "f1": 0.7241379310344828,
+        "precision": 0.6,
+        "recall": 0.9130434782608695,
+        "mcc": 0.45557564310789705,
+        "tn": 15,
+        "fp": 14,
+        "fn": 2,
+        "tp": 21,
+        "n": 52,
+        "n_anomaly_true": 23,
+        "n_anomaly_pred": 35,
+        "f1_ci95": [
+          0.5761501210653753,
+          0.8387096774193549
+        ],
+        "false_alarm_ratio": 0.4,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0884": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "mcc": 0.0,
+        "tn": 2,
+        "fp": 34,
+        "fn": 0,
+        "tp": 0,
+        "n": 36,
+        "n_anomaly_true": 0,
+        "n_anomaly_pred": 34,
+        "f1_ci95": [
+          0.0,
+          0.0
+        ],
+        "false_alarm_ratio": 1.0,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0886": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "mcc": -0.5773502691896258,
+        "tn": 1,
+        "fp": 2,
+        "fn": 1,
+        "tp": 0,
+        "n": 4,
+        "n_anomaly_true": 1,
+        "n_anomaly_pred": 2,
+        "f1_ci95": [
+          0.0,
+          0.0
+        ],
+        "false_alarm_ratio": 1.0,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        },
+        "small_sample_warning": "n=4 过小（< 30），不具统计意义，不得单独作为结论"
+      },
+      "CADC0888": {
+        "f1": 0.3055555555555556,
+        "precision": 0.18333333333333332,
+        "recall": 0.9166666666666666,
+        "mcc": -0.041344911529736156,
+        "tn": 3,
+        "fp": 49,
+        "fn": 1,
+        "tp": 11,
+        "n": 64,
+        "n_anomaly_true": 12,
+        "n_anomaly_pred": 60,
+        "f1_ci95": [
+          0.15151515151515152,
+          0.4358974358974359
+        ],
+        "false_alarm_ratio": 0.8166666666666667,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0890": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "mcc": 0.0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0,
+        "tp": 2,
+        "n": 2,
+        "n_anomaly_true": 2,
+        "n_anomaly_pred": 2,
+        "f1_ci95": [
+          1.0,
+          1.0
+        ],
+        "false_alarm_ratio": 0.0,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        },
+        "small_sample_warning": "n=2 过小（< 30），不具统计意义，不得单独作为结论"
+      },
+      "CADC0892": {
+        "f1": 0.20689655172413793,
+        "precision": 0.11764705882352941,
+        "recall": 0.8571428571428571,
+        "mcc": -0.21519718464500817,
+        "tn": 1,
+        "fp": 45,
+        "fn": 1,
+        "tp": 6,
+        "n": 53,
+        "n_anomaly_true": 7,
+        "n_anomaly_pred": 51,
+        "f1_ci95": [
+          0.07407407407407407,
+          0.34388640873015863
+        ],
+        "false_alarm_ratio": 0.8823529411764706,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0894": {
+        "f1": 0.3333333333333333,
+        "precision": 0.2,
+        "recall": 1.0,
+        "mcc": 0.23904572186687872,
+        "tn": 8,
+        "fp": 20,
+        "fn": 0,
+        "tp": 5,
+        "n": 33,
+        "n_anomaly_true": 5,
+        "n_anomaly_pred": 25,
+        "f1_ci95": [
+          0.08,
+          0.5333333333333333
+        ],
+        "false_alarm_ratio": 0.8,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      }
+    },
+    "small_sample_channels_test": [
+      "CADC0886",
+      "CADC0890"
+    ],
+    "note": "global IF：把所有通道的段混在一起，用 18 维特征拟合单一 IsolationForest，忽略通道结构。contamination c 在 val 上扫描选取。段级评估。"
+  }
+}

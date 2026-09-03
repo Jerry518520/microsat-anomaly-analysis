@@ -1,0 +1,288 @@
+{
+  "name": "rule_only",
+  "meta": {
+    "timestamp": "2026-09-03T19:56:45",
+    "git_commit": "47ad3676d0439669739292f6f4f9fd6d795fb2e1",
+    "git_dirty": true,
+    "python": "3.13.13",
+    "sklearn": "1.8.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "random_state": 42,
+    "data_file": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
+    "data_sha256": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "script": "scripts/rerun_baselines_v3.py",
+    "split_spec": "official_train -> 80% fit / 20% val, official_test = final eval only",
+    "split": "official_train -> 80% fit / 20% val, official_test = final eval only"
+  },
+  "results": {
+    "f1": 0.5882352941176471,
+    "precision": 0.528169014084507,
+    "recall": 0.6637168141592921,
+    "mcc": 0.46490027228403336,
+    "tn": 349,
+    "fp": 67,
+    "fn": 38,
+    "tp": 75,
+    "n": 529,
+    "n_anomaly_true": 113,
+    "n_anomaly_pred": 142,
+    "f1_ci95": [
+      0.5166598360655739,
+      0.6556083793908647
+    ],
+    "false_alarm_ratio": 0.47183098591549294,
+    "bootstrap": {
+      "n_boot": 1000,
+      "seed": 42,
+      "metric": "f1",
+      "ci": 0.95
+    },
+    "method": "Rule-only",
+    "method_code": "Rule-only",
+    "rule_type": "3-sigma OR IQR, per-channel",
+    "hyperparam": "k (段内被判违规的特征数阈值)",
+    "k_candidates": [
+      1,
+      2,
+      3
+    ],
+    "best_k": 2,
+    "val_f1_at_best_k": 0.5652173913043478,
+    "val_k_detail": {
+      "1": 0.5221674876847291,
+      "2": 0.5652173913043478,
+      "3": 0.37383177570093457
+    },
+    "rule_thresholds_fit_on": "fit_df (官方 train 的 80%)",
+    "threshold_fit_on": "fit_df",
+    "evaluated_on": "test_df (官方 test, 529)",
+    "feature_count": 18,
+    "n_channels_with_thresholds": 9,
+    "per_channel_test": {
+      "CADC0872": {
+        "f1": 0.6666666666666666,
+        "precision": 0.6,
+        "recall": 0.75,
+        "mcc": 0.5501778368617851,
+        "tn": 84,
+        "fp": 16,
+        "fn": 8,
+        "tp": 24,
+        "n": 132,
+        "n_anomaly_true": 32,
+        "n_anomaly_pred": 40,
+        "f1_ci95": [
+          0.5263157894736842,
+          0.781663560111836
+        ],
+        "false_alarm_ratio": 0.4,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0873": {
+        "f1": 0.6493506493506493,
+        "precision": 0.5434782608695652,
+        "recall": 0.8064516129032258,
+        "mcc": 0.5560305850037146,
+        "tn": 101,
+        "fp": 21,
+        "fn": 6,
+        "tp": 25,
+        "n": 153,
+        "n_anomaly_true": 31,
+        "n_anomaly_pred": 46,
+        "f1_ci95": [
+          0.5184343434343434,
+          0.7605633802816901
+        ],
+        "false_alarm_ratio": 0.45652173913043476,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0874": {
+        "f1": 0.47619047619047616,
+        "precision": 0.5263157894736842,
+        "recall": 0.43478260869565216,
+        "mcc": 0.12834572424336294,
+        "tn": 20,
+        "fp": 9,
+        "fn": 13,
+        "tp": 10,
+        "n": 52,
+        "n_anomaly_true": 23,
+        "n_anomaly_pred": 19,
+        "f1_ci95": [
+          0.2631578947368421,
+          0.6487115021998743
+        ],
+        "false_alarm_ratio": 0.47368421052631576,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0884": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "mcc": 0.0,
+        "tn": 32,
+        "fp": 4,
+        "fn": 0,
+        "tp": 0,
+        "n": 36,
+        "n_anomaly_true": 0,
+        "n_anomaly_pred": 4,
+        "f1_ci95": [
+          0.0,
+          0.0
+        ],
+        "false_alarm_ratio": 1.0,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0886": {
+        "f1": 0.4,
+        "precision": 0.25,
+        "recall": 1.0,
+        "mcc": 0.0,
+        "tn": 0,
+        "fp": 3,
+        "fn": 0,
+        "tp": 1,
+        "n": 4,
+        "n_anomaly_true": 1,
+        "n_anomaly_pred": 4,
+        "f1_ci95": [
+          0.0,
+          0.8571428571428571
+        ],
+        "false_alarm_ratio": 0.75,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        },
+        "small_sample_warning": "n=4 过小（< 30），不具统计意义，不得单独作为结论"
+      },
+      "CADC0888": {
+        "f1": 0.8,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "mcc": 0.7867957924694432,
+        "tn": 52,
+        "fp": 0,
+        "fn": 4,
+        "tp": 8,
+        "n": 64,
+        "n_anomaly_true": 12,
+        "n_anomaly_pred": 8,
+        "f1_ci95": [
+          0.5,
+          0.9655172413793104
+        ],
+        "false_alarm_ratio": 0.0,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0890": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "mcc": 0.0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 2,
+        "tp": 0,
+        "n": 2,
+        "n_anomaly_true": 2,
+        "n_anomaly_pred": 0,
+        "f1_ci95": [
+          0.0,
+          0.0
+        ],
+        "false_alarm_ratio": null,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        },
+        "small_sample_warning": "n=2 过小（< 30），不具统计意义，不得单独作为结论"
+      },
+      "CADC0892": {
+        "f1": 0.3333333333333333,
+        "precision": 0.2727272727272727,
+        "recall": 0.42857142857142855,
+        "mcc": 0.2126008168161838,
+        "tn": 38,
+        "fp": 8,
+        "fn": 4,
+        "tp": 3,
+        "n": 53,
+        "n_anomaly_true": 7,
+        "n_anomaly_pred": 11,
+        "f1_ci95": [
+          0.0,
+          0.6153846153846154
+        ],
+        "false_alarm_ratio": 0.7272727272727273,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      },
+      "CADC0894": {
+        "f1": 0.5333333333333333,
+        "precision": 0.4,
+        "recall": 0.8,
+        "mcc": 0.45696813431178934,
+        "tn": 22,
+        "fp": 6,
+        "fn": 1,
+        "tp": 4,
+        "n": 33,
+        "n_anomaly_true": 5,
+        "n_anomaly_pred": 10,
+        "f1_ci95": [
+          0.16666666666666666,
+          0.8183155080213903
+        ],
+        "false_alarm_ratio": 0.6,
+        "bootstrap": {
+          "n_boot": 1000,
+          "seed": 42,
+          "metric": "f1",
+          "ci": 0.95
+        }
+      }
+    },
+    "small_sample_channels_test": [
+      "CADC0886",
+      "CADC0890"
+    ],
+    "note": "纯规则基线：每通道拟合 3σ/IQR 阈值（fit），段内被判违规的特征数 >= k 判异常；k 在 val 上扫描选取。段级（segment-level）评估，样本单位=段，标签来自 anomaly 列。无模型。这是论文叙事基线。"
+  }
+}
