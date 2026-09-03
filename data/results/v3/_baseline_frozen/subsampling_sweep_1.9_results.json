@@ -1,0 +1,16 @@
+{
+  "best_seg_f1": 0.5682656826568265,
+  "best_psi": 128,
+  "best_threshold": 0.25,
+  "stage_results": {
+    "stage0_baseline": {
+      "f1": 0.29955947136563876
+    },
+    "stage1_per_channel": {
+      "f1": 0.5381165919282511
+    },
+    "stage2_fusion": {
+      "f1": 0.5682656826568265
+    }
+  }
+}

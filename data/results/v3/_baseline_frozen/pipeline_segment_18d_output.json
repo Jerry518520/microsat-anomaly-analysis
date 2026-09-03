@@ -1,0 +1,117 @@
+{
+  "metadata": {
+    "project": "微小卫星遥测智能异常检测与RAG解释辅助系统",
+    "dataset": "ESA OPS-SAT-AD",
+    "timestamp": "2026-05-27T18:20:20.079769",
+    "version": "2.0-segment-18d",
+    "feature_type": "段级18维统计特征"
+  },
+  "data_info": {
+    "n_segments_total": 2123,
+    "n_channels": 9,
+    "anomaly_rate": 0.20442769665567592,
+    "n_train_segments": 1594,
+    "n_test_segments": 529
+  },
+  "model_config": {
+    "feature_dim": 18,
+    "feature_cols": [
+      "duration",
+      "len",
+      "mean",
+      "var",
+      "std",
+      "kurtosis",
+      "skew",
+      "n_peaks",
+      "smooth10_n_peaks",
+      "smooth20_n_peaks",
+      "diff_peaks",
+      "diff2_peaks",
+      "diff_var",
+      "diff2_var",
+      "gaps_squared",
+      "len_weighted",
+      "var_div_duration",
+      "var_div_len"
+    ],
+    "contamination_default": 0.2,
+    "random_state": 42,
+    "strong_channels": [
+      "CADC0872",
+      "CADC0873",
+      "CADC0874"
+    ],
+    "weak_channels": [
+      "CADC0884",
+      "CADC0886",
+      "CADC0888",
+      "CADC0890",
+      "CADC0892",
+      "CADC0894"
+    ]
+  },
+  "stages_performance": {
+    "stage0_global_if": {
+      "description": "全局IForest, c=0.2",
+      "metrics": {
+        "f1": 0.29955947136563876,
+        "precision": 0.2982456140350877,
+        "recall": 0.3008849557522124,
+        "mcc": 0.10823016103557025
+      }
+    },
+    "stage1_per_channel": {
+      "description": "分通道独立IForest, c=0.2",
+      "metrics": {
+        "f1": 0.5381165919282511,
+        "precision": 0.5454545454545454,
+        "recall": 0.5309734513274337,
+        "mcc": 0.4148518514590734
+      },
+      "improvement_over_s0_pct": 79.63597995251914
+    },
+    "stage2_fusion": {
+      "description": "IF + 规则融合（强通道OR，弱通道纯规则）",
+      "metrics": {
+        "f1": 0.5682656826568265,
+        "precision": 0.4873417721518987,
+        "recall": 0.6814159292035398,
+        "mcc": 0.4358485976398133
+      },
+      "total_improvement_pct": 89.70045582808768
+    }
+  },
+  "baseline_comparison": [
+    {
+      "method": "IForest(论文基线)",
+      "SegF1": 0.295,
+      "note": "18维,c=0.2"
+    },
+    {
+      "method": "本文全局IF",
+      "SegF1": 0.29955947136563876,
+      "note": "18维"
+    },
+    {
+      "method": "本文最终方法",
+      "SegF1": 0.5682656826568265,
+      "note": "IF+规则"
+    },
+    {
+      "method": "OCSVM(论文)",
+      "SegF1": 0.647,
+      "note": "经典单类"
+    },
+    {
+      "method": "MO-GAAL(论文)",
+      "SegF1": 0.726,
+      "note": "最佳无监督"
+    },
+    {
+      "method": "FCNN(有监督)",
+      "SegF1": 0.946,
+      "note": "有监督上限"
+    }
+  ]
+}

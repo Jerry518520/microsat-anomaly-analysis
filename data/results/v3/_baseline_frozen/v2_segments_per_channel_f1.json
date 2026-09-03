@@ -1,0 +1,56 @@
+{
+  "CADC0872": {
+    "f1": 0.6486486486486487,
+    "n_test": 132,
+    "n_anomaly": 32,
+    "strategy": "IF+规则OR"
+  },
+  "CADC0873": {
+    "f1": 0.6,
+    "n_test": 153,
+    "n_anomaly": 31,
+    "strategy": "IF+规则OR"
+  },
+  "CADC0874": {
+    "f1": 0.5217391304347826,
+    "n_test": 52,
+    "n_anomaly": 23,
+    "strategy": "IF+规则OR"
+  },
+  "CADC0884": {
+    "f1": 0.0,
+    "n_test": 36,
+    "n_anomaly": 0,
+    "strategy": "纯规则"
+  },
+  "CADC0886": {
+    "f1": 0.4,
+    "n_test": 4,
+    "n_anomaly": 1,
+    "strategy": "纯规则"
+  },
+  "CADC0888": {
+    "f1": 0.7619047619047619,
+    "n_test": 64,
+    "n_anomaly": 12,
+    "strategy": "纯规则"
+  },
+  "CADC0890": {
+    "f1": 0.0,
+    "n_test": 2,
+    "n_anomaly": 2,
+    "strategy": "纯规则"
+  },
+  "CADC0892": {
+    "f1": 0.42105263157894735,
+    "n_test": 53,
+    "n_anomaly": 7,
+    "strategy": "纯规则"
+  },
+  "CADC0894": {
+    "f1": 0.5333333333333333,
+    "n_test": 33,
+    "n_anomaly": 5,
+    "strategy": "纯规则"
+  }
+}

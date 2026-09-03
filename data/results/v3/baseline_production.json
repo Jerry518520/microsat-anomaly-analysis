@@ -1,0 +1,412 @@
+{
+  "meta": {
+    "timestamp": "2026-09-03T19:21:45",
+    "git_commit": "d6d51f96363acd5b65dc6562c35a1e7ba91fbae0",
+    "git_commit_short": "d6d51f9",
+    "git_branch": "main",
+    "git_dirty": true,
+    "git_status_porcelain_before_freeze": "M configs/rag_config.yaml\n M frontend/package-lock.json\n M src/rag/prompts.py\n?? data/results/v3/\n?? scripts/probe_apikey_v3.py\n?? scripts/probe_prompt_v3.py",
+    "git_status_porcelain_after_freeze": "M configs/rag_config.yaml\n M frontend/package-lock.json\n M src/rag/prompts.py\n?? data/results/v3/\n?? scripts/probe_apikey_v3.py\n?? scripts/probe_prompt_v3.py",
+    "git_last_commit": "d6d51f96363acd5b65dc6562c35a1e7ba91fbae0 2026-08-01 14:08:42 +0800 feat(streaming): 实时流检测重写为 Stage 2 段闭合判定(严格对齐 ipynb)",
+    "python": "3.13.13",
+    "sklearn": "1.8.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "random_state": 42,
+    "data_file": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
+    "data_sha256": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "data_rows": 2123,
+    "data_segments": 2123,
+    "data_anomaly_rows": 434,
+    "data_anomaly_segment_rate": 0.20442769665567592,
+    "script": "verify_production.py（独立复现生产系统 AnomalyRAGPipeline 检测路径）",
+    "script_path": "C:/Users/LENOVO/WorkBuddy/2026-09-02-12-44-00/verify_production.py",
+    "generator": "freeze_baseline.py（本文件，runpy 载入 verify_production.py 取运行时变量）",
+    "split": "官方 split：train=1 的段拟合（规则阈值 + 分通道 IF + 全局段级 baseline IF），train=0 的 529 段为最终评估",
+    "config": {
+      "psi_max_samples": 128,
+      "vote_threshold": 0.25,
+      "rule_ratio_threshold": 0.2,
+      "global_baseline_contamination": 0.25,
+      "best_contamination": {
+        "CADC0872": 0.5,
+        "CADC0873": 0.5,
+        "CADC0874": 0.5,
+        "CADC0886": 0.2,
+        "CADC0888": 0.45,
+        "CADC0890": 0.3,
+        "CADC0892": 0.5,
+        "CADC0894": 0.5
+      },
+      "strong_channels": [
+        "CADC0872",
+        "CADC0873",
+        "CADC0874"
+      ]
+    },
+    "note": "本结果为修改前的生产系统真实表现（改前基线）。",
+    "data_segments_train": 1594,
+    "data_segments_test": 529,
+    "freeze_integrity": {
+      "freeze_start_time": "2026-09-03T19:16:00",
+      "head_at_freeze": "d6d51f96363acd5b65dc6562c35a1e7ba91fbae0",
+      "head_short": "d6d51f9",
+      "head_is_expected_baseline_commit": true,
+      "critical_files": [
+        {
+          "path": "src/utils/stat_rules.py",
+          "exists_in_worktree": true,
+          "diff_exit_code": 0,
+          "identical_to_head": true,
+          "mtime": "2026-08-01T18:18:25"
+        },
+        {
+          "path": "src/integration/anomaly_rag_pipeline.py",
+          "exists_in_worktree": true,
+          "diff_exit_code": 0,
+          "identical_to_head": true,
+          "mtime": "2026-08-01T18:18:25"
+        },
+        {
+          "path": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
+          "exists_in_worktree": true,
+          "diff_exit_code": 0,
+          "identical_to_head": true,
+          "mtime": "2026-04-23T13:24:10"
+        }
+      ],
+      "all_critical_identical_to_head": true,
+      "worktree_changes": [
+        {
+          "kind": "tracked",
+          "status": "M",
+          "path": "configs/rag_config.yaml",
+          "mtime": "2026-09-03T19:20:40",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "tracked",
+          "status": "M",
+          "path": "frontend/package-lock.json",
+          "mtime": "2026-08-01T18:29:32",
+          "changed_after_freeze_start": false
+        },
+        {
+          "kind": "tracked",
+          "status": "M",
+          "path": "src/rag/prompts.py",
+          "mtime": "2026-09-03T19:20:31",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/BASELINE.md",
+          "mtime": "2026-09-03T19:21:45",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_apikey_probe.txt",
+          "mtime": "2026-09-03T19:21:58",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_baseline_frozen/anomaly_rag_results.json",
+          "mtime": "2026-06-03T13:31:01",
+          "changed_after_freeze_start": false
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_baseline_frozen/fair_comparison_v2_segments_results.json",
+          "mtime": "2026-05-27T18:17:40",
+          "changed_after_freeze_start": false
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_baseline_frozen/pipeline_segment_18d_output.json",
+          "mtime": "2026-05-27T18:20:20",
+          "changed_after_freeze_start": false
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_baseline_frozen/subsampling_sweep_1.9_results.json",
+          "mtime": "2026-05-27T18:20:20",
+          "changed_after_freeze_start": false
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_baseline_frozen/v2_segments_per_channel_f1.json",
+          "mtime": "2026-05-27T18:20:20",
+          "changed_after_freeze_start": false
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_probe_after.txt",
+          "mtime": "2026-09-03T19:20:55",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/_probe_before.txt",
+          "mtime": "2026-09-03T19:20:22",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/baseline_production.json",
+          "mtime": "2026-09-03T19:23:06",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/baseline_requirements.txt",
+          "mtime": "2026-09-03T19:18:46",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/frozen_files_manifest.json",
+          "mtime": "2026-09-03T19:21:45",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/smoke_rule_only.json",
+          "mtime": "2026-09-03T19:23:51",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "data/results/v3/split_indices.json",
+          "mtime": "2026-09-03T19:23:37",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "scripts/probe_apikey_v3.py",
+          "mtime": "2026-09-03T19:21:52",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "scripts/probe_prompt_v3.py",
+          "mtime": "2026-09-03T19:19:01",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "scripts/smoke_test_framework.py",
+          "mtime": "2026-09-03T19:23:33",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "src/experiments/framework.py",
+          "mtime": "2026-09-03T19:23:06",
+          "changed_after_freeze_start": true
+        },
+        {
+          "kind": "untracked",
+          "status": "??",
+          "path": "src/experiments/make_split.py",
+          "mtime": "2026-09-03T19:22:13",
+          "changed_after_freeze_start": true
+        }
+      ],
+      "git_status_porcelain_raw": " M configs/rag_config.yaml\n M frontend/package-lock.json\n M src/rag/prompts.py\n?? data/results/v3/\n?? scripts/probe_apikey_v3.py\n?? scripts/probe_prompt_v3.py\n?? scripts/smoke_test_framework.py\n?? src/experiments/framework.py\n?? src/experiments/make_split.py\n",
+      "note": "冻结执行期间有其它 agent 并行改动工作区（见 worktree_changes 中 changed_after_freeze_start=True 的条目，主要是 RAG 相关与 src/experiments/*）。这些改动均不在检测路径上；且 HEAD 仍为 d6d51f9、检测路径关键文件与 HEAD 无差异、数据集未被改动，因此本文件的数字仍是有效的【改前基线】。注意：此后任何人复现本基线，都必须确认上述条件仍成立。"
+    }
+  },
+  "results": {
+    "overall": {
+      "f1": 0.44168734491315137,
+      "precision": 0.30689655172413793,
+      "recall": 0.7876106194690266,
+      "mcc": 0.25071836399277353,
+      "tn": 215,
+      "fp": 201,
+      "fn": 24,
+      "tp": 89,
+      "n_detected": 290,
+      "n_test": 529,
+      "n_anomaly_true": 113,
+      "false_alarm_ratio": 0.6931034482758621
+    },
+    "per_channel": [
+      {
+        "channel": "CADC0872",
+        "n_test": 132,
+        "n_anomaly": 32,
+        "n_detected": 78,
+        "tp": 27,
+        "fp": 51,
+        "f1": 0.4909090909090909,
+        "precision": 0.34615384615384615,
+        "recall": 0.84375,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0873",
+        "n_test": 153,
+        "n_anomaly": 31,
+        "n_detected": 78,
+        "tp": 28,
+        "fp": 50,
+        "f1": 0.5137614678899083,
+        "precision": 0.358974358974359,
+        "recall": 0.9032258064516129,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0874",
+        "n_test": 52,
+        "n_anomaly": 23,
+        "n_detected": 28,
+        "tp": 15,
+        "fp": 13,
+        "f1": 0.5882352941176471,
+        "precision": 0.5357142857142857,
+        "recall": 0.6521739130434783,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0884",
+        "n_test": 36,
+        "n_anomaly": 0,
+        "n_detected": 20,
+        "tp": 0,
+        "fp": 20,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0886",
+        "n_test": 4,
+        "n_anomaly": 1,
+        "n_detected": 0,
+        "tp": 0,
+        "fp": 0,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "n_too_small": true
+      },
+      {
+        "channel": "CADC0888",
+        "n_test": 64,
+        "n_anomaly": 12,
+        "n_detected": 35,
+        "tp": 9,
+        "fp": 26,
+        "f1": 0.3829787234042553,
+        "precision": 0.2571428571428571,
+        "recall": 0.75,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0890",
+        "n_test": 2,
+        "n_anomaly": 2,
+        "n_detected": 2,
+        "tp": 2,
+        "fp": 0,
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "n_too_small": true
+      },
+      {
+        "channel": "CADC0892",
+        "n_test": 53,
+        "n_anomaly": 7,
+        "n_detected": 30,
+        "tp": 3,
+        "fp": 27,
+        "f1": 0.16216216216216217,
+        "precision": 0.1,
+        "recall": 0.42857142857142855,
+        "n_too_small": false
+      },
+      {
+        "channel": "CADC0894",
+        "n_test": 33,
+        "n_anomaly": 5,
+        "n_detected": 19,
+        "tp": 5,
+        "fp": 14,
+        "f1": 0.4166666666666667,
+        "precision": 0.2631578947368421,
+        "recall": 1.0,
+        "n_too_small": false
+      }
+    ]
+  },
+  "frozen_files": [
+    {
+      "file": "anomaly_rag_results.json",
+      "bytes": 1647962,
+      "sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+      "copy_sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+      "sha256_match": true,
+      "src_path": "data/results/anomaly_rag_results.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/anomaly_rag_results.json"
+    },
+    {
+      "file": "fair_comparison_v2_segments_results.json",
+      "bytes": 8958,
+      "sha256": "e1da2d917a5953f1090b022d8cc2df646d615668e0da2d68849d386f877e39c8",
+      "copy_sha256": "e1da2d917a5953f1090b022d8cc2df646d615668e0da2d68849d386f877e39c8",
+      "sha256_match": true,
+      "src_path": "data/results/fair_comparison_v2_segments_results.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/fair_comparison_v2_segments_results.json"
+    },
+    {
+      "file": "pipeline_segment_18d_output.json",
+      "bytes": 2831,
+      "sha256": "b075d4a6f2c4674ef01bd7fbe63a2aecd40f9ed73812065a12f42f8370588ca5",
+      "copy_sha256": "b075d4a6f2c4674ef01bd7fbe63a2aecd40f9ed73812065a12f42f8370588ca5",
+      "sha256_match": true,
+      "src_path": "data/results/pipeline_segment_18d_output.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/pipeline_segment_18d_output.json"
+    },
+    {
+      "file": "subsampling_sweep_1.9_results.json",
+      "bytes": 315,
+      "sha256": "90db4884bbc45f422797b22f6a9b507474d4bd9989ba1c5b79f1646a58c7031b",
+      "copy_sha256": "90db4884bbc45f422797b22f6a9b507474d4bd9989ba1c5b79f1646a58c7031b",
+      "sha256_match": true,
+      "src_path": "data/results/subsampling_sweep_1.9_results.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/subsampling_sweep_1.9_results.json"
+    },
+    {
+      "file": "v2_segments_per_channel_f1.json",
+      "bytes": 1061,
+      "sha256": "e17701821183b9b0059f92471fba809b3ac30ec14f0d4695488b037530120287",
+      "copy_sha256": "e17701821183b9b0059f92471fba809b3ac30ec14f0d4695488b037530120287",
+      "sha256_match": true,
+      "src_path": "data/results/v2_segments_per_channel_f1.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/v2_segments_per_channel_f1.json"
+    }
+  ]
+}

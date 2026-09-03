@@ -1,0 +1,53 @@
+{
+  "frozen_files": [
+    {
+      "file": "anomaly_rag_results.json",
+      "bytes": 1647962,
+      "sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+      "copy_sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+      "sha256_match": true,
+      "src_path": "data/results/anomaly_rag_results.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/anomaly_rag_results.json"
+    },
+    {
+      "file": "fair_comparison_v2_segments_results.json",
+      "bytes": 8958,
+      "sha256": "e1da2d917a5953f1090b022d8cc2df646d615668e0da2d68849d386f877e39c8",
+      "copy_sha256": "e1da2d917a5953f1090b022d8cc2df646d615668e0da2d68849d386f877e39c8",
+      "sha256_match": true,
+      "src_path": "data/results/fair_comparison_v2_segments_results.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/fair_comparison_v2_segments_results.json"
+    },
+    {
+      "file": "pipeline_segment_18d_output.json",
+      "bytes": 2831,
+      "sha256": "b075d4a6f2c4674ef01bd7fbe63a2aecd40f9ed73812065a12f42f8370588ca5",
+      "copy_sha256": "b075d4a6f2c4674ef01bd7fbe63a2aecd40f9ed73812065a12f42f8370588ca5",
+      "sha256_match": true,
+      "src_path": "data/results/pipeline_segment_18d_output.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/pipeline_segment_18d_output.json"
+    },
+    {
+      "file": "subsampling_sweep_1.9_results.json",
+      "bytes": 315,
+      "sha256": "90db4884bbc45f422797b22f6a9b507474d4bd9989ba1c5b79f1646a58c7031b",
+      "copy_sha256": "90db4884bbc45f422797b22f6a9b507474d4bd9989ba1c5b79f1646a58c7031b",
+      "sha256_match": true,
+      "src_path": "data/results/subsampling_sweep_1.9_results.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/subsampling_sweep_1.9_results.json"
+    },
+    {
+      "file": "v2_segments_per_channel_f1.json",
+      "bytes": 1061,
+      "sha256": "e17701821183b9b0059f92471fba809b3ac30ec14f0d4695488b037530120287",
+      "copy_sha256": "e17701821183b9b0059f92471fba809b3ac30ec14f0d4695488b037530120287",
+      "sha256_match": true,
+      "src_path": "data/results/v2_segments_per_channel_f1.json",
+      "frozen_path": "data/results/v3/_baseline_frozen/v2_segments_per_channel_f1.json"
+    }
+  ],
+  "source_dir": "data/results",
+  "dest_dir": "data/results/v3/_baseline_frozen",
+  "n_files": 5,
+  "all_sha256_match": true
+}
