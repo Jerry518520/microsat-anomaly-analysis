@@ -21,6 +21,33 @@ load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 logger = logging.getLogger(__name__)
 
 
+def _safe_format(template: str, **values) -> str:
+    """填充提示词模板，对调用方未提供的占位符用「未提供」兜底而非抛 KeyError。
+
+    为什么需要（P0-A5）：
+        `str.format` 遇到模板里存在、但本次调用未传的命名占位符会直接抛
+        `KeyError`。项目里 `configs/rag_config.yaml` 的 `prompt.user_template`
+        含 4 个占位符，而 `generate_with_context` 原实现只传了 2 个，
+        一调用就崩。本函数让「模板与调用方参数不同步」这种漂移
+        退化为可观测的占位文字，而不是线上异常。
+
+    另兼容两种情况：
+        - 模板带 str.format 的格式说明符（如 {score:.2f}）时，正则只取
+          字段名，补齐后交给 format 处理，格式说明符不丢失；
+        - 出现未知占位符时同样填「未提供」，不中断生成。
+    """
+    import re as _re
+
+    # 注意：只对「兜底填充」的占位符做 str() 转换，调用方已提供的值一律
+    # 原样保留。否则 score=1.5 会被转成 '1.5'，导致 {score:.2f} 这类带格式
+    # 说明符的字段抛 ValueError: Unknown format code 'f'。
+    known = dict(values)
+    for name in _re.findall(r"\{(\w+)", template):
+        if name not in known:
+            known[name] = "未提供"
+    return template.format(**known)
+
+
 class LLMClient:
     """
     LLM 客户端（支持火山引擎/DeepSeek、NVIDIA等OpenAI兼容API）
@@ -321,33 +348,55 @@ class LLMClient:
             raise RuntimeError(f"网络请求失败：{e}")
     
     def generate_with_context(
-        self, 
-        query: str, 
+        self,
+        query: str,
         context: str,
         system_prompt: Optional[str] = None,
-        template: Optional[str] = None
+        template: Optional[str] = None,
+        channel_id: Optional[str] = None,
+        anomaly_type: Optional[str] = None,
+        anomaly_description: Optional[str] = None,
     ) -> str:
         """
         基于上下文生成响应（RAG 模式）
-        
+
         Args:
             query: 用户查询
             context: 检索到的上下文
             system_prompt: 系统提示词
             template: 用户提示词模板
-        
+            channel_id: 异常所在遥测通道（如 CADC0874），填入模板的 {channel_id}
+            anomaly_type: 异常类型（如 磁力计饱和），填入模板的 {anomaly_type}
+            anomaly_description: 异常的文字描述，填入模板的 {anomaly_description}
+
         Returns:
             str: 生成的响应
+
+        修复记录（P0-A5）：
+            原实现只向模板传 context 与 query 两个变量，而
+            configs/rag_config.yaml 的 prompt.user_template 实际含有 4 个占位符
+            —— {context} / {channel_id} / {anomaly_type} / {anomaly_description}。
+            调用本函数会直接抛 `KeyError: 'channel_id'`（实测复现）。
+            根因是 str.format 对缺失的命名占位符抛 KeyError，与 query 无关
+            （模板本身未使用 {query}，多传的 query 不会报错，少传的会报错）。
+
+            现在按「模板实际用到什么就填什么」的原则补齐三个可选参数，并
+            对仍缺失的占位符用占位文字兜底（见 _safe_format），保证任何
+            模板组合下都不会再因占位符缺失而崩溃。
         """
         # 使用默认模板
         if template is None:
             template = self.config.get("prompt", {}).get("user_template", "")
-        
+
         # 填充模板
         if template:
-            prompt = template.format(
+            prompt = _safe_format(
+                template,
                 context=context,
-                query=query
+                query=query,
+                channel_id=channel_id or "未提供",
+                anomaly_type=anomaly_type or "未提供",
+                anomaly_description=anomaly_description or "未提供",
             )
         else:
             # 默认提示词
@@ -359,11 +408,25 @@ class LLMClient:
 问题：{query}
 
 请给出专业、准确的回答，并标注知识来源。"""
-        
+
         # 使用默认系统提示词
-        if system_prompt is None:
-            system_prompt = self.config.get("prompt", {}).get("system_prompt", "")
-        
+        # 两级回落（修复 7 段式防幻觉在 RAG 路径上静默失效）：
+        #   1. 调用方显式传入的非空 system_prompt
+        #   2. 配置 prompt.system_prompt
+        #   3. src/rag/prompts.py 的代码默认值（748 字符，含
+        #      【通道定位】【来源】等 7 段式约束）
+        # 原实现只做 1、2 两级，且用 get(k, "") 使「键存在但值为空串」时
+        # 直接取空 -> 7 段式 system 消息被静默丢弃，LLM 退化为自由发挥。
+        if not system_prompt:
+            system_prompt = self.config.get("prompt", {}).get("system_prompt") or ""
+        if not system_prompt:
+            try:
+                from .prompts import PromptTemplates
+                system_prompt = PromptTemplates().get_system_prompt()
+            except Exception as e:  # 提示词模块异常不应阻断生成
+                logger.warning(f"未能加载默认 system_prompt（7 段式约束将缺失）：{e}")
+                system_prompt = ""
+
         # 生成响应
         return self.generate(prompt, system_prompt)
     
