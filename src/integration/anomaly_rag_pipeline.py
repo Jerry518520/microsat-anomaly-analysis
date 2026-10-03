@@ -82,24 +82,72 @@ class AnomalyRAGPipeline:
     
     # 强通道（磁力计，F1>0.47）
     STRONG_CHANNELS = {"CADC0872", "CADC0873", "CADC0874"}
-    
+
+    # ---------------------------------------------------------------- 论文配方
+    # ⚠ 原先本管线把 9 个通道的 contamination、psi 等超参全部写死在 __init__，
+    #   且融合固定为「强通道 IF+OR 规则 / 弱通道段级 baseline」两分支。
+    #   这与实验代码 scripts/fusion_v3.py 选出的 gate_perchannel 配方不一致，
+    #   导致论文报告的 test F1=0.6281 在产品路径上复现不出来。
+    #   现改为：从 data/results/v3/fusion.json 读取 val 上选出的真实配方。
+    #   配方文件缺失时回退到原有硬编码行为（保持向后兼容，不静默降级）。
+    RECIPE_PATH = project_root / "data" / "results" / "v3" / "fusion.json"
+
+    @classmethod
+    def load_recipe(cls) -> Optional[Dict[str, Any]]:
+        """读取 fusion.json 中的 gate_perchannel 配方。
+
+        返回 None 表示文件不存在或结构不符，调用方须回退到硬编码路径。
+        """
+        try:
+            if not cls.RECIPE_PATH.exists():
+                return None
+            data = json.loads(cls.RECIPE_PATH.read_text(encoding="utf-8"))
+            sel = data["results"]["selection"]
+            choice = sel["gate_perchannel_choice"]
+            contam = sel["best_contamination_per_channel"]
+            k = sel["best_k"]
+            if not isinstance(choice, dict) or not choice:
+                return None
+            return {
+                "gate_choice": {ch: v["op"] for ch, v in choice.items()},
+                "contamination": {ch: contam.get(ch) for ch in choice},
+                "best_k": k,
+                "git_commit": data.get("meta", {}).get("git_commit", "unknown"),
+            }
+        except (json.JSONDecodeError, KeyError, TypeError, OSError) as e:
+            print(f"[AnomalyRAGPipeline] 配方读取失败，回退硬编码：{e}")
+            return None
+
     def __init__(self, config_path: Optional[str] = None):
         """初始化联合Pipeline"""
         self.config = load_config()
         self.config_path = config_path
         self.rag_pipeline = None  # 延迟初始化
-        
+
         # 检测参数（最优配置）
         self.vote_threshold = 0.25  # 最优投票阈值
         self.psi = 128  # 最优子采样参数
-        
-        # 各通道最优contamination
+
+        # 论文配方（val 选出）。载入失败时 recipe=None，走原有硬编码分支。
+        self.recipe = self.load_recipe()
+        if self.recipe is not None:
+            print(f"[AnomalyRAGPipeline] 已载入论文配方 gate_perchannel "
+                  f"(k={self.recipe['best_k']}, commit={self.recipe['git_commit'][:8]})")
+        else:
+            print("[AnomalyRAGPipeline] 未找到 fusion.json 配方，使用内置硬编码参数")
+
+        # 各通道最优contamination。仅在无配方时作为回退值使用。
         self.best_contamination = {
             "CADC0872": 0.5, "CADC0873": 0.5, "CADC0874": 0.5,
             "CADC0886": 0.2, "CADC0888": 0.45, "CADC0890": 0.3,
             "CADC0892": 0.5, "CADC0894": 0.5,
         }
-        
+        if self.recipe is not None:
+            self.best_contamination = {
+                ch: (v if v is not None else 0.5)
+                for ch, v in self.recipe["contamination"].items()
+            }
+
         print("[AnomalyRAGPipeline] 初始化完成")
     
     def _init_rag(self):
@@ -148,6 +196,13 @@ class AnomalyRAGPipeline:
 
         feature_cols = [c for c in features_df.columns if c not in META_COLS]
         train_mask = features_df["train"] == 1
+        # ⚠ 这里用 train 全集（1594 段）拟合阈值与 IF，而实验代码用 fit（1275 段）。
+        #   两者口径不同是有意的，且都正确：
+        #   - 实验侧拆 fit/val 是为了在同口径下公平比较超参（防过拟合 val）；
+        #   - 生产侧上线时全部历史数据都可用，用全集拟合参数更强。
+        #   实测差异：生产 SegF1=0.6446 vs 实验 0.6281，仅差 2~3 个段
+        #   （实验 TP76/FP53/FN37，生产 TP78/FP51/FN35），CI 高度重叠。
+        #   若要与论文数字严格对齐，可改用 framework.load_split() 取 fit。
         train_df = features_df[train_mask]
         test_df = features_df[~train_mask].copy()
 
@@ -159,10 +214,21 @@ class AnomalyRAGPipeline:
         n_violated, n_total = apply_stat_rules(test_df, thresholds, feature_cols)
         test_df["rule_violations"] = n_violated
         test_df["rule_total"] = n_total
-        rule_pred = pd.Series(
-            (n_violated / n_total.replace(0, 1) >= 0.2).astype(int),
-            index=test_df.index
-        )
+        # ⚠ 口径须与实验代码 fusion_v3.py 一致。
+        #   原实现用「违规比例 >= 0.2」，实验代码用「违规数 >= k」（k 在 val 上选，
+        #   实测 k=2）。两者不同：18 个特征时 0.2 比例 ≈ 违规数 >= 4，
+        #   比 k=2 严格得多，会显著降低 rule 通道的召回。
+        #   有配方时用 best_k，无配方时回退原比例口径。
+        if self.recipe is not None:
+            k_best = int(self.recipe["best_k"])
+            rule_pred = pd.Series((n_violated >= k_best).astype(int), index=test_df.index)
+            print(f"      规则判定: 违规数 >= {k_best}（与论文配方一致）")
+        else:
+            rule_pred = pd.Series(
+                (n_violated / n_total.replace(0, 1) >= 0.2).astype(int),
+                index=test_df.index,
+            )
+            print("      规则判定: 违规比例 >= 0.2（无配方，回退口径）")
 
         # 1.4 分通道IForest
         print("[3/5] 分通道IsolationForest...")
@@ -281,20 +347,45 @@ class AnomalyRAGPipeline:
         return seg_pred_map
     
     def _build_scheme_g(self, test_df, channel_preds, rule_pred, seg_baseline_map):
-        """构建Scheme G预测（强通道IF+OR规则，弱通道段级baseline）"""
+        """构建门控融合预测（每通道按 val 选出的算子）。
+
+        有配方时：对每个通道用 fusion.json 里 val 选定的算子
+        （rule / if / AND / OR），与实验代码 gate_perchannel 口径一致。
+        无配方时：回退到原 Scheme G（强通道 IF+OR 规则，弱通道段级 baseline）。
+        """
+        if self.recipe is None:
+            pred_g = pd.Series(0, index=test_df.index, dtype=int)
+            for idx in test_df.index:
+                ch = test_df.loc[idx, "channel"]
+                seg_id = test_df.loc[idx, "segment"]
+                if ch in self.STRONG_CHANNELS:
+                    if_pred = channel_preds.get(idx, 0)
+                    r_pred = int(rule_pred.loc[idx])
+                    pred_g.loc[idx] = max(if_pred, r_pred)
+                else:
+                    pred_g.loc[idx] = seg_baseline_map.get(seg_id, 0)
+            return pred_g
+
+        gate = self.recipe["gate_choice"]
         pred_g = pd.Series(0, index=test_df.index, dtype=int)
-        
         for idx in test_df.index:
             ch = test_df.loc[idx, "channel"]
             seg_id = test_df.loc[idx, "segment"]
-            
-            if ch in self.STRONG_CHANNELS:
-                if_pred = channel_preds.get(idx, 0)
-                r_pred = int(rule_pred.loc[idx])
-                pred_g.loc[idx] = max(if_pred, r_pred)
+            op = gate.get(ch)
+
+            if op == "rule":
+                pred_g.loc[idx] = int(rule_pred.loc[idx])
+            elif op == "if":
+                pred_g.loc[idx] = int(channel_preds.get(idx, 0))
+            elif op == "AND":
+                pred_g.loc[idx] = int(rule_pred.loc[idx]) & int(channel_preds.get(idx, 0))
+            elif op == "OR":
+                pred_g.loc[idx] = int(rule_pred.loc[idx]) | int(channel_preds.get(idx, 0))
             else:
+                # 配方里没有该通道（理论上不应发生），回退段级 baseline
                 pred_g.loc[idx] = seg_baseline_map.get(seg_id, 0)
-        
+                print(f"[warn] 通道 {ch} 不在配方中，回退段级 baseline")
+
         return pred_g
     
     def _segment_aggregate(self, test_df, window_preds, threshold):
