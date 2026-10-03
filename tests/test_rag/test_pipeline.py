@@ -82,6 +82,10 @@ class TestRAGPipeline:
     def mock_vectorstore(self):
         """模拟向量数据库"""
         vectorstore = Mock(spec=FAISSVectorStore)
+        # ⚠ `index` 是 FAISSVectorStore.__init__ 里动态赋值的属性，不在类定义里，
+        #   所以 Mock(spec=...) 访问不到它。RAGPipeline.__init__ 会读
+        #   `self.vectorstore.index is None`，缺该属性会抛 AttributeError。
+        vectorstore.index = Mock()
         vectorstore.search_with_context.return_value = (
             "卫星遥测数据异常可能原因：1. 传感器故障 2. 通信链路问题",
             [
@@ -200,10 +204,13 @@ class TestRAGPipeline:
     
     def test_load_knowledge_base(self, pipeline, mock_vectorstore):
         """测试加载知识库"""
+        # load_knowledge_base 直接返回 vectorstore.add_documents() 的结果，
+        # mock 未设返回值时返回的是 Mock 对象，`count >= 0` 会抛 TypeError。
+        mock_vectorstore.add_documents.return_value = 1
         # 模拟 PDF 文件
         with patch('os.path.exists', return_value=True):
             count = pipeline.load_knowledge_base(["test.pdf"])
-            
+
             assert count >= 0
             mock_vectorstore.add_documents.assert_called_once()
     

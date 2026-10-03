@@ -187,3 +187,63 @@ def test_f1_from_confusion_matrix_matches_sklearn():
     fn = int(((y == 1) & (p == 0)).sum())
     manual = 2 * tp / (2 * tp + fp + fn)
     assert abs(manual - f1_score(y, p, zero_division=0)) < 1e-12
+
+
+# ---------------------------------------------------------------- 阈值网格
+
+
+def test_tau_grid_has_no_degenerate_zero():
+    """TAU_GRID 下界必须 > 0。
+
+    归一化分数恒 >= 0，判定用 `>= tau`，所以 tau=0.0 等价于「全部判异常」，
+    不是阈值搜索的应有结果，而是网格边界造成的退化解。
+    修复前实测有 3 个通道（0884/0886/0890）选中 tau=0.0。
+    """
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[1] / "scripts" / "fusion_v3.py").read_text(
+        encoding="utf-8"
+    )
+    line = next(ln for ln in src.splitlines() if ln.startswith("TAU_GRID ="))
+    # 形如 TAU_GRID = [round(x, 3) for x in np.arange(0.05, 1.001, 0.05)]
+    start = float(line.split("np.arange(")[1].split(",")[0])
+    assert start > 0, f"TAU_GRID 下界为 {start}，tau=0 会退化为全判异常"
+
+
+def test_no_channel_selected_degenerate_tau():
+    """实测：跑一次 fusion_v3.py，任何通道都不应再选中 tau=0。
+
+    依赖上一步已重跑生成的 data/results/v3/fusion.json。
+    若 fusion.json 不存在则跳过（不因此报错）。
+    """
+    import json
+    from pathlib import Path
+
+    pj = (
+        Path(__file__).resolve().parents[1]
+        / "data" / "results" / "v3" / "fusion.json"
+    )
+    if not pj.exists():
+        pytest.skip("fusion.json 不存在，先跑 scripts/fusion_v3.py")
+    params = json.loads(pj.read_text(encoding="utf-8"))["results"]["selection"][
+        "soft_perchannel_params"
+    ]
+    zeros = [ch for ch, p in params.items() if p["tau"] == 0.0]
+    assert not zeros, f"这些通道仍选中退化的 tau=0.0：{zeros}"
+
+
+def test_soft_calibrated_does_not_self_evaluate():
+    """soft_calibrated 不得在 val 上 fit LR 后又用同一 val 选 tau。
+
+    训练集自评属于方法论错误：val F1 会虚高，换高维特征必然暴露。
+    修复后改为 5 折分层交叉验证，用 OOF 概率选 tau。
+    """
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[1] / "scripts" / "fusion_v3.py").read_text(
+        encoding="utf-8"
+    )
+    assert "StratifiedKFold" in src, "soft_calibrated 未使用交叉验证"
+    bad = "lr.predict_proba(Xtr_val)[:, 1]"
+    assert bad not in src, f"仍存在 val 自评写法：{bad}"
+

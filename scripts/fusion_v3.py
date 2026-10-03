@@ -41,6 +41,7 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score as _f1
+from sklearn.model_selection import StratifiedKFold
 
 np.random.seed(42)
 
@@ -64,7 +65,11 @@ CONTAM_GRID = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
 MIN_FIT = 10
 MIN_EVAL = 5
 W_GRID = [round(x, 2) for x in np.arange(0.0, 1.01, 0.1)]
-TAU_GRID = [round(x, 3) for x in np.arange(0.0, 1.001, 0.05)]
+# ⚠ 下界必须 > 0。归一化分数恒 >= 0，若 tau=0 与判定 `>= tau` 组合，
+#   tau=0.0 等价于「全部判异常」——这不是阈值搜索的应有结果，而是网格边界
+#   造成的退化解。实测曾有 3 个通道（0884/0886/0890）选中 tau=0.0。
+#   0.05 与 TAU_GRID_CAL 的下界一致，不影响任何其他通道的既有选择。
+TAU_GRID = [round(x, 3) for x in np.arange(0.05, 1.001, 0.05)]
 TAU_GRID_CAL = [round(x, 3) for x in np.arange(0.1, 0.9001, 0.05)]
 
 
@@ -271,19 +276,28 @@ def main():
         gp_val[m_va] = cand[best_op][0]
         gp_test[m_te] = cand[best_op][1]
 
-    # ---- 策略8：soft_calibrated（LR 融合，τ 在 val 调）----
-    Xtr_val = np.column_stack([rn_va, ifn_va])
-    lr = LogisticRegression(C=1.0, max_iter=1000).fit(Xtr_val, y_true_val)
-    proba_val = lr.predict_proba(Xtr_val)[:, 1]
+    # ---- 策略8：soft_calibrated（LR 融合，τ 在 val 内交叉验证选出）----
+    # ⚠ 不可在 val 上 fit LR 后又用同一 val 选 τ：训练集自评会让 val F1 虚高，
+    #   属于方法论错误（本次因 LR 仅 2 维未暴露，但换高维特征必然虚高）。
+    #   改为 5 折分层交叉验证：每折用 4/5 训 LR、在留出 1/5 上预测，
+    #   拼出「全程未见过的」val 概率分布再选 τ。test 概率仍由全 val 训的 LR 给出。
+    X_val2 = np.column_stack([rn_va, ifn_va])
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    oof = np.zeros(len(y_true_val), dtype=float)
+    for tr_i, te_i in skf.split(X_val2, y_true_val):
+        lr_k = LogisticRegression(C=1.0, max_iter=1000).fit(X_val2[tr_i], y_true_val[tr_i])
+        oof[te_i] = lr_k.predict_proba(X_val2[te_i])[:, 1]
+    lr = LogisticRegression(C=1.0, max_iter=1000).fit(X_val2, y_true_val)
     proba_test = lr.predict_proba(np.column_stack([rn_te, ifn_te]))[:, 1]
     best_tc, best_cf1 = 0.5, -1.0
     for tau in TAU_GRID_CAL:
-        f1 = quick_f1(y_true_val, (proba_val >= tau).astype(int))
+        f1 = quick_f1(y_true_val, (oof >= tau).astype(int))
         if f1 > best_cf1:
             best_cf1, best_tc = f1, tau
     cal_test = (proba_test >= best_tc).astype(int)
-    cal_val = (proba_val >= best_tc).astype(int)
-    print(f"[soft_calibrated] 选 τ={best_tc} (val F1={best_cf1:.4f})  coef={lr.coef_[0].round(3).tolist()}")
+    # 报告用的 val 预测用同一批 OOF 概率，口径与选 τ 时一致，不自评
+    cal_val = (oof >= best_tc).astype(int)
+    print(f"[soft_calibrated] 选 τ={best_tc} (val F1={best_cf1:.4f}, 5折OOF)  coef={lr.coef_[0].round(3).tolist()}")
 
     # ---- 最终评估（test 仅此一次，带 bootstrap CI）----
     methods = {

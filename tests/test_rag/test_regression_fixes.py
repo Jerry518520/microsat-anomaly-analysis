@@ -230,10 +230,21 @@ def test_existing_error_data_matches_patterns():
 
     data = json.loads(results_path.read_text(encoding="utf-8"))
 
-    # 找出所有包含错误信息的结果
-    error_results = [r for r in data if "失败" in r.get("rag_explanation", "")
-                     or "错误" in r.get("rag_explanation", "")
-                     or "RAG" in r.get("rag_explanation", "")]
+    # 找出真正的错误/乱码记录。
+    # ⚠ 不要用「异常确认」「RAG」等词做筛选——那些是**正常诊断输出**的内容
+    #   （7 段式提示词要求 LLM 输出「异常确认」段落），不是错误数据。
+    #   之前的筛选条件把 200 条正常输出全当成「错误记录」，然后断言它们必须
+    #   被判为乱码，导致 assert False is True。
+    #   真正的错误特征：替换字符 U+FFFD、连续问号、或明确的失败提示。
+    def _looks_broken(text: str) -> bool:
+        return (
+            "�" in text
+            or "??" in text
+            or "调用失败" in text
+            or "Traceback" in text
+        )
+
+    error_results = [r for r in data if _looks_broken(r.get("rag_explanation", ""))]
 
     for r in error_results:
         explanation = r["rag_explanation"]
