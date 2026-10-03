@@ -559,15 +559,24 @@ def report(res, targets, diff_channels):
         print(f"      显示语义穷举: round(F1,{nd})=={lo_w:.6f} 解数={len(sol_bad)}"
               f"  => {'该字面量在本 test 规模下不可能产生' if not sol_bad else '可产生'}")
 
-        def window(p, q):
+        def window(p, q, parity_both=False):
             """可行窗口 + 整性约束 -> (lo, hi, m列表)。用于机理诊断。
-            ⚠ 返回三元组，取解数须用返回值[2] 的 len()，直接 len() 得到的是元组长度。"""
+            ⚠ 返回三元组，取解数须用返回值[2] 的 len()，直接 len() 得到的是元组长度。
+            ⚠ 整性约束【只】施加于 tp = Pm/2，即仅要求 Pm 为偶。
+              fpn = m(Q-P) 中 m/Q/P 皆整数 => fpn 自动为整数，【不可】再要求它为偶。
+              parity_both=True 保留旧错误口径，仅用于复现该静默错误：
+              在 P 偶、Q-P 奇时会排除全部 m，把真解 1 个误报为 0 个。"""
             lo = 2 * n_pos / (2 * q - p)
             hi = min(2 * n_pos / p, 2 * n_test / (2 * q - p))
+            # ⚠ 这里必须写成 `not parity_both or ...`。
+            #   若写成 `and (parity_both and ...)`，当 parity_both=False 时该子表达式
+            #   求值为 False，and 链把【整个条件】判为 False -> 解数恒为 0（静默错误）。
+            #   这类 bug 的特征是「程序正常退出、格式正确、数字有说服力」，
+            #   故下方加了 assert_parity_equiv 断言做 sanity check。
             ok = [m for m in range(1, 4 * n_test + 2)
                   if lo <= m <= hi
                   and (p * m) % 2 == 0
-                  and (m * (q - p)) % 2 == 0]
+                  and (not parity_both or (m * (q - p)) % 2 == 0)]
             # 不变量自检：窗口内每个 m 还原出的混淆矩阵须合法且 F1 恰为 p/q
             for m in ok:
                 tp_ = p * m // 2
@@ -581,22 +590,89 @@ def report(res, targets, diff_channels):
                     f"m={m} 还原F1 != {p}/{q}"
             return lo, hi, ok
 
-        # 判别性实验：解数由P 与 2Q-P 共同决定，单看任一皆不成立。
+        def assert_parity_equiv():
+            """sanity check：parity_both 开关本身不得改变正确口径的解数。
+            曾因写成 `and (parity_both and ...)` 导致解数恒为 0。"""
+            for p_, q_ in [(5, 6), (11, 16), (43, 64), (162, 229), (3, 7)]:
+                a = len(window(p_, q_, parity_both=False)[2])
+                b = len(window(p_, q_, parity_both=True)[2])
+                assert a > 0, f"parity_both=False 时 {p_}/{q_} 解数为 0，疑似布尔链写错"
+                assert a >= b, f"{p_}/{q_} 旧口径解数反而更多，异常"
+            print(f"        [sanity] parity 开关自检通过（正确口径解数均 > 0）")
+
+        def brute_exact(p, q):
+            """暴力穷举：F1【恰等于】既约 P/Q 的完整混淆矩阵个数。用于裁决窗口口径。"""
+            cnt, ex = 0, []
+            for tp_ in range(n_pos + 1):
+                fn_ = n_pos - tp_
+                for fp_ in range(n_neg + 1):
+                    den = 2 * tp_ + fp_ + fn_
+                    if den and Fraction(2 * tp_, den) == Fraction(p, q):
+                        cnt += 1
+                        ex.append((tp_, fp_, fn_, n_neg - fp_))
+            return cnt, ex
+
+        def branch_pick(p, q):
+            """生效上界由判别式决定：2Q-P <= (N/n_pos)*P ?"""
+            return "P项" if (2 * q - p) <= (n_test / n_pos) * p else "2Q-P项"
+
+        # 判别性实验：P 与 Q 各自都能大幅改变解数，单看任一皆不成立。
         # ⚠ fpn 公式曾三次推错：写成 (2Q-P)m/2漏了 2tp 项中已含 m，与暴力枚举差 1。
+        # ⚠ 早期版本用「固定 2Q-P」当对照组，但该组 Q 随 P 一起变，不是真正的
+        #   单变量对照。改用严格控变量：组B固定 Q 只变P，组A固定 P 只变Q。
         p0 = 15
         ok0 = window(p0, 26)[2]      # 2Q-P = 37；⚠ 取 [2] 才是 m 列表，len() 直接用会算成元组长度
         print(f"      机理: 窗口 [2·n_pos/(2Q-P), min(2·n_pos/P, 2·N/(2Q-P))] "
-              f"+ m 整性约束；解数 = 窗口内合格 m 的个数")
-        print(f"      判别性实验(固定 2Q-P=37, 只变 P): "
-              f"5/21 -> {len(window(5, 21)[2])} 解, 15/26 -> {len(ok0)} 解")
-        print(f"      判别性实验(固定 P=15, 只变 2Q-P): "
-              f"2Q-P=37 -> {len(ok0)} 解, 2Q-P=49 -> {len(window(15, 32)[2])} 解")
-        print(f"        => 两个方向都能让解数变化，故「分子决定」「分母决定」"
-              f"「2Q-P 决定」均不成立，须两者合并看")
+              f"+ m 整性约束(仅 Pm 偶)；解数 = 窗口内合格 m 的个数")
+        grpA = {q_: len(window(5, q_)[2]) for q_ in (6, 7, 8, 12, 14)}
+        grpB = {p_: len(window(p_, 16)[2]) for p_ in range(1, 16, 2)}
+        assert_parity_equiv()
+        print(f"      判别性实验(固定 P=5, 严格只变Q): "
+              + " ".join(f"5/{q_}={n_}解" for q_, n_ in grpA.items())
+              + f"  => {min(grpA.values())}..{max(grpA.values())} 解, "
+                f"{max(grpA.values()) / min(grpA.values()):.0f} 倍差")
+        print(f"      判别性实验(固定 Q=16, 严格只变P): "
+              + " ".join(f"{p_}/16={n_}解" for p_, n_ in grpB.items())
+              + f"  => {min(grpB.values())}..{max(grpB.values())} 解, "
+                f"{max(grpB.values()) / min(grpB.values()):.0f} 倍差")
+        print(f"        => P、Q 各自都能大幅改变解数，故「分子决定」「分母决定」"
+              f"「2Q-P 决定」均不成立，须合并看窗口宽度")
+
         for nm, p_, q_ in [("43/64", 43, 64), ("11/16", 11, 16)]:
             a_, b_, ok_ = window(p_, q_)
             print(f"        B 档 {nm}: 2Q-P={2 * q_ - p_}, 窗口宽={b_ - a_:.1f}, "
-                  f"可行 m={ok_} -> {len(ok_)} 解")
+                  f"生效上界={branch_pick(p_, q_)} "
+                  f"(阈值{(n_test / n_pos) * p_:.1f}), 可行 m={ok_} -> {len(ok_)} 解")
+
+        # 判别式：两分支是否都真实存在（固定 Q=16 只变 P）
+        print(f"      判别式: 2Q-P <= (N/n_pos)·P = {n_test / n_pos:.4f}·P ? "
+              f"满足取P项，否则取2Q-P项")
+        for q_ in (16,):
+            row = []
+            for p_ in range(1, q_, 2):
+                row.append(f"{p_}/{q_}:{len(window(p_, q_)[2])}解"
+                           f"({branch_pick(p_, q_)})")
+            print(f"        Q={q_} 恒定只变P -> " + "  ".join(row))
+        print(f"        => 两分支都真实存在；本test n_pos偏小使 B 档两值均走 P 项")
+
+        # 整性约束口径裁决：只施加 Pm 偶 vs 旧口径(再要求 m(Q-P) 偶)，以暴力穷举为准
+        print(f"      ⚠ 整性约束口径裁决（只 Pm 偶 = 正确）:")
+        cases = [(150, 241), (156, 241), (162, 229), (43, 64), (11, 16),
+                 (83, 114), (2, 3), (2, 5), (4, 9), (8, 9), (1, 16),
+                 (15, 16), (5, 21), (15, 26)]
+        nbad = 0
+        for p_, q_ in cases:
+            b_cnt, _ = brute_exact(p_, q_)
+            good = len(window(p_, q_, parity_both=False)[2])
+            bad = len(window(p_, q_, parity_both=True)[2])
+            if b_cnt != good:
+                nbad += 1
+            flag = "" if bad == good else f"  <-旧口径错报{bad}解"
+            print(f"        {p_}/{q_:<4} 穷举={b_cnt:<4} 正确口径={good:<4} "
+                  f"旧口径={bad:<4}{flag}")
+        assert nbad == 0, f"正确口径与穷举有 {nbad} 处分歧"
+        print(f"        => 14 组零分歧，证实「只 Pm 偶」为唯一正确口径；"
+              f"旧口径在 P 偶、Q-P 奇时把真解 1 个误报为 0 个")
         print(f"      ⚠ 易错：被检验对象是精确端点 {lo_exact}（分母 "
               f"{lo_exact.denominator}），非其六位显示 {round(res['interval'][0], nd):.{nd}f}"
               f" = {Fraction(str(round(res['interval'][0], nd)))}（规模判据下需 "
