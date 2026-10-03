@@ -707,6 +707,26 @@ def report(res, targets, diff_channels):
         assert nbad == 0, f"正确口径与穷举有 {nbad} 处分歧"
         print(f"        => 14 组零分歧，证实「只 Pm 偶」为唯一正确口径；"
               f"旧口径在 P 偶、Q-P 奇时把真解 1 个误报为 0 个")
+
+        # 受影响需三条件同时成立：P偶 & Q-P奇 & 窗口内含奇m
+        # ⚠ 扫描须从偶数起步(range(2,...,2))；曾误用 range(1,...,2) 全扫到奇数，
+        #   导致已知答案 2/3 都不命中却未察觉。此即纪律 9。
+        def has_odd_m(p_, q_):
+            return any(m % 2 == 1 for m in window(p_, q_, parity_both=False)[2])
+
+        assert has_odd_m(2, 3), "扫描器自检失败：已知答案 2/3 应判为受影响"
+        imm = aff = 0
+        for p_ in range(2, 120, 2):
+            for q_ in range(p_ + 1, 200):
+                if (q_ - p_) % 2 == 1 and has_odd_m(p_, q_):
+                    aff += 1
+                else:
+                    imm += 1
+        print(f"        受影响需三条件同时成立(P偶 & Q-P奇 & 窗口含奇m): "
+              f"实测 {aff}/{aff + imm} = {100 * aff / (aff + imm):.1f}% 受影响")
+        lo_, hi_, ok_ = window(18, 19)
+        print(f"        反例 18/19 满足前两条件但窗口[{lo_:.1f},{hi_:.1f}]不含奇m => 免疫; "
+              f"本表 B/D 档因 P 为奇数而免疫")
         print(f"      ⚠ 易错：被检验对象是精确端点 {lo_exact}（分母 "
               f"{lo_exact.denominator}），非其六位显示 {round(res['interval'][0], nd):.{nd}f}"
               f" = {Fraction(str(round(res['interval'][0], nd)))}（规模判据下需 "
