@@ -638,6 +638,40 @@ def report(res, targets, diff_channels):
         print(f"        => P、Q 各自都能大幅改变解数，故「分子决定」「分母决定」"
               f"「2Q-P 决定」均不成立，须合并看窗口宽度")
 
+        # 第三维度交叉印证：锁死 2Q-P=37 只变 P。
+        # ⚠ 此组 Q 随 P 同变，【不是单变量对照】，仅用于验证 2Q-P 不变时解数仍变。
+        grpC = {}
+        for p_ in range(1, 16, 2):
+            q_ = (37 + p_) // 2
+            assert 2 * q_ - p_ == 37, "第三组未锁死 2Q-P"
+            grpC[f"{p_}/{q_}"] = len(window(p_, q_)[2])
+        s_win = s_enum = 0
+        for p_ in range(1, 16, 2):
+            q_ = (37 + p_) // 2
+            s_win += len(window(p_, q_)[2])
+            s_enum += brute_exact(p_, q_)[0]
+        assert s_win == s_enum, f"第三组闭式{s_win} != 枚举{s_enum}"
+        print(f"      第三维度(锁死 2Q-P=37, 只变P; 非单变量): "
+              + " ".join(f"{k}={v}解" for k, v in grpC.items()))
+        print(f"        => 2Q-P 钉死时解数仍 {max(grpC.values())}→{min(grpC.values())} 变化，"
+              f"进一步排除「2Q-P 单独决定」；窗口/枚举合计均为 {s_win}，逐个一致")
+
+        # 0 解伪差异陷阱普查：len(set(解数))>1 可能只来自 {0,1}，
+        # 那只说明「一个不可达、一个可达」，不是判别性证据。
+        n_trap = n_all = 0
+        for g in range(3, 400, 2):
+            cnts = [len(window(p_, (g + p_) // 2)[2])
+                    for p_ in range(1, g, 2) if (g + p_) // 2 > p_]
+            if not cnts or len(set(cnts)) < 2:
+                continue
+            n_all += 1
+            if set(cnts) <= {0, 1}:
+                n_trap += 1
+        print(f"      ⚠ 0解伪差异普查: 扫 2Q-P=3..399 全部奇数，"
+              f"解数有差异的组={n_all}，其中仅由{{0,1}}构成的伪差异组={n_trap}")
+        print(f"        => 筛选差异组须加 set(解数)-{{0}} 非空，否则「不可达 vs 可达」"
+              f"会被误当作判别性证据")
+
         for nm, p_, q_ in [("43/64", 43, 64), ("11/16", 11, 16)]:
             a_, b_, ok_ = window(p_, q_)
             print(f"        B 档 {nm}: 2Q-P={2 * q_ - p_}, 窗口宽={b_ - a_:.1f}, "
