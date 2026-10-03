@@ -17,7 +17,13 @@
     "data_n": 200,
     "script": "scripts/eval_rag_v3.py",
     "random_state": null,
-    "note": "本评估为确定性字符串匹配统计，不涉及随机性，无需 random_state"
+    "note": "本评估为确定性字符串匹配统计，不涉及随机性，无需 random_state",
+    "timestamp_postfix": "2026-10-03T23:51:31",
+    "git_commit_postfix": "7656f476ce14650ab09929cf48fc6ac4f48189bd",
+    "git_commit_short_postfix": "7656f47",
+    "python_postfix": "3.13.13",
+    "api_calls_postfix": 200,
+    "note_postfix": "post_fix 由 scripts/eval_rag_postfix_v3.py 真实调用 DeepSeek API 产出"
   },
   "defect": {
     "location": "src/rag/prompts.py:91（原） + configs/rag_config.yaml:118（原）",
@@ -89,8 +95,85 @@
     "n_failed_generation": 0,
     "status": "实测"
   },
-  "post_fix": null,
-  "post_fix_note": "用户本次提供的 DEEPSEEK_API_KEY 在 Ark 端点返回 HTTP 401（非有效 Ark 密钥或已失效）；配置中的 model `deepseek-v3-2-251201` 在可用密钥下返回 HTTP 404 InvalidEndpointOrModel.NotFound。即当前无任何可用推理接入点，无法重新生成，修复后结构命中率未验证。post_fix 必须保持 null，严禁编造修复后数字。",
+  "post_fix": {
+    "scope": "full_200",
+    "sample_seed": null,
+    "n_evaluated": 200,
+    "n_api_calls": 200,
+    "system_prompt_len": 748,
+    "model": "deepseek-chat",
+    "api_base": "https://api.deepseek.com/v1/chat/completions",
+    "temperature": 0.1,
+    "marker_hit_rates": {
+      "【来源】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【紧急程度】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【建议措施】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      }
+    },
+    "marker_hit_rates_all_7": {
+      "【通道定位】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【异常类型】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【可能原因】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【影响评估】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【建议措施】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【紧急程度】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      },
+      "【来源】": {
+        "hit": 200,
+        "total": 200,
+        "rate": 1.0
+      }
+    },
+    "n_full_7_markers": 200,
+    "n_full_7_markers_rate": 1.0,
+    "n_full_key_markers": 200,
+    "n_full_key_markers_rate": 1.0,
+    "n_failed_generation": 0,
+    "latency": {
+      "min_s": 1.686,
+      "max_s": 59.538,
+      "mean_s": 3.601,
+      "median_s": 2.247
+    },
+    "total_tokens": 291804,
+    "status": "实测（真实调用 DeepSeek API 重新生成）",
+    "failed_examples": []
+  },
+  "post_fix_note": "post_fix 为真实评测：用修复后的 7 段式 system_prompt（长度 748）+ DeepSeek 官方 API（model=deepseek-chat），对 全部 200 条 真实重新生成解释，共发起 200 次真实 API 调用。 全量 200 条均真实重新生成，三关键标记命中率为全量实测值。",
   "static_verification": {
     "system_prompt_len": 748,
     "default_system_prompt_len": 748,
@@ -119,10 +202,10 @@
       "修复前 system_prompt 长度 = 0（SHA256 为空串哈希）",
       "修复后 system_prompt 长度 = 748，与 default_system_prompt 逐字节一致",
       "修复前 200 条：来源 0/200、紧急程度 0/200、建议措施 29/200 (14.5%)",
-      "检索侧正常：200/200 均有来源，检索中位耗时见 retrieval 字段"
+      "检索侧正常：200/200 均有来源，检索中位耗时见 retrieval 字段",
+      "修复后 全量 200 条 重新生成：7 段式完整命中 200/200 （100.0%）；三关键标记全命中 200/200（100.0%）"
     ],
     "unverified": [
-      "修复后重新生成的结构命中率 —— 未验证（无可用推理接入点）",
       "修复对诊断质量（人工评分/事实一致性）的影响 —— 未验证"
     ]
   }
