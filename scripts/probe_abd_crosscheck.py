@@ -558,6 +558,45 @@ def report(res, targets, diff_channels):
                   f"  (应等于穷举端点 {lo_exact})")
         print(f"      显示语义穷举: round(F1,{nd})=={lo_w:.6f} 解数={len(sol_bad)}"
               f"  => {'该字面量在本 test 规模下不可能产生' if not sol_bad else '可产生'}")
+
+        def window(p, q):
+            """可行窗口 + 整性约束 -> (lo, hi, m列表)。用于机理诊断。
+            ⚠ 返回三元组，取解数须用返回值[2] 的 len()，直接 len() 得到的是元组长度。"""
+            lo = 2 * n_pos / (2 * q - p)
+            hi = min(2 * n_pos / p, 2 * n_test / (2 * q - p))
+            ok = [m for m in range(1, 4 * n_test + 2)
+                  if lo <= m <= hi
+                  and (p * m) % 2 == 0
+                  and (m * (q - p)) % 2 == 0]
+            # 不变量自检：窗口内每个 m 还原出的混淆矩阵须合法且 F1 恰为 p/q
+            for m in ok:
+                tp_ = p * m // 2
+                fpn_ = m * (q - p)
+                fn_ = n_pos - tp_
+                fp_ = fpn_ - fn_
+                tn_ = n_neg - fp_
+                assert fn_ >= 0 and fp_ >= 0 and tn_ >= 0, f"m={m} 混淆矩阵越界"
+                assert tp_ + fpn_ <= n_test, f"m={m} 总段数超限"
+                assert Fraction(2 * tp_, 2 * tp_ + fpn_) == Fraction(p, q), \
+                    f"m={m} 还原F1 != {p}/{q}"
+            return lo, hi, ok
+
+        # 判别性实验：解数由P 与 2Q-P 共同决定，单看任一皆不成立。
+        # ⚠ fpn 公式曾三次推错：写成 (2Q-P)m/2漏了 2tp 项中已含 m，与暴力枚举差 1。
+        p0 = 15
+        ok0 = window(p0, 26)[2]      # 2Q-P = 37；⚠ 取 [2] 才是 m 列表，len() 直接用会算成元组长度
+        print(f"      机理: 窗口 [2·n_pos/(2Q-P), min(2·n_pos/P, 2·N/(2Q-P))] "
+              f"+ m 整性约束；解数 = 窗口内合格 m 的个数")
+        print(f"      判别性实验(固定 2Q-P=37, 只变 P): "
+              f"5/21 -> {len(window(5, 21)[2])} 解, 15/26 -> {len(ok0)} 解")
+        print(f"      判别性实验(固定 P=15, 只变 2Q-P): "
+              f"2Q-P=37 -> {len(ok0)} 解, 2Q-P=49 -> {len(window(15, 32)[2])} 解")
+        print(f"        => 两个方向都能让解数变化，故「分子决定」「分母决定」"
+              f"「2Q-P 决定」均不成立，须两者合并看")
+        for nm, p_, q_ in [("43/64", 43, 64), ("11/16", 11, 16)]:
+            a_, b_, ok_ = window(p_, q_)
+            print(f"        B 档 {nm}: 2Q-P={2 * q_ - p_}, 窗口宽={b_ - a_:.1f}, "
+                  f"可行 m={ok_} -> {len(ok_)} 解")
         print(f"      ⚠ 易错：被检验对象是精确端点 {lo_exact}（分母 "
               f"{lo_exact.denominator}），非其六位显示 {round(res['interval'][0], nd):.{nd}f}"
               f" = {Fraction(str(round(res['interval'][0], nd)))}（规模判据下需 "
