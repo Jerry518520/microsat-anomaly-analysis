@@ -34,6 +34,7 @@ A/B/D 档「穷举 tie-break 敏感性」独立交叉验证探针
 import itertools
 import os
 import sys
+from fractions import Fraction
 
 import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -93,9 +94,14 @@ TARGETS = {
         #   表格取 0.020646，判据是「上界 − 极差 = 下界」的表内自洽
         #   （0.728070 − 0.020646 = 0.707424 ✓；用 0.020647 则得 0.707423 ✗）。
         #   表格自洽优先于单值精度，故此处 "range" 同样取 0.020646。
-        # 注：任务书原写下界 0.707368，与同组的上界 0.728070、极差不自洽
-        #     （0.728070 - 0.707368 = 0.020702），且经全空间 4^9 枚举证实
-        #     0.707368 在任何算子组合下均不可达 -> 判定为笔误，正确值 0.707424。
+        # 注：PAPER_TABLE.md 曾把 D 档下界原写成 0.707368，与同组的上界
+        #     0.728070、极差 0.020646 不自洽（0.728070 - 0.707368 = 0.020702）。
+        #     更正依据是精确有理数 + 规模判据，不是全空间枚举：
+        #       0.707368 = 88421/125000（既约），F1 = 2tp/(2tp+fp+fn)
+        #       最小总段数 = 2Q - P = 250000 - 88421 = 161579 段
+        #     而 test 只有 529 段 -> 该值在本test 规模下不可能产生。
+        #     ⚠ 不得写「经全空间枚举证实不可达」：全空间诊断报出的 min/max
+        #       不是子空间上下界（F1 非 tp/fp/fn 的线性函数），不能作此对证。
         "interval": (0.707424, 0.728070),
         "interval_as_written": (0.707368, 0.728070),
         "range": 0.020646,
@@ -491,9 +497,20 @@ def report(res, targets, diff_channels):
           f"{'自洽 OK' if consistent else '*** 目标三数互相矛盾 ***'}")
     if "interval_as_written" in t:
         lo_w = t["interval_as_written"][0]
-        print(f"    任务书原文下界={lo_w:.6f}：上界-该下界={hi_t - lo_w:.6f} "
-              f"!= 目标极差 {rg_t:.6f} -> 判定原文下界为笔误，"
-              f"正确值 {hi_t - rg_t:.6f}")
+        print(f"    原文下界={lo_w:.6f}：上界-该下界={hi_t - lo_w:.6f} "
+              f"!= 目标极差 {rg_t:.6f} -> 三数不自洽")
+        # 规模判据：把该下界当分数看，最少需要多少个 test 段才能凑出它。
+        # 这是独立于「小数比对」的第二条排除依据，且不需要全空间枚举。
+        fw = Fraction(str(lo_w))
+        pw, qw = fw.numerator, fw.denominator
+        segs = (2 * qw - pw) // 2 if pw % 2 == 0 else 2 * qw - pw
+        n_test = res["test_n"]          # 从本次运行的真实 test 取，不写字面常量
+        print(f"      规模判据: {lo_w} = {pw}/{qw}（既约），F1=2tp/(2tp+fp+fn) "
+              f"最小总段数={segs}")
+        print(f"      test 实际仅 {n_test} 段-> "
+              f"{'该值不可能产生，构成独立排除' if segs > n_test else '该值规模可行，需另找排除依据'}"
+              f"（超出的 {segs / n_test:.0f} 倍）")
+        print(f"      正确值 {hi_t - rg_t:.6f}")
 
     # 极差口径核对：目标的极差是否等于「舍入后端点相减」
     rng_rounded = round(res["interval"][1], nd) - round(res["interval"][0], nd)
