@@ -291,7 +291,7 @@ def main():
         ch_t = test_df["channel"].to_numpy()
         yp = np.zeros(len(test_df), dtype=int)
         for ch in np.unique(ch_t):
-            m = (ch_t == ch).to_numpy()
+            m = (ch_t == ch)  # ch_t 已是 ndarray，勿再 .to_numpy()
             ev = test_df[m]
             rp = (apply_stat_rules(ev, th, sel)[0] >= kb).astype(int)
             c = bcf.get(ch)
