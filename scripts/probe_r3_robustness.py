@@ -261,10 +261,13 @@ def main():
             ip = (clf.predict(Xa) == -1).astype(int)
             cand = {"rule": qf1(ya[m], rp), "if": qf1(ya[m], ip),
                     "AND": qf1(ya[m], rp & ip), "OR": qf1(ya[m], rp | ip)}
-            #⚠ 必须按固定 rule->if->AND->OR 顺序、严格 > 遍历（与 fusion_v3.py
+            # ⚠ 必须按固定 rule->if->AND->OR 顺序、严格 > 遍历（与 fusion_v3.py
             # 的 max() 字典序一致），否则并列裁决规则与权威口径不同，
             # A4 算出的就不是被验证的那个系统的嵌套值。
-            opA[ch] = cand["rule"]
+            # ⚠ 不可写成 opA[ch] = max(cand, key=cand.get)：那会按 dict 插入序
+            # 择胜；也不可写成 opA[ch] = cand["rule"]：那存进去的是 F1 值不是
+            # 算子名，下一轮 cand[opA[ch]] 直接 KeyError。
+            opA[ch] = "rule"
             for o in ("if", "AND", "OR"):
                 if cand[o] > cand[opA[ch]]:
                     opA[ch] = o
