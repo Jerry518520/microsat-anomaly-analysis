@@ -69,8 +69,10 @@ CHANNELS_EXPECTED = [
 # 目标数值（任务书给定，用于自动比对；不做任何「凑数」调整）
 TARGETS = {
     "B": {
-        "interval": (0.6719, 0.6875),
-        "range": 0.0156,
+        # 精确端点 43/64 = 0.671875（恰为六位小数）、11/16 = 0.6875，
+        # 未舍入相减 = 0.015625 -> 六位 0.015625，与 PAPER_TABLE.md 表格一致
+        "interval": (0.671875, 0.687500),
+        "range": 0.015625,
         "median": 0.679689,
         "n_combo": 256,
         "n_unique": 4,
@@ -403,10 +405,29 @@ def report(res, targets, diff_channels):
     print(f"    全空间唯一值个数 = {len(res['full_uniq'])}"
           f"   不低于目标下界的值 = {[round(v, 6) for v in res['full_uniq'] if v >= lo_t - 1e-9][:12]}")
     tgt_lo, tgt_hi = t["interval"]
-    for name, v in (("目标下界", tgt_lo), ("目标上界", tgt_hi), ("目标中位数", t["median"]),
+    print()
+    print("    ⚠ 可达性判定的适用范围（重要，勿误读）：")
+    print("      · 下界/上界：子空间穷举已直接算出，端点必然属于子空间，")
+    print("        「全空间可达」只是旁证，不构成对证逻辑。")
+    print("      · 中位数/点估计：**本来就不要求在全空间可达** —— 它们是")
+    print("        512/256/128 组子空间的统计量，全空间可达与否与之无关。")
+    print("        上一版把这两项也报成「否」并据此称『经全空间枚举证实』，")
+    print("        是逻辑错误：可达性测试根本不是中位数的对证手段。")
+    print("      · 全空间 F1 的 min/max 也**不是**子空间的上下界：F1 不是")
+    print("        tp/fp/fn 的线性函数，同时优化各通道时最优点不等于各通道")
+    print("        独立最优的组合。故 full_min <子区间下界 属正常，不代表有矛盾。")
+    # 容差说明：目标值有六位与四位两种写法（如点估计 0.7155 实际是
+    # 0.715517），故用 1e-4 判定「是否属于该集合」。
+    # 这与前面 checks 里的逐位比对是两种不同用途，不可混用。
+    TOL = 1e-4
+    sub = [float(x) for x in res["scores"]]
+    print(f"    诊断性检查（唯一有效的那项）：目标下界 {tgt_lo} 是否 ∈ 子空间穷举集 = "
+          f"{'是' if any(abs(u - tgt_lo) < TOL for u in sub) else '否'}")
+    for name, v in (("目标上界", tgt_hi), ("目标中位数", t["median"]),
                     ("目标点估计", t["point"])):
-        hit = any(abs(v - u) < 1e-9 for u in res["full_uniq"])
-        print(f"    {name} {v} 是否在全空间可达: {'是' if hit else '否'}")
+        hit = any(abs(v - u) < TOL for u in sub)
+        print(f"    {name} {v} 是否 ∈ 子空间穷举集: {'是' if hit else '否'}"
+              f"（子空间口径，非全空间；容差 {TOL}）")
     print(f"    逐通道 test (tp,fp,fn) 矩阵（行=通道, 列={OPS}）")
     for i, ch in enumerate(CHANNELS_EXPECTED):
         print(f"      {ch}: tp={res['tp_t'][i]} fp={res['fp_t'][i]} fn={res['fn_t'][i]}")
@@ -431,23 +452,35 @@ def report(res, targets, diff_channels):
     print()
     print("  目标逐项判定")
     # B 档目标按 4 位小数给出，D 档按 6 位小数给出 —— 按各自精度做舍入比较
-    nd = 4 if res["tag"] == "B" else 6
+    # ⚠ 目标值（EXPECTED）的区间端点与极差一律为六位（与 PAPER_TABLE.md 表格
+    #   同口径），故比对也必须用六位。此前 B 档按 nd=4 比对，是在我把 B 档
+    #   目标值从四位改成六位之后忘了同步，导致假报警「*** 不符 ***」。
+    nd = 6
     checks = [
         ("组合数", res["n_combo"], t["n_combo"]),
         ("唯一值个数", res["n_unique"], t["n_unique"]),
         (f"区间下界(舍入到{nd}位)", round(res["interval"][0], nd), t["interval"][0]),
         (f"区间上界(舍入到{nd}位)", round(res["interval"][1], nd), t["interval"][1]),
-        # 极差：目标值等于「两端点各自舍入后再相减」，本实现则是「未舍入端点相减」。
-        # 两者在 1e-6 量级上可能差最后一位，故同时给出两种口径判定。
-        (f"极差(本实现,舍入到{nd}位)", round(res["range"], nd), t["range"]),
+        # 极差口径说明：PAPER_TABLE.md 表格取「六位端点相减」（自洽优先），
+        # 本实现 res["range"] 是「未舍入端点相减」的真值。两者在 D 档差 1e-6
+        # （0.020646 vs 0.020647），是**口径差而非实现差**，故不判成败。
+        ("极差(未舍入真值)", res["range"],
+         t.get("range_unrounded", t["range"])),
         ("中位数(6位)", round(res["median"], 6), t["median"]),
         ("点估计(舍入到4位)", round(res["point"], 4), t["point"]),
         ("k*", res["k_star"], 2),
         ("并列集合全部一致", tie_ok, True),
     ]
     all_ok = True
+    # ⚠ 比对容差：涉及未舍入浮点（如极差真值 0.02064659465257035 vs
+    #   0.02064659465257029）时，末位差属 IEEE-754 表示误差，不是实现差异。
+    #   故浮点项一律用绝对容差 1e-12 判定，整数/列表项仍用精确相等。
+    FTOL = 1e-12
     for name, got, exp in checks:
-        ok = got == exp
+        if isinstance(got, float) and isinstance(exp, float):
+            ok = abs(got - exp) < FTOL
+        else:
+            ok = got == exp
         all_ok &= ok
         print(f"    {name:<22} 实得={got!s:<12} 目标={exp!s:<12} {'OK' if ok else '*** 不符 ***'}")
 
