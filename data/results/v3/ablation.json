@@ -1,13 +1,13 @@
 {
   "name": "ablation",
   "meta": {
-    "timestamp": "2026-09-03T20:15:43",
-    "git_commit": "bebc6b14822a873450937623f251dd2fabaac8df",
+    "timestamp": "2026-10-03T22:14:07",
+    "git_commit": "e32a9a734ddd9b8b5256c269330b89f99cb1335a",
     "git_dirty": true,
     "python": "3.13.13",
     "sklearn": "1.8.0",
-    "numpy": "2.3.5",
-    "pandas": "2.3.3",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
     "random_state": 42,
     "data_file": "data/raw/dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv",
     "data_sha256": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",

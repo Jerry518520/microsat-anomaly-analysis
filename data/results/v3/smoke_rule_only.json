@@ -1,8 +1,8 @@
 {
   "name": "smoke_rule_only",
   "meta": {
-    "timestamp": "2026-09-03T19:42:21",
-    "git_commit": "fa999013f5ddee11bd552035cdee0eee8c20cece",
+    "timestamp": "2026-10-03T22:14:36",
+    "git_commit": "e32a9a734ddd9b8b5256c269330b89f99cb1335a",
     "git_dirty": true,
     "python": "3.13.13",
     "sklearn": "1.8.0",
