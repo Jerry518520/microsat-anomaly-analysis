@@ -499,18 +499,58 @@ def report(res, targets, diff_channels):
         lo_w = t["interval_as_written"][0]
         print(f"    原文下界={lo_w:.6f}：上界-该下界={hi_t - lo_w:.6f} "
               f"!= 目标极差 {rg_t:.6f} -> 三数不自洽")
-        # 规模判据：把该下界当分数看，最少需要多少个 test 段才能凑出它。
-        # 这是独立于「小数比对」的第二条排除依据，且不需要全空间枚举。
-        fw = Fraction(str(lo_w))
-        pw, qw = fw.numerator, fw.denominator
-        segs = (2 * qw - pw) // 2 if pw % 2 == 0 else 2 * qw - pw
+        # 可达性检查：规模判据只能【证成】端点可信，不能【证伪】某个字面量。
+        # F1 = 2tp/(2tp+fpn) = P/Q既约 -> 2tp = P*m, 2tp+fpn = Q*m
+        #   P 偶取 m=1（P/2 = tp，Q-P = fpn），P 奇取 m=2（tp = P，fpn = 2Q-2P）
         n_test = res["test_n"]          # 从本次运行的真实 test 取，不写字面常量
-        print(f"      规模判据: {lo_w} = {pw}/{qw}（既约），F1=2tp/(2tp+fp+fn) "
-              f"最小总段数={segs}")
-        print(f"      test 实际仅 {n_test} 段-> "
-              f"{'该值不可能产生，构成独立排除' if segs > n_test else '该值规模可行，需另找排除依据'}"
-              f"（超出的 {segs / n_test:.0f} 倍）")
-        print(f"      正确值 {hi_t - rg_t:.6f}")
+        n_pos = res["test_pos"]
+
+        def feasible(lit):
+            # 返回 (tp, fp+fn)，总段数 = 两者之和
+            # ⚠ 必须用字符串构造 Fraction。若传 float，Fraction() 取的是double 的
+            #   精确二进制值（分母可达 2^52），规模会算错十几个数量级。
+            x = lit if isinstance(lit, Fraction) else Fraction(str(lit))
+            p, q = x.numerator, x.denominator
+            if p % 2 == 0:          # m=1: 2tp = p
+                return p // 2, q - p
+            return p, 2 * q - 2 * p  # m=2: 2tp = 2p
+
+        def display_solutions(lit):
+            """显示语义穷举：有多少 (tp, fp+fn) 满足 round(F1, 6) == lit。
+            这是比规模判据更强的一层—— 既证可产生，又证「只有这一种」。"""
+            hit = []
+            for tp_ in range(0, n_pos + 1):
+                for fpn_ in range(0, n_test - tp_ + 1):
+                    den = 2 * tp_ + fpn_
+                    if den and round(2 * tp_ / den, 6) == round(lit, 6):
+                        hit.append((tp_, fpn_))
+            return hit
+
+        tp_l, fpn_l = feasible(lo_w)
+        lo_exact = Fraction(res["interval"][0]).limit_denominator(10 ** 6)
+        tp_r, fpn_r = feasible(lo_exact)
+        # 六位显示字面量（显示值 != 精确值，须单独算一次）
+        tp_d, fpn_d = feasible(round(res["interval"][0], nd))
+        print(f"      规模判据(排除 0.707368): 原文下界 {lo_w:.6f} = "
+              f"{Fraction(str(lo_w))} 需{tp_l + fpn_l} 段/tp={tp_l}")
+        print(f"      规模判据(证成 穷举实得): 端点 {res['interval'][0]:.16f} = "
+              f"{lo_exact} 需 {tp_r + fpn_r} 段/tp={tp_r}")
+        print(f"      => 两候选得到不同判决 ({tp_r + fpn_r} <= {n_test} 存活 vs "
+              f"{tp_l + fpn_l} > {n_test} 排除)，判据能区分")
+        sol_ok = display_solutions(res["interval"][0])
+        sol_bad = display_solutions(lo_w)
+        print(f"      显示语义穷举(最强): round(F1,{nd})=={round(res['interval'][0], nd):.{nd}f} "
+              f"解数={len(sol_ok)} {sol_ok[:3]}->最简 "
+              f"{Fraction(2 * sol_ok[0][0], 2 * sol_ok[0][0] + sol_ok[0][1]) if sol_ok else '-'}")
+        print(f"      显示语义穷举: round(F1,{nd})=={lo_w:.6f} 解数={len(sol_bad)}"
+              f"  => {'该字面量在本 test 规模下不可能产生' if not sol_bad else '可产生'}")
+        print(f"      ⚠ 易错：被检验对象是精确端点 {lo_exact}（分母 "
+              f"{lo_exact.denominator}），非其六位显示 {round(res['interval'][0], nd):.{nd}f}"
+              f" = {Fraction(str(round(res['interval'][0], nd)))}（规模判据下需 "
+              f"{tp_d + fpn_d} 段）—— 显示值是舍入产物、从来不是被检验对象，"
+              f"且舍入会破坏既约性")
+        print(f"      ⚠ 不得写「经全空间枚举证实不可达」：全空间诊断的 min/max "
+              f"不是子空间上下界（F1 非 tp/fp/fn 的线性函数），不能作此对证。")
 
     # 极差口径核对：目标的极差是否等于「舍入后端点相减」
     rng_rounded = round(res["interval"][1], nd) - round(res["interval"][0], nd)
