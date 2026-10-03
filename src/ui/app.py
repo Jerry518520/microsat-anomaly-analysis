@@ -103,7 +103,11 @@ with st.sidebar:
         st.error("🔴 遥测数据缺失")
 
     # 健康检查：FAISS 索引
-    _faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
+    # P0-A6：路径改由 src/utils/paths.py 统一提供（与 detection 页面同一来源）；
+    # 同时把"RAG 不可用"从 st.info 升级为 st.error——索引缺失意味着所有异常解释
+    # 都是无知识库引用的纯 LLM 输出，属于功能性降级，不能只给一条灰色提示。
+    from src.utils.paths import read_faiss_index_status
+    _index_status, _chunk_count, _index_reason = read_faiss_index_status()
     _rag_available = False
     try:
         from src.rag.pipeline import get_rag_pipeline  # noqa: F401
@@ -112,10 +116,13 @@ with st.sidebar:
         import logging
         logging.getLogger(__name__).debug(f"RAG 模块加载失败（不影响其他功能）: {_e}")
 
-    if _rag_available and os.path.exists(_faiss_path):
+    if _rag_available and _index_status == "ok":
         st.info("🔵 RAG诊断引擎在线")
     else:
-        st.info("ℹ️ RAG 诊断引擎暂未部署（仅展示模式）")
+        st.error(
+            "🔴 RAG 诊断引擎不可用 — 异常解释将无知识库支撑，结论不可溯源\n\n"
+            f"{_index_reason}"
+        )
 
 # ── 3. 主页面路由逻辑 ──
 

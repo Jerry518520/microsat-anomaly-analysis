@@ -12,6 +12,8 @@ if PROJECT_ROOT not in sys.path:
 
 from src.utils.constants import CHANNEL_MAP, NO_ANOMALY_CHANNELS, FAULT_THRESHOLD
 from src.utils.results_loader import load_json
+# P0-A6：索引路径收敛到 src/utils/paths.py，避免各处手写漂移
+from src.utils.paths import read_faiss_index_status
 
 router = APIRouter()
 
@@ -163,12 +165,16 @@ def get_alerts():
 def get_system_status():
     """系统健康状态"""
     segments_path = os.path.join(PROJECT_ROOT, "data", "raw", "segments.csv")
-    faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
-    rag_error = None
-    rag_available = os.path.exists(faiss_path)
+    # P0-A6：改用 paths 单一来源；rag_error 原为硬编码 None，等于把
+    # "索引缺失/损坏" 这个真实故障永远汇报成"无故障"，属于同一类静默降级。
+    # 现在把真实的失败原因透出。
+    index_status, _chunk_count, index_reason = read_faiss_index_status()
+    rag_available = index_status == "ok"
+    rag_error = None if rag_available else index_reason
 
     return {
         "segments_available": os.path.exists(segments_path),
         "rag_available": rag_available,
         "rag_error": rag_error,
+        "index_status": index_status,
     }

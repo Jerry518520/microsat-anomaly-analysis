@@ -6,7 +6,13 @@ authors = [
     {name = "Jerry518520",email = "jerrylbj@foxmail.com"}
 ]
 readme = "README.md"
-requires-python = "^3.11"
+# P0-A1 修复：原为 "^3.11"（等价于 >=3.11,<4.0），与实际运行环境冲突。
+# 实际验收环境为 Python 3.13.13（见 .venv/pyvenv.cfg），poetry 按此约束会直接
+# 拒绝安装/拒绝构建项目（"The currently activated Python version 3.13.13 is not
+# supported by the project"），导致依赖声明与实际环境互相矛盾。
+# 改为下界约束：项目代码未使用任何 3.12/3.13 移除的 API，向上开放以便在 3.13
+# 乃至更高版本上安装；同时不锁死上界，避免再次出现"声明版本 < 实际版本"的阻断。
+requires-python = ">=3.11"
 dependencies = [
     "pyod (>=3.2.1,<4.0.0)",
     "scikit-learn (>=1.8.0,<2.0.0)",

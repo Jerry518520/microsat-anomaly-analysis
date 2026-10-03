@@ -10,6 +10,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if PROJECT_ROOT not in sys.path: sys.path.insert(0, PROJECT_ROOT)
 
 from src.utils.results_loader import load_json as _load_json_raw
+# P0-A6：索引路径收敛到 src/utils/paths.py 单一来源，不再手写字符串拼接
+# （原写法 data/faiss_index/index.faiss 指向不存在的目录，见 paths.py 说明）
+from src.utils.paths import read_faiss_index_status
 
 @st.cache_data
 def _get_rag_config():
@@ -29,15 +32,13 @@ def _get_rag_config():
                 doc_count[ext] += 1
 
     # 2. 读取 FAISS 索引 chunk 数
-    chunk_count = None
-    faiss_path = os.path.join(PROJECT_ROOT, "data", "faiss_index", "index.faiss")
-    if os.path.exists(faiss_path):
-        try:
-            import faiss
-            idx = faiss.read_index(faiss_path)
-            chunk_count = idx.ntotal
-        except Exception:
-            pass
+    # P0-A6：原来这里手写错误路径 data/faiss_index/index.faiss（该目录不存在），
+    # 且被 `if os.path.exists(...)` + `except: pass` 双重包裹，导致索引缺失时
+    # 不报错不提示、页面照常渲染但实际没有 RAG 能力（静默降级）。
+    # 现在改为向 src/utils/paths.py 取真实路径，并把状态透传给 render()，
+    # 由 render() 用 st.warning/st.error 显式提示——本函数是 @st.cache_data，
+    # 在这里调 st.* 只会首次计算时显示，缓存命中后用户看不到，故不在此处提示。
+    index_status, chunk_count, index_reason = read_faiss_index_status()
 
     # 3. 读取嵌入引擎配置
     embedding_model = "BGE-M3"
@@ -51,7 +52,7 @@ def _get_rag_config():
         except Exception:
             pass
 
-    return doc_count, chunk_count, embedding_model
+    return doc_count, chunk_count, embedding_model, index_status, index_reason
 
 
 @st.cache_data
@@ -71,7 +72,27 @@ def render():
     col1, col2 = st.columns([3, 7])
     with col1:
         st.markdown("#### RAG 知识库配置")
-        doc_count, chunk_count, embedding_model = _get_rag_config()
+        doc_count, chunk_count, embedding_model, index_status, index_reason = _get_rag_config()
+
+        # P0-A6：把索引状态变成页面上可见的信号。
+        # 索引缺失时绝不能只显示 "未索引" 三个字了事——用户会误以为 RAG 在工作，
+        # 实际所有异常解释都在无知识库的情况下生成。这里显式告警并给出排查路径。
+        if index_status == "missing":
+            st.error(
+                "🔴 **FAISS 向量索引缺失 — RAG 解释能力不可用**\n\n"
+                f"{index_reason}\n\n"
+                "本页展示的 Chunk 数为空，异常解释将退化为**无知识库引用**的纯 LLM 输出，"
+                "结论不可溯源。请先构建索引（`python scripts/build_index.py`）"
+                "或解压含 `data/vectorstore/` 的数据包后再使用解释功能。"
+            )
+        elif index_status == "unreadable":
+            st.error(
+                "🔴 **FAISS 索引无法读取 — RAG 解释能力不可用**\n\n"
+                f"{index_reason}\n\n"
+                "通常是 faiss 版本与索引写出版本不匹配，或文件传输中损坏。"
+                "请核对 requirements.txt 中 faiss-cpu 版本后重建索引。"
+            )
+
         doc_parts = []
         if doc_count["pdf"]: doc_parts.append(f"{doc_count['pdf']} PDF")
         if doc_count["md"]: doc_parts.append(f"{doc_count['md']} MD")

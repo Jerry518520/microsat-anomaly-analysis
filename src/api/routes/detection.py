@@ -8,6 +8,8 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from src.utils.results_loader import load_json
+# P0-A6：索引路径收敛到 src/utils/paths.py，避免各处手写漂移
+from src.utils.paths import read_faiss_index_status
 
 router = APIRouter()
 
@@ -28,15 +30,9 @@ def get_rag_config():
             if ext in doc_count:
                 doc_count[ext] += 1
 
-    chunk_count = None
-    faiss_path = os.path.join(PROJECT_ROOT, "data", "vectorstore", "faiss_index.bin")
-    if os.path.exists(faiss_path):
-        try:
-            import faiss
-            idx = faiss.read_index(faiss_path)
-            chunk_count = idx.ntotal
-        except Exception:
-            pass
+    # P0-A6：改用 paths.read_faiss_index_status()，与 UI 侧同一来源；
+    # 同时把状态与原因一并返回，不再"读取失败就当 chunk 数为 None"静默吞掉。
+    index_status, chunk_count, index_reason = read_faiss_index_status()
 
     embedding_model = "BGE-M3"
     config_path = os.path.join(PROJECT_ROOT, "configs", "config.yaml")
@@ -50,7 +46,11 @@ def get_rag_config():
             pass
 
     return {
-        "status": "online" if chunk_count is not None else "offline",
+        "status": "online" if index_status == "ok" else "offline",
+        # P0-A6：新增字段，接口消费方（如前端）可据此显示显式错误，
+        # 不必再靠 chunk_count is None 反推"是否降级"
+        "index_status": index_status,
+        "index_reason": index_reason,
         "doc_count": doc_count,
         "chunk_count": chunk_count,
         "embedding_model": embedding_model,
