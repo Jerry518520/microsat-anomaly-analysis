@@ -45,7 +45,7 @@ cp .env.example .env
 
 ## 4. 后端运行（接口联调基准）
 
-需要 **Python 3.11+** 与 **NVIDIA CUDA**（当前 `requirements.txt` 含 `faiss-gpu`，队友机器已确认有显卡）。
+需要 **Python 3.13**（`requirements.txt` 锁 `faiss-cpu==1.14.2`，向量检索走 CPU；**不需要** faiss-gpu，NVIDIA CUDA 仅 BGE-M3 嵌入计算需要）。
 
 ```bash
 python -m venv .venv
@@ -62,7 +62,7 @@ curl http://localhost:8000/api/health
 # => {"status":"ok","version":"2.0.0"}
 ```
 
-> 无显卡机器兜底：把 `requirements.txt` 的 `faiss-gpu` 改成 `faiss-cpu` 再 `pip install`。
+> 无显卡机器同样可直接安装：`requirements.txt` 用的就是 `faiss-cpu`（CPU 版向量检索），无需改动任何依赖；只是 BGE-M3 嵌入计算变慢。
 
 ---
 
@@ -95,7 +95,7 @@ Vite 已在 `frontend/vite.config.ts` 配置 `/api` 代理到 `http://localhost:
 
 ## 7. 验收 Checklist
 
-- [ ] 能 `clone -b dev` 并在本地起后端 + 前端
+- [ ] 能 `clone -b main` 并在本地起后端 + 前端
 - [ ] 9 个通道 `label` 与配色和 `API.md` §2 一致
 - [ ] 严重度 5 档判定逻辑与阈值一致
 - [ ] 所有请求走 `/api/...`，返回字段名与 `API.md` 示例**完全一致**
@@ -106,14 +106,14 @@ Vite 已在 `frontend/vite.config.ts` 配置 `/api` 代理到 `http://localhost:
 
 ## 8. 提交规范
 
-- 基于 `dev` 新建功能分支：`git checkout -b feat/frontend-xxx`
-- 提 PR 到 `dev`，描述清楚改动内容与接口对齐情况
+- 基于 `main` 新建功能分支：`git checkout -b feat/frontend-xxx`
+- 提 PR 到 `main`，描述清楚改动内容与接口对齐情况
 - **严禁**提交 `.env`、模型权重、`data/`、`node_modules/`、`__pycache__/`
 
 ---
 
 ## 9. 常见问题
 
-- **后端起不来** → 检查 CUDA / `faiss-gpu` 是否装好、`.env` 是否填了 key、`data/` 是否解压到位。
+- **后端起不来** → 检查 `faiss-cpu` 是否装好、`.env` 是否填了 key、`data/` 是否解压到位。
 - **RAG 问答 `/query` 返回空或报错** → 需要 BGE-M3 模型（首次自动从镜像下载，或填 `EMBEDDING_MODEL_PATH` 指向本地模型）。
 - **其余接口（dashboard / detection / detail / waveform）只需 `segments.csv + results + vectorstore`，无需模型即可联调**——可先把这些界面跑通，再处理 RAG 问答。

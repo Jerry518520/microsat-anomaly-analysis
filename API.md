@@ -265,7 +265,7 @@ per-channel IsolationForest 连续判分 → 越限(训练集分数 95 分位数
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-   > `requirements.txt` 含 `faiss-gpu`，**需要 NVIDIA 显卡 + CUDA**。无显卡机器请把 `faiss-gpu` 改成 `faiss-cpu` 再装。
+   > `requirements.txt` 含 `faiss-cpu`（CPU 版向量检索，Python 3.13 无 `faiss-gpu` wheel），向量检索**无需** NVIDIA 显卡 / CUDA；CUDA 仅 BGE-M3 嵌入计算需要。
 
 2. 把队长给的 **`data_share.zip`** 解压到项目根目录（得到 `data/raw/segments.csv`、`data/results/*`、`data/vectorstore/*`）。
 

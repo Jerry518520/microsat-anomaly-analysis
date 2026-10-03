@@ -28,8 +28,8 @@
 > 本仓库**工作分支是 `main`**。**克隆务必加 `-b main`**，否则可能拿到旧分支的空项目。
 
 ### 前置要求
-- **NVIDIA 显卡 + CUDA 11.8+**（本项目锁死 `faiss-gpu`，无 GPU 无法安装/运行；向量检索走 GPU）
-- **Python 3.11 / 3.12**（推荐；faiss-gpu 官方 wheel 齐全，3.13 需自行解决安装）
+- **Python 3.13**（本项目锁定 `faiss-cpu==1.14.2`，3.11/3.12 亦可；3.13 无 `faiss-gpu` wheel）
+- **NVIDIA 显卡 + CUDA 11.8+**（**仅 BGE-M3 嵌入计算需要**；向量检索用 `faiss-cpu` 走 CPU，不依赖 GPU）
 - **Node.js 18+**（仅前端开发需要）
 - Git
 
@@ -293,7 +293,7 @@ microsat-anomaly-analysis/
 | **异常检测** | scikit-learn (Isolation Forest) | 机器学习 |
 | **特征工程** | pandas + numpy + 自定义提取器 | 18维特征 |
 | **嵌入模型** | BGE-M3 (sentence-transformers) | 向量化 |
-| **向量库** | FAISS (faiss-gpu, 需 CUDA) | 相似度检索 |
+| **向量库** | FAISS (faiss-cpu, CPU 检索) | 相似度检索 |
 | **LLM** | DeepSeek V3 (火山引擎 Ark) | 文本生成 |
 | **RAG 框架** | LangChain | 流程编排 |
 | **旧版 UI** | Streamlit | 已弃用 |
@@ -304,9 +304,9 @@ microsat-anomaly-analysis/
 
 ### 系统要求
 
-- **Python**: 3.11 / 3.12（推荐；faiss-gpu 官方 wheel 齐全，3.13 需自行解决 faiss-gpu 安装）
+- **Python**: 3.13（验收环境；faiss-cpu 1.14.2 有官方 wheel，3.11/3.12 亦可）
 - **Node.js**: 18+ (前端开发)
-- **CUDA**: 11.8+（**必需**，本项目使用 faiss-gpu，无 NVIDIA/CUDA 无法安装或运行）
+- **CUDA**: 11.8+（**仅嵌入计算需要**；FAISS 检索走 CPU，无 GPU 也能装）
 - **操作系统**: Windows 10/11, Linux, macOS
 
 ### Python 环境
@@ -656,11 +656,11 @@ python scripts/run_rag_experiment.py
 
 ### Q1: 没有 NVIDIA / CUDA 能用吗？
 
-本项目的向量检索依赖 `faiss-gpu`，**必须有 NVIDIA 显卡和 CUDA 环境**才能安装运行。若机器无 GPU：
+本项目的向量检索依赖 `faiss-cpu`（**CPU 版，不使用 `faiss-gpu`**），检索环节**不需要** NVIDIA 显卡或 CUDA；CUDA 仅 BGE-M3 嵌入计算使用。
 - 看板/检测/波形接口仍可读 `data_share.zip` 中的数据并联调前端；
-- 但 RAG 问答（`/api/explanation/query`）与嵌入计算需要 GPU，无法在无卡环境运行。
+- 无卡环境下 RAG 也能跑，但 BGE-M3 嵌入计算在 CPU 上较慢；如需加速，把 `rag_config.yaml` 的 `embedding.device` 由 `cuda` 改为 `cpu` 即可。
 
-如确需 CPU 版兜底，可把 `requirements.txt` 中的 `faiss-gpu` 换成 `faiss-cpu`，并将 `rag_config.yaml` 的 `embedding.device` 改为 `cpu`（属非官方方案，未经充分测试）。
+> 说明：Python 3.13 没有 `faiss-gpu` 的可用 wheel，所以 `requirements.txt` 锁定 `faiss-cpu==1.14.2`（Python 3.13 下 `faiss.get_num_gpus()` = 0），`rag_config.yaml` 的 `vectorstore.use_gpu` 为 `false`。
 
 ### Q2: FAISS 索引构建失败？
 
@@ -737,9 +737,8 @@ npm run dev
 
 ### 分支策略
 
-- `main`: 主分支，稳定版本
-- `dev`: 开发分支，日常开发
-- `feature/*`: 功能分支
+- `main`: 主分支，**唯一开发分支**（`dev` 是 `main` 的历史祖先，落后 31 个提交，不要基于它开发）
+- `feature/*`: 功能分支（从 `main` 切出，PR 回 `main`）
 
 ### 提交规范
 
@@ -764,11 +763,11 @@ git add .
 git commit -m "feat: 添加新功能"
 
 # 推送
-git push origin dev
+git push origin main
 
-# 合并到 main
+# 功能分支合并回 main
 git checkout main
-git merge dev
+git merge feature/xxx
 ```
 
 ---
