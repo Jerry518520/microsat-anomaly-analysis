@@ -762,6 +762,8 @@ def report(res, targets, diff_channels):
         #   解数被改变 ⟺ 含奇m ; 假0解 ⟺ 全部m为奇
         n_aff = n_zero = n_cond = 0
         n_mismatch = 0
+        n_even_but_same = n_empty = n_all_even = 0
+        n_old_is_even = 0
         for p_ in range(1, 401):
             for q_ in range(p_ + 1, 401):
                 if math.gcd(p_, q_) != 1:
@@ -775,12 +777,31 @@ def report(res, targets, diff_channels):
                 if explicit != all_m_odd(p_, q_):
                     n_mismatch += 1
                 n_zero += explicit
+                if p_ % 2 == 0:
+                    if len(good) == len(bad):
+                        n_even_but_same += 1
+                        n_empty += not good
+                        n_all_even += bool(good) and not has_odd_m(p_, q_)
+                    # P 偶且既约 => Q 必奇 => Q-P 必奇 => 旧约束等价于「m 须偶」
+                    lo_ = max(1.0, 2 * n_pos / (2 * q_ - p_))
+                    hi_ = min(2 * n_pos / p_, 2 * n_test / (2 * q_ - p_))
+                    evens = [m for m in range(1, 4 * n_test + 2)
+                             if lo_ <= m <= hi_ and m % 2 == 0]
+                    n_old_is_even += (bad == evens)
         assert n_mismatch == 0, f"假0解两法判定有 {n_mismatch} 处分歧"
         n_tot = sum(1 for p_ in range(1, 401) for q_ in range(p_ + 1, 401)
                     if math.gcd(p_, q_) == 1)
+        n_even = sum(1 for p_ in range(1, 401) for q_ in range(p_ + 1, 401)
+                     if math.gcd(p_, q_) == 1 and p_ % 2 == 0)
+        assert n_even_but_same == n_even - n_aff, "P偶样本数与受影响/未受影响之和不符"
+        assert n_old_is_even == n_even, "P偶时旧解集应恒等于窗口内偶m"
         print(f"        层级区分(全域既约 {n_tot} 个): 解数被改变={n_aff}"
               f"({100 * n_aff / n_tot:.1f}%)  假0解={n_zero}({100 * n_zero / n_tot:.1f}%)"
               f"  满足P偶&Q-P奇={n_cond}({100 * n_cond / n_tot:.1f}%)")
+        print(f"        冗余项: 既约+P偶=>Q必奇=>Q-P必奇, 故「Q-P奇」是冗余合取项")
+        print(f"        P偶({n_even})中未受影响的 {n_even_but_same} 例 = 窗口空 {n_empty}"
+              f" + 窗口全偶m {n_all_even}; => P偶是必要非充分条件")
+        print(f"        P偶时「旧解集==窗口内偶m」{n_old_is_even}/{n_even} 零差异")
         print(f"        => 「两条件」是假0解的必要非充分条件"
               f"({n_cond} 满足中仅 {n_zero} 产生假0解)；")
         print(f"           「解数被改变」充要=窗口含奇m；「假0解」充要=全部m为奇")
