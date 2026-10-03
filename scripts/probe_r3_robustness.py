@@ -87,7 +87,7 @@ def run(fit_df, val_df, eval_df, rule_cols, if_cols, thr, seed,
 
     def layers(df, chs):
         nv, _ = apply_stat_rules(df, thr, rule_cols)
-        rp = (nv >= bk).astype(int).to_numpy()
+        rp = (nv >= bk).astype(int)  # nv 已是 ndarray，勿再 .to_numpy()
         ip = np.zeros(len(df), dtype=int)
         for ch in chs:
             m = (df["channel"] == ch).to_numpy()
@@ -246,7 +246,7 @@ def main():
                 opA[ch] = "rule"
                 continue
             Xf, Xa = np.nan_to_num(cf[sel].values), np.nan_to_num(va.loc[m, sel].values)
-            rp = (apply_stat_rules(va[va["channel"] == ch], th, sel)[0] >= kb).astype(int).to_numpy()
+            rp = (apply_stat_rules(va[va["channel"] == ch], th, sel)[0] >= kb).astype(int)
             cbest, fbest = None, -1.0
             for c in CONTAM_GRID:
                 clf = IsolationForest(n_estimators=N_ESTIMATORS, max_samples=MAX_SAMPLES,
@@ -261,7 +261,13 @@ def main():
             ip = (clf.predict(Xa) == -1).astype(int)
             cand = {"rule": qf1(ya[m], rp), "if": qf1(ya[m], ip),
                     "AND": qf1(ya[m], rp & ip), "OR": qf1(ya[m], rp | ip)}
-            opA[ch] = max(cand, key=lambda c: cand[c])
+            #⚠ 必须按固定 rule->if->AND->OR 顺序、严格 > 遍历（与 fusion_v3.py
+            # 的 max() 字典序一致），否则并列裁决规则与权威口径不同，
+            # A4 算出的就不是被验证的那个系统的嵌套值。
+            opA[ch] = cand["rule"]
+            for o in ("if", "AND", "OR"):
+                if cand[o] > cand[opA[ch]]:
+                    opA[ch] = o
         # B 半评估（test 上评一次）
         bcf = {}
         for ch in np.unique(test_df["channel"].unique()):
@@ -284,7 +290,7 @@ def main():
         for ch in np.unique(ch_t):
             m = (ch_t == ch).to_numpy()
             ev = test_df[m]
-            rp = (apply_stat_rules(ev, th, sel)[0] >= kb).astype(int).to_numpy()
+            rp = (apply_stat_rules(ev, th, sel)[0] >= kb).astype(int)
             c = bcf.get(ch)
             if c is None:
                 ip = np.zeros(int(m.sum()), dtype=int)
