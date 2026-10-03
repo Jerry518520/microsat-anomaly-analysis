@@ -32,6 +32,7 @@ A/B/D 档「穷举 tie-break 敏感性」独立交叉验证探针
 """
 
 import itertools
+import math
 import os
 import sys
 from fractions import Fraction
@@ -567,6 +568,10 @@ def report(res, targets, diff_channels):
               parity_both=True 保留旧错误口径，仅用于复现该静默错误：
               在 P 偶、Q-P 奇时会排除全部 m，把真解 1 个误报为 0 个。"""
             lo = 2 * n_pos / (2 * q - p)
+            # ⚠ 下界须写全 max(1, ·)：2·n_pos/(2Q-P) 可 < 1（本表 150/241、156/241、
+            #   162/229 分别为 0.681/0.693/0.764，全域 84% 的既约样本如此）。
+            #   因 m 为正整数，省略与保留结果相同，但读者套公式会困惑，故写完整。
+            lo = max(1.0, lo)
             hi = min(2 * n_pos / p, 2 * n_test / (2 * q - p))
             # ⚠ 这里必须写成 `not parity_both or ...`。
             #   若写成 `and (parity_both and ...)`，当 parity_both=False 时该子表达式
@@ -616,6 +621,28 @@ def report(res, targets, diff_channels):
             """生效上界由判别式决定：2Q-P <= (N/n_pos)*P ?"""
             return "P项" if (2 * q - p) <= (n_test / n_pos) * p else "2Q-P项"
 
+        def _win_noclamp(p, q):
+            """对照实现：与 window() 唯一差别是不做 max(1,·) 钳位。"""
+            lo = 2 * n_pos / (2 * q - p)
+            hi = min(2 * n_pos / p, 2 * n_test / (2 * q - p))
+            return [m for m in range(1, 4 * n_test + 2)
+                    if lo <= m <= hi and (p * m) % 2 == 0]
+
+        def assert_max1_equiv():
+            """max(1,·) 不改变任何解数（m 为正整数，ceil(<1)=1），但公式须写全。
+            ⚠ 对照实现必须是 _win_noclamp，而非 window() 自身—— 后者已含钳位，
+               拿它当对照会与钳位前的行为比较，报出大量假差异。"""
+            ndiff = nlo = 0
+            for p_ in range(1, 300):
+                for q_ in range(p_ + 1, 400):
+                    if 2 * n_pos / (2 * q_ - p_) < 1:
+                        nlo += 1
+                        if window(p_, q_)[2] != _win_noclamp(p_, q_):
+                            ndiff += 1
+            assert ndiff == 0, f"max(1,·) 改变了 {ndiff} 个样本的解数，与预期矛盾"
+            print(f"        [sanity] max(1,·) 等价性通过：下界<1 的样本 {nlo} 个，"
+                  f"加不加 max(1,·) 解数零差异")
+
         # 判别性实验：P 与 Q 各自都能大幅改变解数，单看任一皆不成立。
         # ⚠ fpn 公式曾三次推错：写成 (2Q-P)m/2漏了 2tp 项中已含 m，与暴力枚举差 1。
         # ⚠ 早期版本用「固定 2Q-P」当对照组，但该组 Q 随 P 一起变，不是真正的
@@ -627,6 +654,7 @@ def report(res, targets, diff_channels):
         grpA = {q_: len(window(5, q_)[2]) for q_ in (6, 7, 8, 12, 14)}
         grpB = {p_: len(window(p_, 16)[2]) for p_ in range(1, 16, 2)}
         assert_parity_equiv()
+        assert_max1_equiv()
         print(f"      判别性实验(固定 P=5, 严格只变Q): "
               + " ".join(f"5/{q_}={n_}解" for q_, n_ in grpA.items())
               + f"  => {min(grpA.values())}..{max(grpA.values())} 解, "
@@ -714,16 +742,70 @@ def report(res, targets, diff_channels):
         def has_odd_m(p_, q_):
             return any(m % 2 == 1 for m in window(p_, q_, parity_both=False)[2])
 
+        def all_m_odd(p_, q_):
+            """假0解的充要条件：解集非空 且 全部合法 m 均为奇数。
+            ⚠ 必须带 `bool(ms) and` —— 空窗口时 Python 的 all([]) 返回 True
+              （vacuous truth），会把「本就无解」误判成「全部为奇数」。
+              实例：19/20 的窗口为空，不带守卫即误判。
+            ⚠ 此函数须被 assert 真正调用，否则等于没写。"""
+            ms = window(p_, q_, parity_both=False)[2]
+            return bool(ms) and all(m % 2 == 1 for m in ms)
+
         assert has_odd_m(2, 3), "扫描器自检失败：已知答案 2/3 应判为受影响"
-        imm = aff = 0
-        for p_ in range(2, 120, 2):
-            for q_ in range(p_ + 1, 200):
-                if (q_ - p_) % 2 == 1 and has_odd_m(p_, q_):
-                    aff += 1
+        # 假0解 充要条件自检：19/20 解集为空 -> 必非假0解（防 vacuous truth）
+        assert not window(19, 20)[2], "19/20 解集应为空，前置假设已变"
+        assert not all_m_odd(19, 20), "vacuous truth 未挡住：空解集被误判为全奇"
+        assert all_m_odd(150, 241), "150/241 应为假0解（唯一解 m=1 为奇）"
+        print(f"        [sanity] 假0解充要条件自检通过（19/20 空集不误判、"
+              f"150/241 正确识别）")
+        # 两个层级必须分开统计，切勿混谈：
+        #   解数被改变 ⟺ 含奇m ; 假0解 ⟺ 全部m为奇
+        n_aff = n_zero = n_cond = 0
+        n_mismatch = 0
+        for p_ in range(1, 401):
+            for q_ in range(p_ + 1, 401):
+                if math.gcd(p_, q_) != 1:
+                    continue
+                good = window(p_, q_, parity_both=False)[2]
+                bad = window(p_, q_, parity_both=True)[2]
+                n_aff += len(good) != len(bad)
+                n_cond += (p_ % 2 == 0) and ((q_ - p_) % 2 == 1)
+                # 两法交叉：显式判据 vs 充要条件判据，二者须一致
+                explicit = bool(good) and not bad
+                if explicit != all_m_odd(p_, q_):
+                    n_mismatch += 1
+                n_zero += explicit
+        assert n_mismatch == 0, f"假0解两法判定有 {n_mismatch} 处分歧"
+        n_tot = sum(1 for p_ in range(1, 401) for q_ in range(p_ + 1, 401)
+                    if math.gcd(p_, q_) == 1)
+        print(f"        层级区分(全域既约 {n_tot} 个): 解数被改变={n_aff}"
+              f"({100 * n_aff / n_tot:.1f}%)  假0解={n_zero}({100 * n_zero / n_tot:.1f}%)"
+              f"  满足P偶&Q-P奇={n_cond}({100 * n_cond / n_tot:.1f}%)")
+        print(f"        => 「两条件」是假0解的必要非充分条件"
+              f"({n_cond} 满足中仅 {n_zero} 产生假0解)；")
+        print(f"           「解数被改变」充要=窗口含奇m；「假0解」充要=全部m为奇")
+
+        # 失效两型：归零 vs 非归零低估。⚠ 非归零【不是】一律减半。
+        n_zero2 = n_half = n_other = 0
+        for p_ in range(1, 401):
+            for q_ in range(p_ + 1, 401):
+                if math.gcd(p_, q_) != 1:
+                    continue
+                g = window(p_, q_, parity_both=False)[2]
+                b = window(p_, q_, parity_both=True)[2]
+                if len(g) == len(b):
+                    continue
+                if not b:
+                    n_zero2 += 1
+                elif abs(len(b) / len(g) - 0.5) < 1e-9:
+                    n_half += 1
                 else:
-                    imm += 1
-        print(f"        受影响需三条件同时成立(P偶 & Q-P奇 & 窗口含奇m): "
-              f"实测 {aff}/{aff + imm} = {100 * aff / (aff + imm):.1f}% 受影响")
+                    n_other += 1
+        print(f"        失效两型: 归零={n_zero2}  非归零中比值恰1/2={n_half}"
+              f"  比值非1/2={n_other}")
+        assert n_other > 0, "非归零却恒为减半，与实测矛盾（不可写「非归零时减半」）"
+        print(f"        => 非归零非一律减半（比值散布 1/3~2/3），因 m(Q-P) 偶约束"
+              f"按 m 奇偶非均匀过滤")
         lo_, hi_, ok_ = window(18, 19)
         print(f"        反例 18/19 满足前两条件但窗口[{lo_:.1f},{hi_:.1f}]不含奇m => 免疫; "
               f"本表 B/D 档因 P 为奇数而免疫")
