@@ -44,6 +44,9 @@ data/processed/*.csv
 data/results/*.json
 data/results/*.png
 
+# 历史版本备份（由 framework.save_result 自动落盘，不进交付面、不入库）
+data/results/v3/_backups/
+
 # Environment / Secrets
 .env
 .envrc

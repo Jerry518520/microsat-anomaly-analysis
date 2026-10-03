@@ -1,8 +1,8 @@
 {
   "name": "fusion",
   "meta": {
-    "timestamp": "2026-09-03T21:28:37",
-    "git_commit": "2729c15df63883b074af6ebfbc920e8aac0f4589",
+    "timestamp": "2026-10-03T15:31:24",
+    "git_commit": "7529cec497a19033a231beec3e793e763665d6ea",
     "git_dirty": true,
     "python": "3.13.13",
     "sklearn": "1.8.0",
@@ -538,9 +538,15 @@
         }
       }
     },
-    "best_method_test": "gate_perchannel",
-    "best_test_f1": 0.628099173553719,
+    "best_method_by_val": "gate_perchannel",
+    "best_val_f1": 0.6029411764705882,
+    "best_method_test_f1": 0.628099173553719,
+    "best_method_test_f1_ci95": [
+      0.5540672716404934,
+      0.6942259163459719
+    ],
+    "selection_rule": "best_method_by_val 按 val F1 选出；test 仅在该策略确定后评估一次，不参与选择",
     "method": "Fusion strategy comparison (rule + IF)",
-    "note": "8 种融合策略对比；引入规则连续严重度 nv 与 IF 连续异常分 -decision_function，覆盖软加权/逐通道门控/逻辑回归校准。超参全部 val 选，test 一次评估。"
+    "note": "8 种融合策略对比；引入规则连续严重度 nv 与 IF 连续异常分 -decision_function，覆盖软加权/逐通道门控/逻辑回归校准。策略按 val F1 选出，test 在选定后一次性评估，不参与任何选择决策。"
   }
 }

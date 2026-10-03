@@ -299,7 +299,7 @@ def main():
 
     results = {}
     print("\n" + "=" * 78)
-    print("融合策略对比（test 段级 F1，val 选参，test 一次评估）")
+    print("融合策略对比（策略按 val F1 选出，test 在选定后一次性评估）")
     print("=" * 78)
     for name, (yp_test, yp_val) in methods.items():
         m_test = evaluate(y_true_test, yp_test)
@@ -309,8 +309,13 @@ def main():
         print(f"  {name:<16} test F1={m_test['f1']:.4f} CI[{lo:.4f},{hi:.4f}] "
               f"P={m_test['precision']:.3f} R={m_test['recall']:.3f} | val F1={m_val['f1']:.4f}")
 
-    best = max(results, key=lambda k: results[k]["test"]["f1"])
-    print(f"\n[结论] test F1 最优策略 = {best} (F1={results[best]['test']['f1']:.4f})")
+    # 铁律：策略选择只看 val，test 在此之前不得进入任何决策。
+    # （原实现误用 test["f1"] 选优，等于用 test 选模型 —— 已在验收 B1 中判为 P0）
+    best = max(results, key=lambda k: results[k]["val"]["f1"])
+    print(f"\n[结论] 按 val F1 选出的最优策略 = {best} "
+          f"(val F1={results[best]['val']['f1']:.4f})")
+    print(f"[test] 该策略在 test 上一次性评估：F1={results[best]['test']['f1']:.4f} "
+          f"CI{results[best]['test']['f1_ci95']}")
 
     payload_results = {
         "setup": {
@@ -331,15 +336,18 @@ def main():
                                  "lr_coef": lr.coef_[0].tolist()},
         },
         "methods": results,
-        "best_method_test": best,
-        "best_test_f1": results[best]["test"]["f1"],
+        "best_method_by_val": best,
+        "best_val_f1": results[best]["val"]["f1"],
+        "best_method_test_f1": results[best]["test"]["f1"],
+        "best_method_test_f1_ci95": results[best]["test"]["f1_ci95"],
+        "selection_rule": "best_method_by_val 按 val F1 选出；test 仅在该策略确定后评估一次，不参与选择",
     }
 
     path = save_result(payload_results, "fusion", extra={
         "method": "Fusion strategy comparison (rule + IF)",
         "note": ("8 种融合策略对比；引入规则连续严重度 nv 与 IF 连续异常分 "
                  "-decision_function，覆盖软加权/逐通道门控/逻辑回归校准。"
-                 "超参全部 val 选，test 一次评估。"),
+                 "策略按 val F1 选出，test 在选定后一次性评估，不参与任何选择决策。"),
     })
     print(f"\n[完成] 结果: {os.path.relpath(path, PROJECT_ROOT)}")
 

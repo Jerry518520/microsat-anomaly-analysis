@@ -248,15 +248,23 @@ def evaluate(y_true, y_pred, n_boot=1000, seed=42):
 # ---------------------------------------------------------------- save_result
 
 def _unique_backup_path(name: str) -> str:
-    """生成一个不会与已有文件冲突的备份路径（带秒级时间戳，冲突则追加序号）。"""
+    """生成一个不会与已有文件冲突的备份路径（带秒级时间戳，冲突则追加序号）。
+
+    备份统一落到 data/results/v3/_backups/，**不得**直接写在交付目录里。
+    原因：交付目录是对外口径来源，同名结果的历史版本若混在这里，会出现
+    「同一个 fusion 既有 F1=0.6281 又有 F1=0.5308」的自证矛盾（实际发生过，
+    成因是早期 scores_for 的行错位 bug）。备份留档但不进交付面。
+    """
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    base = os.path.join(RESULTS_DIR, f"{name}_{stamp}.json")
+    backup_dir = os.path.join(RESULTS_DIR, "_backups")
+    os.makedirs(backup_dir, exist_ok=True)
+    base = os.path.join(backup_dir, f"{name}_{stamp}.json")
     if not os.path.exists(base):
         return base
     i = 1
-    while os.path.exists(os.path.join(RESULTS_DIR, f"{name}_{stamp}_{i}.json")):
+    while os.path.exists(os.path.join(backup_dir, f"{name}_{stamp}_{i}.json")):
         i += 1
-    return os.path.join(RESULTS_DIR, f"{name}_{stamp}_{i}.json")
+    return os.path.join(backup_dir, f"{name}_{stamp}_{i}.json")
 
 
 def save_result(result: dict, name: str, extra: dict = None):
