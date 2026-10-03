@@ -60,7 +60,7 @@
 ```json
 {
   "anomaly_rate": 0.3304,
-  "anomaly_rate_str": "33.0%",
+  "anomaly_rate_str": "33.0%（点级）",
   "anomaly_rows": 100264,
   "total_rows": 303493,
   "fault_count": 200,
@@ -70,7 +70,9 @@
   "channel_count": 9
 }
 ```
-> 注：`best_f1` 即 `best_seg_f1`，取自 `data/results/subsampling_sweep_1.9_results.json` = **0.5683**（与 `/detection/experiments` 的 Stage-2 融合 F1 相同）；`0.425` 仅是该文件缺失时的兜底默认值，不是真实值。其余字段为 2026-07-30 实际计算值（来源 `segments.csv` + `anomaly_rag_results.json`）：total_rows=303493、anomaly_rows=100264、anomaly_rate=33.0%、fault_count=total_anomalies=200。
+> **口径警告（重要）**：`anomaly_rate` / `anomaly_rate_str` / `anomaly_rows` 是**点级（行级）口径**——分母是遥测**采样点**数（`total_rows`=303,493），不是段数。项目另有一套**段级口径**异常率 **20.44%（434 / 2123 段）**，是论文主表口径。两者分母不同，**不可混用或相减比较**。差异主因是段长加权（异常段段长均值 231.02 点 vs 正常段 120.33 点，1.92 倍），而段内标签恒定（2,123 段中标签不唯一的段数为 0）。完整定义见 `docs/指标口径说明.md`。
+>
+> 注：`best_f1` 即 `best_seg_f1`（**段级** F1），取自 `data/results/subsampling_sweep_1.9_results.json` = **0.5683**（与 `/detection/experiments` 的 Stage-2 融合 F1 相同）；`0.425` 仅是该文件缺失时的兜底默认值，不是真实值。其余字段为 2026-07-30 实际计算值（来源 `segments.csv` + `anomaly_rag_results.json`）：total_rows=303493、anomaly_rows=100264、anomaly_rate=33.0%（点级）、fault_count=total_anomalies=200。
 
 **GET `/channels`** — 各通道 sparkline + 状态（每通道取最后 500 点）
 ```json

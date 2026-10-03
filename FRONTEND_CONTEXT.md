@@ -69,10 +69,10 @@
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| `anomaly_rate` | float | 异常行占比（0~1） |
-| `anomaly_rate_str` | str | 形如 `"12.3%"` |
-| `anomaly_rows` | int | 异常行数 |
-| `total_rows` | int | 总行数 |
+| `anomaly_rate` | float | 异常行占比（0~1）——**点级口径**，分母为采样点数 |
+| `anomaly_rate_str` | str | 形如 `"12.3%"`——**点级口径** |
+| `anomaly_rows` | int | 异常行数（点级） |
+| `total_rows` | int | 总行数（采样点数，非段数） |
 | `fault_count` | int | 异常分 > 0.05 的故障数 |
 | `total_anomalies` | int | RAG 结果中的异常条目数 |
 | `best_f1` | float | 最佳 SegF1（实测 = best_seg_f1 = 0.5683，取自 subsampling_sweep_1.9_results.json） |
@@ -83,7 +83,7 @@
 ```json
 {
   "anomaly_rate": 0.3304,
-  "anomaly_rate_str": "33.0%",
+  "anomaly_rate_str": "33.0%（点级）",
   "anomaly_rows": 100264,
   "total_rows": 303493,
   "fault_count": 200,
@@ -92,7 +92,9 @@
   "throughput": 303493,
   "channel_count": 9
 }
-> 注：以上为 2026-07-30 实际计算值（来源 `data/raw/segments.csv` + `data/results/anomaly_rag_results.json`）：total_rows=303493、anomaly_rows=100264、anomaly_rate=33.0%、fault_count=total_anomalies=200（anomaly_score>0.05 的 RAG 条目数）、best_f1=0.5683（=best_seg_f1）。
+> **口径警告（重要）**：`anomaly_rate` / `anomaly_rate_str` / `anomaly_rows` / `total_rows` 均为**点级（行级）口径**，分母是遥测采样点数（303,493），不是段数。项目另有一套**段级口径**异常率 **20.44%（434 / 2123 段）**（论文主表口径），两者分母不同、不可混用。注意 `best_f1` 是**段级** F1，与上述点级字段口径不同。完整定义见 `docs/指标口径说明.md`。
+>
+> 注：以上为 2026-07-30 实际计算值（来源 `data/raw/segments.csv` + `data/results/anomaly_rag_results.json`）：total_rows=303493、anomaly_rows=100264、anomaly_rate=33.0%（点级）、fault_count=total_anomalies=200（anomaly_score>0.05 的 RAG 条目数）、best_f1=0.5683（=best_seg_f1，段级）。
 ```
 
 ### 3.2 GET `/api/dashboard/channels`

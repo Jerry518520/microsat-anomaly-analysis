@@ -4,13 +4,16 @@ from typing import Optional
 
 
 class CoreMetrics(BaseModel):
-    anomaly_rate: float
-    anomaly_rate_str: str
-    anomaly_rows: int
-    total_rows: int
+    # 口径警告：anomaly_rate / anomaly_rate_str / anomaly_rows / total_rows 均为【点级】口径，
+    # 分母是遥测采样点数（303493），不是段数。段级口径异常率为 20.44%（434 / 2123 段），
+    # 是论文主表口径。两者分母不同、不可混用或相减。详见 docs/指标口径说明.md。
+    anomaly_rate: float  # 点级：anomaly_rows / total_rows（采样点口径）
+    anomaly_rate_str: str  # 点级，如 "33.0%"
+    anomaly_rows: int  # 点级：异常采样点数
+    total_rows: int  # 点级：总采样点数（非段数）
     fault_count: int
     total_anomalies: int
-    best_f1: float
+    best_f1: float  # 段级 SegF1（注意：与上面点级字段口径不同）
     throughput: int
     channel_count: int = 9
 
@@ -18,7 +21,7 @@ class CoreMetrics(BaseModel):
 class ChannelInfo(BaseModel):
     channel: str
     label: str
-    anomaly_rate: float
+    anomaly_rate: float  # 点级：该通道内异常采样点占比（分母为采样点数，非段数）
     status: str  # nominal | caution | warning | critical
     sparkline_values: list[float]
     anomaly_indices: list[int]

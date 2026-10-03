@@ -45,9 +45,9 @@ def _render_core_metrics():
         rate_str = "N/A"
         rate_delta = "数据缺失"
 
-    with col1: st.metric("系统异常率", rate_str, delta=rate_delta, delta_color="inverse")
+    with col1: st.metric("系统异常率（点级）", rate_str, delta=rate_delta, delta_color="inverse")
     with col2: st.metric("当前告警队列", f"{fault_count} 条", delta=f"共{total_anomalies}条异常段")
-    with col3: st.metric("核心诊断 F1", f"{best_f1:.3f}")
+    with col3: st.metric("核心诊断 F1（段级）", f"{best_f1:.3f}")
     with col4: st.metric("遥测吞吐量", f"{total_rows//1000}K Rows" if total_rows > 0 else "N/A", delta="9 通道并发")
 
 def _render_channel_sparklines():
