@@ -504,6 +504,7 @@ def report(res, targets, diff_channels):
         #   P 偶取 m=1（P/2 = tp，Q-P = fpn），P 奇取 m=2（tp = P，fpn = 2Q-2P）
         n_test = res["test_n"]          # 从本次运行的真实 test 取，不写字面常量
         n_pos = res["test_pos"]
+        n_neg = n_test - n_pos
 
         def feasible(lit):
             # 返回 (tp, fp+fn)，总段数 = 两者之和
@@ -516,14 +517,23 @@ def report(res, targets, diff_channels):
             return p, 2 * q - 2 * p  # m=2: 2tp = 2p
 
         def display_solutions(lit):
-            """显示语义穷举：有多少 (tp, fp+fn) 满足 round(F1, 6) == lit。
-            这是比规模判据更强的一层—— 既证可产生，又证「只有这一种」。"""
+            """显示语义穷举：有多少完整混淆矩阵满足 round(F1, 6) == lit。
+
+            ⚠ 必须施加【完整】混淆矩阵约束：
+                 tp + fn = n_pos 且 fp + tn = n_neg  （两条等式缺一不可）
+               若只约束 tp <= n_pos 与 tp+fp+fn <= n_test，会允许 fp 为负的假解，
+               使 B 档解数虚增（0.687500 会由 5 解误报为 10 解）。
+               属静默错误：A/D 档因真值恰为 1 解而侥幸不受影响，故务必断言。"""
             hit = []
             for tp_ in range(0, n_pos + 1):
-                for fpn_ in range(0, n_test - tp_ + 1):
-                    den = 2 * tp_ + fpn_
+                fn_ = n_pos - tp_                      # 第一条等式
+                for fp_ in range(0, n_neg + 1):        # tn_ = n_neg - fp_
+                    den = 2 * tp_ + fp_ + fn_
                     if den and round(2 * tp_ / den, 6) == round(lit, 6):
-                        hit.append((tp_, fpn_))
+                        tn_ = n_neg - fp_              # 第二条等式
+                        assert tp_ + fp_ + fn_ + tn_ == n_test, "混淆矩阵总和应等于 test 段数"
+                        assert fn_ <= n_pos and fp_ <= n_neg, "fp/fn 越界"
+                        hit.append((tp_, fp_, fn_, tn_))
             return hit
 
         tp_l, fpn_l = feasible(lo_w)
@@ -539,9 +549,13 @@ def report(res, targets, diff_channels):
               f"{tp_l + fpn_l} > {n_test} 排除)，判据能区分")
         sol_ok = display_solutions(res["interval"][0])
         sol_bad = display_solutions(lo_w)
-        print(f"      显示语义穷举(最强): round(F1,{nd})=={round(res['interval'][0], nd):.{nd}f} "
-              f"解数={len(sol_ok)} {sol_ok[:3]}->最简 "
-              f"{Fraction(2 * sol_ok[0][0], 2 * sol_ok[0][0] + sol_ok[0][1]) if sol_ok else '-'}")
+        print(f"      显示语义穷举(最强, 完整混淆矩阵约束): "
+              f"round(F1,{nd})=={round(res['interval'][0], nd):.{nd}f} "
+              f"解数={len(sol_ok)} {sol_ok[:2]}")
+        if sol_ok:
+            t_, p_, f_, n_ = sol_ok[0]
+            print(f"        ->该解最简 F1 = {Fraction(2 * t_, 2 * t_ + p_ + f_)}"
+                  f"  (应等于穷举端点 {lo_exact})")
         print(f"      显示语义穷举: round(F1,{nd})=={lo_w:.6f} 解数={len(sol_bad)}"
               f"  => {'该字面量在本 test 规模下不可能产生' if not sol_bad else '可产生'}")
         print(f"      ⚠ 易错：被检验对象是精确端点 {lo_exact}（分母 "
