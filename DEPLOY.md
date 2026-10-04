@@ -69,7 +69,71 @@ DEEPSEEK_API_KEY=sk-xxxxx
 
 # 嵌入模型本地路径（离线环境必需，见 0.4）
 EMBEDDING_MODEL_PATH=models/Xorbits/bge-m3
+
+# API 认证（**上线必填**，见 0.3b）
+API_AUTH_KEYS=your-key-here,another-key
 ```
+
+### 0.3b API 认证（**上线必配**）
+
+后端自 v2.1.0 起对**除 `/api/health` 外**的所有接口启用 API Key 认证。
+
+**未配置 `API_AUTH_KEYS` 时所有受保护接口返回 503** —— 这是刻意的安全默认：
+忘记配置应明确报错，而非静默裸奔。
+
+三种传 key 方式（按优先级）：
+
+| 方式 | 用途 |
+|---|---|
+| `X-API-Key: <key>` 头 | HTTP 请求（推荐，密钥不进访问日志） |
+| `Authorization: Bearer <key>` | 便于网关统一鉴权 |
+| `?api_key=<key>` | **仅 WebSocket 用** —— 浏览器 WS API 无法设置自定义头 |
+
+**限流规则**（固定窗口）：
+
+| 路径 | 限制 |
+|---|---|
+| `/api/explanation/query` | 10 秒内 2 次（**每次真实调用 DeepSeek，耗钱**） |
+| `/api/explanation` | 10 秒内 4 次 |
+| `/api/stream` | 10 秒内 20 次 |
+| 其余 `/api/*` | 10 秒内 200 次 |
+
+超限返回 **429** + `Retry-After` 头。
+
+可选开关：
+
+```env
+API_AUTH_DISABLED=true      # 本地开发临时关闭认证（严禁公网部署）
+API_RATE_LIMIT_DISABLED=true # 关闭限流
+```
+
+前端会自动带 key：优先读 `VITE_API_KEY`，其次 `localStorage.api_key`。
+⚠ 生产部署**不要**把 key 打进前端包（`VITE_*` 会被内联进产物）；
+正式上线应在反向代理（Nginx/网关）层注入并鉴权。
+
+验证：
+
+```bash
+curl http://127.0.0.1:8000/api/health                              # 200，免认证
+curl http://127.0.0.1:8000/api/dashboard/metrics                 # 401，无 key
+curl -H "X-API-Key: $KEY" http://127.0.0.1:8000/api/dashboard/metrics  # 200
+```
+
+> ⚠ 本机若配置了代理，`curl` 本机地址可能返回 502（代理拦截）。
+> 用 Python 绕过：`urllib.request.build_opener(urllib.request.ProxyHandler({}))`。
+
+### 0.3c 告警持久化
+
+告警与段判定写 SQLite（默认 `data/alerts.db`，已在 `.gitignore` 中），
+**进程重启不丢**。表结构幂等创建，无需手动初始化。
+
+| 接口 | 用途 |
+|---|---|
+| `GET /api/stream/alerts` | 查历史告警，支持 `since`/`until`（unix 秒）、`channel`、`severity` 过滤，`limit`/`offset` 分页（limit ≤ 1000） |
+| `GET /api/stream/alerts/stats` | 总数、按严重度/通道分布 |
+
+> 与 `/api/stream/state` 里的 `alerts` 不同：那个只有内存最近 200 条且**重启即丢**，
+> `/api/stream/alerts` 读的是持久化库。
 
 ### 0.4 下载嵌入模型（**必做，约 2.2 GiB**）
 
@@ -174,6 +238,11 @@ curl http://127.0.0.1:8000/api/health
 | `Found no NVIDIA driver` / CUDA 设备报错 | 配置里 `device: cuda` 但无显卡 | `configs/rag_config.yaml` 的 `embedding.device` 改 `cpu` |
 | 建索引很慢 | 无显卡，CPU 编码比 GPU 慢约 8 倍 | 属正常；加显卡可显著提速 |
 | 嵌入模型相关异常 | 模型没下或路径不对 | 跑 `download_model.py --check` |
+| 调接口返回 **401** | 未提供或 key 错 | 加头 `X-API-Key: <key>`；检查 `.env` 的 `API_AUTH_KEYS` |
+| 调接口返回 **503** | 未配置 `API_AUTH_KEYS` | 在 `.env` 配至少一个 key 后重启服务 |
+| 调接口返回 **429** | 触发限流 | 按 `Retry-After` 头等待；query 接口 10 秒仅 2 次 |
+| 前端报「未授权（401）」 | 前端没拿到 key | `localStorage.api_key = '<key>'` 或设 `VITE_API_KEY` 后重新构建 |
+| WebSocket 连不上 | WS 需用 query 传 key | `ws://host/api/stream/ws?api_key=<key>`（浏览器 WS 不能加自定义头） |
 | 索引读不出 | faiss 版本不符 | 确认 `faiss-cpu==1.14.2` |
 | 修改代码后 `git_dirty=True` | 自指循环，见下 | 正常，非缺陷 |
 

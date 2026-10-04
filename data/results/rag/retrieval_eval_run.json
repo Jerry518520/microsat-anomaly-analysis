@@ -92,7 +92,7 @@
     {
       "q": "立方体卫星姿态控制失稳的常见原因",
       "kind": "zh_general",
-      "top1_score": 0.6425498048415543,
+      "top1_score": 0.6425498035482813,
       "top1_source": "ITU Small Satellite Handbook CN",
       "topk_sources": [
         "ITU Small Satellite Handbook CN",
@@ -214,7 +214,7 @@
     {
       "q": "CADC0874通道对应什么物理量",
       "kind": "project_fact",
-      "top1_score": 0.6460525854573865,
+      "top1_score": 0.6460525845610858,
       "top1_source": "Experiment Knowledge Base",
       "topk_sources": [
         "Experiment Knowledge Base",
@@ -306,7 +306,7 @@
     {
       "q": "投票阈值 vote_threshold 0.25 是怎么来的",
       "kind": "project_fact",
-      "top1_score": 0.604936378889109,
+      "top1_score": 0.60493637945395,
       "top1_source": "Experiment Knowledge Base",
       "topk_sources": [
         "Experiment Knowledge Base",
