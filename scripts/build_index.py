@@ -96,17 +96,22 @@ print(f'Filtered {dropped} low-quality chunks (min_chars={min_chunk_chars}, '
 
 # 4. Embed
 print('\nLoading BGE-M3 model...')
-from pathlib import Path
+
+# 模型路径解析：复用 src/rag/embedding.py 的**唯一实现**，不再各读各的。
+# 修复记录：原代码在此处自带一份 "EMBEDDING_MODEL_PATH or config['model_name']"
+# 逻辑，与 src/rag/embedding.py:73 的同名逻辑重复。两者虽在字符串层面碰巧
+# 一致，但没有任何机制保证它们**永远**一致——一旦有人只改 configs/rag_config.yaml
+# 的 model_name，build_index 与运行时就会加载不同权重，已建索引与查询向量
+# 分属不同向量空间，检索静默劣化。现改为单一真相源。
+sys.path.insert(0, os.getcwd())
+from src.rag.embedding import resolve_embedding_model_path, EmbeddingModelPathError
 from sentence_transformers import SentenceTransformer
 
-# 模型路径解析与 src/rag/embedding.py 保持一致：
-# 优先环境变量 EMBEDDING_MODEL_PATH（本地模型），否则用配置里的 model_name。
-# 原先直接用 config['embedding']['model_name']（BAAI/bge-m3），在离线环境
-# 下即使本地已有模型也会因无法连接 HuggingFace 而失败。
-model_name = os.getenv('EMBEDDING_MODEL_PATH') or config['embedding']['model_name']
-_project_root = Path(os.getcwd())
-_local = _project_root / model_name
-model_path = str(_local) if _local.is_dir() else model_name
+try:
+    model_path = resolve_embedding_model_path(config.get('embedding', {}))
+except EmbeddingModelPathError as e:
+    print(f'\n[FATAL] 嵌入模型路径不可用：\n{e}')
+    sys.exit(1)
 print(f'Model path: {model_path}')
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

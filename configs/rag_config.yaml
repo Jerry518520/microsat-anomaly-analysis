@@ -3,8 +3,32 @@
 
 # ========== 嵌入模型配置 ==========
 embedding:
-  # 模型配置
-  model_name: "BAAI/bge-m3"  # 默认从 HuggingFace 镜像(hf-mirror.com)自动下载；可用环境变量 EMBEDDING_MODEL_PATH 覆盖为本地路径(如 models/Xorbits/bge-m3)
+  # ⚠ 嵌入模型路径的**唯一真相源是环境变量 EMBEDDING_MODEL_PATH**（在 .env 中配置），
+  #    本键不再存放模型标识，**必须保持为 null**。
+  #
+  # 为什么（实测证据）：
+  #   1. 本项目运行在离线/内网环境。实测 huggingface.co 直连 8s 超时不可达，
+  #      只有 hf-mirror.com 可达；把 BAAI/bge-m3 写死为默认值，等于让每次
+  #      冷启动都隐式触发 2.2GB 联网下载，不可靠也不可接受。
+  #   2. 曾经的分叉：build_index.py 用本键（BAAI/bge-m3）建索引，运行时
+  #      src/rag/embedding.py 用 .env 的 EMBEDDING_MODEL_PATH（models/Xorbits/bge-m3）。
+  #      两边权重一旦不同，索引与查询向量就落在不同向量空间——检索结果
+  #      静默劣化，不报任何错。
+  #   3. 已实算验证 models/Xorbits/bge-m3 与 BAAI/bge-m3 为**同一份权重**
+  #      （pytorch_model.bin md5 均为 767f43f2a03a47fce93b3ab353f209d0），
+  #      同文本编码后向量逐元素相同（max|Δ|=0.0，余弦=1.0），因此改用本地
+  #      路径不会改变任何检索结果。
+  #
+  # 解析实现：src/rag/embedding.py::resolve_embedding_model_path()
+  #   - 未设置 EMBEDDING_MODEL_PATH -> 抛 EmbeddingModelPathError 并给出
+  #     可操作提示（不静默回退到任何其他模型）
+  #   - 目录缺权重文件（如下载中断残留的 models/bge-m3/）-> 明确报错
+  model_name: null
+  # 说明：本键为 null 时，模型路径**只能**由 EMBEDDING_MODEL_PATH 提供。
+  # 保持为 null 即可让 src/rag/embedding.py 与 scripts/build_index.py 走同一份
+  # 解析逻辑；tests/test_rag/test_embedding_model_path.py 有防回归测试，
+  # 任何人把它改回具体模型名（或与 .env 指向不同权重）都会导致测试失败。
+
   device: "cuda"  # CUDA 加速（必须）
   batch_size: 32  # 批处理大小（GPU 优化）
   
@@ -144,7 +168,15 @@ llm:
   
   # 超时设置
   timeout: 60               # API 调用超时（秒）
-  max_retries: 3            # 最大重试次数
+  max_retries: 3            # 最大重试次数（含首次，即最多打3 次）
+
+  # 指数退避参数：第 n 次失败后等待 base * factor^(n-1)，封顶 cap
+  # 实测（改前 3 次紧邻重试、零 sleep）：401 场景总耗时 1.58s 纯属白等；
+  # 429/网络错误 0.00s 打完就放弃，服务端来不及恢复。
+  # 改后：401/403 首次即失败（0.00s，1 次尝试）；429/超时按 1s→2s 退避。
+  retry_backoff_base: 1.0
+  retry_backoff_factor: 2.0
+  retry_backoff_cap: 30.0
 
 # ========== Prompt 模板配置 ==========
 prompt:

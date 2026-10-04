@@ -1,6 +1,14 @@
 """
 嵌入编码模块
-使用 BAAI/bge-m3 模型进行文本嵌入编码，支持 CUDA 加速
+使用 BGE-M3 模型进行文本嵌入编码，支持 CUDA 加速
+
+模型路径单一真相源（P0修复）：
+    建索引（scripts/build_index.py）与运行时（本模块）曾各读各的：
+        - build_index.py 用 configs/rag_config.yaml 的 model_name（BAAI/bge-m3）
+        - 本模块用 .env 的 EMBEDDING_MODEL_PATH（models/Xorbits/bge-m3）
+    两者是不同字符串，一旦权重不同（例如有人只改了 yaml），已建好的
+    FAISS 索引与查询向量就会落在**不同的向量空间**里，检索结果静默
+    劣化——不报错，只是变差。现统一到 `resolve_embedding_model_path()`。
 """
 
 import os
@@ -36,6 +44,203 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
+# ============================================================
+# 模型路径解析：建索引与运行时共用的唯一实现
+# ============================================================
+
+#: 环境变量名（唯一真相源）。.env / 部署环境均通过它指定本地模型。
+MODEL_PATH_ENV_VAR = "EMBEDDING_MODEL_PATH"
+
+#: 一个本地模型目录被认为「完整」所需的文件。
+#:
+#: 为什么需要这个检查：实测 models/bge-m3/ 只有 1_Pooling/ + imgs/ +
+#: .cache/huggingface/download/，是 BAAI/bge-m3 **中断的下载残留**，
+#: 没有任何权重文件。SentenceTransformer 对这种目录不会立刻报「模型
+#: 损坏」，而是等到真正 encode 时才炸，或者更糟——某些版本会拿
+#: config.json 随机初始化，静默产出**完全无意义的向量**。
+_REQUIRED_MODEL_FILES = ("config.json",)
+#: 权重文件候选（至少命中一个）。BGE-M3 同时带 safetensors + bin。
+_WEIGHT_FILES = ("model.safetensors", "pytorch_model.bin")
+#: 用于确认是 sentence-transformers 目录（否则只是普通 HF 目录）。
+_ST_MODULE_FILES = ("modules.json", "1_Pooling/config.json")
+
+
+class EmbeddingModelPathError(RuntimeError):
+    """模型路径无法解析/不可用。**不静默回退**到其他模型。"""
+
+
+def _looks_like_hub_id(name: str) -> bool:
+    """判断字符串是否是 HuggingFace Hub repo id（如 BAAI/bge-m3）。
+
+    特征：含且只含一个 '/'，且不是 Windows 盘符路径、不是绝对/相对
+    路径。用于识别「需要联网下载」的写法。
+    """
+    if os.path.isabs(name):
+        return False
+    if name.startswith((".", "\\")):
+        return False
+    if name.startswith("models/") or name.startswith("models\\"):
+        return False
+    #盘符形如 C:/... 已经被isabs 排除；这里只处理 'org/name'
+    return name.count("/") == 1 and not name[1:3] in (":\\", ":/")
+
+
+def describe_model_dir(path: str) -> str:
+    """返回本地模型目录的完整性诊断文本（供报错信息使用）。"""
+    p = Path(path)
+    if not p.exists():
+        return f"路径不存在：{p}"
+    if not p.is_dir():
+        return f"不是目录：{p}"
+    has = [f for f in _REQUIRED_MODEL_FILES if (p / f).exists()]
+    missing = [f for f in _REQUIRED_MODEL_FILES if not (p / f).exists()]
+    weights = [f for f in _WEIGHT_FILES if (p / f).exists()]
+    bits = [f"存在 {len(weights)} 个权重文件: {weights or '无'}"]
+    bits.append(f"config 缺失: {missing or '无'}")
+    st = [f for f in _ST_MODULE_FILES if (p / f).exists()]
+    bits.append(f"sentence-transformers 模块文件: {st or '无（不是 ST 目录）'}")
+    return f"目录 {p} | " + "; ".join(bits)
+
+
+def validate_local_model_dir(path: str) -> None:
+    """校验本地模型目录是否**真的能用**，否则抛带诊断信息的异常。
+
+    刻意不做任何回退：路径指向残缺目录时自动改用别的模型，会让索引
+    与查询向量悄悄分属不同模型，比直接报错危害大得多。
+    """
+    p = Path(path)
+    if not p.exists():
+        raise EmbeddingModelPathError(
+            f"嵌入模型目录不存在：{p}\n{describe_model_dir(path)}\n"
+            f"请把 {MODEL_PATH_ENV_VAR} 指向一个完整解压的模型目录，"
+            f"或参考 .env.example。"
+        )
+    if not p.is_dir():
+        raise EmbeddingModelPathError(
+            f"嵌入模型路径不是目录：{p}\n"
+            f"{MODEL_PATH_ENV_VAR} 应指向解压后的模型文件夹本身。"
+        )
+    missing = [f for f in _REQUIRED_MODEL_FILES if not (p / f).exists()]
+    if missing:
+        raise EmbeddingModelPathError(
+            f"嵌入模型目录缺少必要文件 {missing}：{p}\n"
+            f"{describe_model_dir(path)}\n"
+            f"这通常是从 HuggingFace 下载中断留下的空壳目录，"
+            f"请删除后重新完整下载/解压。"
+        )
+    if not any((p / f).exists() for f in _WEIGHT_FILES):
+        raise EmbeddingModelPathError(
+            f"嵌入模型目录**没有任何权重文件**：{p}\n"
+            f"{describe_model_dir(path)}\n"
+            f"至少需要 {' 或 '.join(_WEIGHT_FILES)}。"
+            f"该目录极可能是下载残留——已验证此前的 models/bge-m3/ "
+            f"就是这种空壳（只有 1_Pooling/ 与 imgs/），无法产出可用向量。"
+        )
+    if not any((p / f).exists() for f in _ST_MODULE_FILES):
+        raise EmbeddingModelPathError(
+            f"嵌入模型目录不是 sentence-transformers 格式：{p}\n"
+            f"{describe_model_dir(path)}\n"
+            f"需要 modules.json 或 1_Pooling/config.json 来确定各子模块结构。"
+        )
+
+
+def resolve_embedding_model_path(
+    embedding_config: Optional[Dict[str, Any]] = None,
+    env: Optional[Dict[str, str]] = None,
+    project_root: Optional[str] = None,
+    allow_hub_download: bool = False,
+    validate: bool = True,
+) -> str:
+    """解析嵌入模型路径——**建索引与运行时共用的唯一真相源**。
+
+    优先级：
+        1. 环境变量 ``EMBEDDING_MODEL_PATH``（推荐，.env 里配置）
+        2. ``embedding_config['model_name']``
+
+    Args:
+        embedding_config: configs/rag_config.yaml 的 embedding 段
+        env: 环境变量映射，默认 os.environ（测试可注入）
+        project_root: 项目根目录，默认取本文件上溯两级
+        allow_hub_download: 是否允许 Hub repo id（如 BAAI/bge-m3）。
+            默认 **False**：本项目运行在离线/内网环境，实测
+            huggingface.co 直连超时（8s TIMEOUT），只有 hf-mirror
+            可达；而依赖镜像下载 2.2GB 权重不是可接受的隐式行为。
+            传True 才会放行 repo id。
+        validate: 是否校验本地目录完整性
+
+    Returns:
+        str: 可直接传给 SentenceTransformer 的模型标识
+
+    Raises:
+        EmbeddingModelPathError: 路径不存在/不完整，或离线环境给了 Hub id。
+            **绝不静默回退**到其他模型或目录。
+    """
+    env = os.environ if env is None else env
+    if project_root is None:
+        project_root = str(Path(__file__).resolve().parent.parent.parent)
+    root = Path(project_root)
+
+    from_env = (env.get(MODEL_PATH_ENV_VAR) or "").strip()
+    from_config = ""
+    if embedding_config:
+        from_config = str(embedding_config.get("model_name") or "").strip()
+
+    if from_env:
+        # 显式指定的优先级最高—— .env 是部署者的显式意图
+        source = f"环境变量 {MODEL_PATH_ENV_VAR}"
+        name = from_env
+    elif from_config:
+        source = "配置文件 embedding.model_name"
+        name = from_config
+    else:
+        raise EmbeddingModelPathError(
+            f"未配置嵌入模型路径：环境变量 {MODEL_PATH_ENV_VAR} 为空，"
+            f"且 embedding.model_name 也为空。\n"
+            f"请在项目根目录 .env 中设置：\n"
+            f"    {MODEL_PATH_ENV_VAR}=models/Xorbits/bge-m3"
+        )
+
+    # 本地路径 -> 绝对路径；Hub repo id -> 视allow_hub_download 决定放行与否
+    candidate = Path(name)
+    looks_local = candidate.is_absolute() or os.sep in name or "/" in name
+    local = (root / candidate) if not candidate.is_absolute() else candidate
+
+    if local.is_dir():
+        if validate:
+            validate_local_model_dir(str(local))
+        logger.info(f"嵌入模型路径（{source}）解析为本地目录：{local}")
+        return str(local)
+
+    # 不是已存在的本地目录
+    if _looks_like_hub_id(name) or not looks_local:
+        if not allow_hub_download:
+            raise EmbeddingModelPathError(
+                f"配置的嵌入模型 `{name}`（来自{source}）是一个 HuggingFace "
+                f"Hub repo id，不是本地模型目录。\n"
+                f"本项目运行在离线/内网环境：实测 huggingface.co 直连超时"
+                f"（8s 无响应），直接使用 repo id 会下载失败或挂起。\n"
+                f"请把完整模型下载/解压到本地后，在 .env 中设置：\n"
+                f"    {MODEL_PATH_ENV_VAR}=models/<你的目录>\n"
+                f"（已验证 models/Xorbits/bge-m3 与 BAAI/bge-m3 为**同一份"
+                f"权重**，pytorch_model.bin 的 md5 均为 767f43f2a03a47fc...，"
+                f"向量逐元素相同，可直接使用）\n"
+                f"若你确知网络可用并希望临时从镜像下载，"
+                f"请显式传 allow_hub_download=True。"
+            )
+        logger.warning(
+            f"嵌入模型使用 Hub repo id `{name}`（来自{source}），"
+            f"将触发联网下载。离线环境会失败。"
+        )
+        return name
+
+    # 本地路径写法但目录不存在
+    raise EmbeddingModelPathError(
+        f"嵌入模型目录不存在：{local}（来自{source}，原值 {name!r}）\n"
+        f"请检查 {MODEL_PATH_ENV_VAR} 的拼写与相对路径基准"
+        f"（相对路径基准为项目根目录 {root}）。"
+    )
+
+
 class BGE_M3_Embedder:
     """
     BGE-M3 嵌入编码器
@@ -67,17 +272,11 @@ class BGE_M3_Embedder:
         self.device = device or self._detect_device()
         logger.info(f"初始化 BGE-M3 嵌入编码器，设备：{self.device}")
         
-        # 模型参数
-        # 优先使用环境变量 EMBEDDING_MODEL_PATH（便于不同机器指向本地模型），
-        # 默认从配置读取（仓库默认 BAAI/bge-m3，首次运行自动从 HuggingFace 镜像下载）
-        model_name = os.getenv("EMBEDDING_MODEL_PATH") or self.embedding_config.get("model_name", "BAAI/bge-m3")
-        # 如果是相对路径且存在，解析为绝对路径
-        project_root = Path(__file__).parent.parent.parent
-        model_path = project_root / model_name
-        if model_path.is_dir():
-            self.model_name = str(model_path)
-        else:
-            self.model_name = model_name
+        # 模型参数：路径解析交给唯一真相源 resolve_embedding_model_path()
+        # （与 scripts/build_index.py 共用），保证建索引与运行时加载**同一份**
+        # 权重。原实现在此处重复实现了一遍 "env or config or BAAI/bge-m3"，
+        # 正是两条路径分叉的根因。
+        self.model_name = resolve_embedding_model_path(self.embedding_config)
         self.batch_size = self.embedding_config.get("batch_size", 32)
         self.normalize_embeddings = self.embedding_config.get("normalize_embeddings", True)
         self.max_length = self.embedding_config.get("max_length", 512)
