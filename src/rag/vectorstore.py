@@ -28,6 +28,10 @@ except ImportError as e:
 from .embedding import BGE_M3_Embedder, get_embedder
 from .retrieval_policy import default_priority_caps, is_low_quality, select_candidates
 
+# 关键词侧（BM25）。可选依赖：jieba 缺失时 bm25.tokenize自动退化为
+# 「英文正则 + CJK bigram」，不会让检索失败。
+from .bm25 import BM25Index
+
 # 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
 
@@ -102,7 +106,14 @@ class FAISSVectorStore:
         self.low_confidence_threshold = self.retrieval_config.get(
             "low_confidence_threshold", 0.45
         )
-        
+        # --- 混合检索（向量 + BM25 关键词）---
+        # 实测依据与选型理由见 _merge_keyword_candidates 的docstring。
+        # 关键约束：keyword_boost 实测必须 <=0.02，否则 MRR 下降（0.940 -> 0.917）。
+        self.hybrid_search = self.retrieval_config.get("hybrid_search", False)
+        self.keyword_pool_k = self.retrieval_config.get("keyword_pool_k", 40)
+        self.keyword_boost = self.retrieval_config.get("keyword_boost", 0.02)
+        self._bm25: Optional[BM25Index] = None
+
         # 初始化组件
         self.index: Optional[faiss.Index] = None
         self.documents: List[Document] = []
@@ -341,6 +352,156 @@ class FAISSVectorStore:
         
         return len(all_chunks)
     
+    def _ensure_bm25(self) -> Optional[BM25Index]:
+        """懒构建 BM25 索引：首次混合检索时才建，避免纯向量用户付出代价。
+
+        语料或文档集合变化后需失效重建（:meth:`_invalidate_bm25`）。
+        """
+        if not self.hybrid_search:
+            return None
+        if self._bm25 is not None:
+            return None if self._bm25.is_empty() else self._bm25
+        if not self.documents:
+            return None
+        try:
+            corpus = [
+                d if isinstance(d, str) else getattr(d, "page_content", str(d))
+                for d in self.documents
+            ]
+            self._bm25 = BM25Index(corpus)
+            logger.info(
+                f"BM25 关键词索引已构建：{self._bm25.size} chunk / "
+                f"{self._bm25.vocabulary_size} 词元"
+            )
+        except Exception as e:
+            logger.warning(f"BM25 索引构建失败，退回纯向量检索：{e}")
+            self._bm25 = None
+        return self._bm25
+
+    def _invalidate_bm25(self) -> None:
+        """文档集合变化后让BM25 索引失效。"""
+        self._bm25 = None
+
+    def _merge_keyword_candidates(
+        self,
+        query: str,
+        vector_results: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """把 BM25 关键词信号叠加到向量候选上（混合检索的第二路召回）。
+
+        ## 为什么是「小权重加分」而不是 RRF 排名融合
+
+        实测（24 条标注查询，评测脚本 ``scripts/eval_retrieval_quality.py``，
+        选型探针 ``scripts/probe_fusion_weight.py`` 与 ``probe_fusion_blend.py``）
+        横向比较了 4 类融合公式：
+
+        ====================  ==========  ==========  ==============
+        融合方式                 usable@5MRR        kw_recall
+        ====================  ==========  ==========  ==============
+        纯向量（改动前）        0.875       0.940       0.681
+        RRF（排名融合）          **0.917**   0.902       0.710
+        分数线性加权            0.917       0.902       0.688
+        **BM25 小权重加分**     0.875       **0.940**   **0.724**
+        ====================  ==========  ==========  ==============
+
+        RRF 能把召回率提到 0.917，但**MRR 从 0.940 掉到 0.902**：
+        它完全抛弃向量分数的语义序、改用纯排名序。而 BGE-M3 在同源
+        细粒度相关性上的方向是可靠的（相邻两名差~0.01 但排序稳定），
+        丢掉它得不偿失——这属于「用首位精度换召回」。
+
+        ``keyword_boost=0.02``（加到向量分上）是实测中**唯一
+        MRR 不降、kw_recall 反而 +0.043** 的方案，故采用。
+
+        ## 残留局限（如实记录，未解决）
+
+        本方案**不提升 usable@5**。原因是：纯 BM25 命中但向量侧未召回的
+        chunk，其向量分为 0.0，加 0.02 后仍排在候选池尾部，进不了 top-5。
+        要真正救回这批 chunk，必须让 cross-encoder rerank 接管打分
+        （实测 usable@5 可达 1.000），但代价是 MRR 0.940 -> 0.807，
+        超出「不许降低准确率换召回」的约束，本次**不做**。
+
+        ## 与 RetrievalPolicy 既有约定的关系
+
+        本方法只产出候选与分数，**不参与排序决策**：
+        priority 仍只决定「入选资格」，最终顺序仍严格按 ``score`` 降序
+        （由 :func:`~src.rag.retrieval_policy.select_candidates` 执行）。
+        关键词加分只是让「字面匹配强」的 chunk 获得应得的分数补偿。
+
+        Args:
+            query: 原始查询文本。
+            vector_results: 向量侧候选列表（原地追加关键词侧补充项）。
+        """
+        bm25 = self._ensure_bm25()
+        if bm25 is None or not vector_results or self.keyword_boost <= 0:
+            return vector_results
+
+        n_docs = len(self.documents)
+        already = {
+            r["_pos"] for r in vector_results if r.get("_pos") is not None
+        }
+        # 关键词侧最高分，用于把BM25 分数压到 [0,1] 再乘权重，
+        # 避免 BM25 的原始量纲（实测 0~48）压倒余弦相似度（0.45~0.67）。
+        kw_hits = bm25.top_n(query, self.keyword_pool_k)
+        if not kw_hits:
+            return vector_results
+        kw_max = max(s for _, s in kw_hits) or 1.0
+
+        added = 0
+        for pos, kw_score in kw_hits:
+            if pos in already or pos >= n_docs or kw_score <= 0:
+                continue
+            content = self._content_at(pos)
+            if not content:
+                continue
+            if self.filter_low_quality and is_low_quality(
+                content, self.min_chunk_chars, self.max_junk_ratio
+            ):
+                continue
+            metadata = (
+                self.document_metadata[pos]
+                if pos < len(self.document_metadata) else {}
+            )
+            vector_results.append({
+                "content": content,
+                # 向量侧未召回 -> 基线分0.0，仅靠关键词加分进入候选池。
+                # 实测这类 chunk 仍排在池尾（见上方「残留局限」），
+                # 保留它们是为了让 keyword_match 信号可见、可供后续策略使用。
+                "score": self.keyword_boost * (kw_score / kw_max),
+                "metadata": metadata,
+                "keyword_match": kw_score,
+                "_pos": pos,
+            })
+            added += 1
+
+        # 对**已在向量候选池内**的 chunk 按关键词强度加分：
+        # 这是真正生效的部分（它们有可比的向量分，加分不会被池尾淹没）。
+        for r in vector_results:
+            pos = r.get("_pos")
+            if pos is None:
+                continue
+            hit = dict(kw_hits).get(pos)
+            if hit:
+                r["score"] = r["score"] + self.keyword_boost * (hit / kw_max)
+                r["keyword_match"] = hit
+
+        if added:
+            logger.info(
+                f"混合检索：关键词侧补充 {added} 个候选"
+                f"（BM25 top{self.keyword_pool_k}，boost={self.keyword_boost}）"
+            )
+        return vector_results
+
+    def _content_at(self, pos: int) -> Optional[str]:
+        """取下标 ``pos`` 的 chunk 文本，兼容 Document / str / 其他类型。"""
+        if pos < 0 or pos >= len(self.documents):
+            return None
+        doc = self.documents[pos]
+        if isinstance(doc, str):
+            return doc
+        if hasattr(doc, "page_content"):
+            return doc.page_content
+        return str(doc)
+
     def search(
         self, 
         query: str, 
@@ -415,11 +576,18 @@ class FAISSVectorStore:
                 results.append({
                     "content": content,
                     "score": score,
-                    "metadata": metadata
+                    "metadata": metadata,
+                    "_pos": int(idx),
                 })
             
             if n_filtered_quality:
                 logger.info(f"过滤低质量片段 {n_filtered_quality} 条（min_chars={self.min_chunk_chars}）")
+            
+            # 混合检索：把 BM25 关键词信号叠加进候选池。
+            # 必须在 score_threshold 过滤**之后**做——阈值是余弦相似度
+            # 阈值（作用于向量侧），BM25 分数量纲不同，不可同一把尺子量。
+            if self.hybrid_search:
+                results = self._merge_keyword_candidates(query, results)
             
             # priority 感知的融合：priority 决定「是否入选」，score 决定「最终顺序」
             if len(results) > top_k:
@@ -445,6 +613,10 @@ class FAISSVectorStore:
                     )
                 for r in results:
                     r["low_confidence"] = low_conf
+            
+            # 剥掉内部字段：_pos 仅供融合阶段定位文档，不属于对外契约。
+            for r in results:
+                r.pop("_pos", None)
             
             logger.info(f"检索完成，查询：{query[:50]}...，返回 {len(results)} 个结果")
             return results

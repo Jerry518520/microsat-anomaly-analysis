@@ -1,0 +1,831 @@
+{
+  "top_k": 5,
+  "n_queries": 24,
+  "overall": {
+    "n": 24,
+    "source_hit@1": 0.9583,
+    "source_hit@k": 1.0,
+    "usable@k": 0.9167,
+    "kw_recall": 0.6799,
+    "mrr": 0.9129,
+    "top1_score_mean": 0.605,
+    "top1_score_min": 0.4924,
+    "low_conf_ratio": 0.0
+  },
+  "by_kind": {
+    "acronym": {
+      "n": 4,
+      "source_hit@1": 1.0,
+      "source_hit@k": 1.0,
+      "usable@k": 0.75,
+      "kw_recall": 0.4167,
+      "mrr": 1.0,
+      "top1_score_mean": 0.5856,
+      "top1_score_min": 0.5645,
+      "low_conf_ratio": 0.0
+    },
+    "diagnosis": {
+      "n": 3,
+      "source_hit@1": 1.0,
+      "source_hit@k": 1.0,
+      "usable@k": 1.0,
+      "kw_recall": 0.5556,
+      "mrr": 1.0,
+      "top1_score_mean": 0.5613,
+      "top1_score_min": 0.5242,
+      "low_conf_ratio": 0.0
+    },
+    "en_general": {
+      "n": 4,
+      "source_hit@1": 1.0,
+      "source_hit@k": 1.0,
+      "usable@k": 1.0,
+      "kw_recall": 0.7292,
+      "mrr": 0.8333,
+      "top1_score_mean": 0.5859,
+      "top1_score_min": 0.4924,
+      "low_conf_ratio": 0.0
+    },
+    "project_fact": {
+      "n": 6,
+      "source_hit@1": 1.0,
+      "source_hit@k": 1.0,
+      "usable@k": 1.0,
+      "kw_recall": 0.9445,
+      "mrr": 1.0,
+      "top1_score_mean": 0.6148,
+      "top1_score_min": 0.5494,
+      "low_conf_ratio": 0.0
+    },
+    "zh_general": {
+      "n": 4,
+      "source_hit@1": 0.75,
+      "source_hit@k": 1.0,
+      "usable@k": 0.75,
+      "kw_recall": 0.5625,
+      "mrr": 0.5833,
+      "top1_score_mean": 0.5868,
+      "top1_score_min": 0.5503,
+      "low_conf_ratio": 0.0
+    },
+    "zh_itu": {
+      "n": 3,
+      "source_hit@1": 1.0,
+      "source_hit@k": 1.0,
+      "usable@k": 1.0,
+      "kw_recall": 0.7167,
+      "mrr": 1.0,
+      "top1_score_mean": 0.7048,
+      "top1_score_min": 0.6778,
+      "low_conf_ratio": 0.0
+    }
+  },
+  "source_slot_share": {
+    "NASA SOA 2024": 43,
+    "Experiment Knowledge Base": 31,
+    "ITU Small Satellite Handbook CN": 18,
+    "ITU Small Satellite Handbook EN": 10,
+    "MAXWELL Mission Handbook": 10,
+    "Ruszczak OPS-SAT AD 2025": 8
+  },
+  "results": [
+    {
+      "q": "立方体卫星姿态控制失稳的常见原因",
+      "kind": "zh_general",
+      "top1_score": 0.6269152164459229,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook EN",
+        "NASA SOA 2024",
+        "MAXWELL Mission Handbook"
+      ],
+      "topk_scores": [
+        0.6269,
+        0.6015,
+        0.5803,
+        0.5616,
+        0.548
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.5,
+      "hit_terms": [
+        "attitude",
+        "control"
+      ],
+      "rank_first_usable": 2,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "电源系统电压跌落如何诊断",
+      "kind": "zh_general",
+      "top1_score": 0.5503085255622864,
+      "top1_source": "ITU Small Satellite Handbook EN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook EN",
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.5503,
+        0.5189,
+        0.508,
+        0.4984,
+        0.4895
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "遥测数据缺失在地面站如何处理",
+      "kind": "zh_general",
+      "top1_score": 0.6131260991096497,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Ruszczak OPS-SAT AD 2025"
+      ],
+      "topk_scores": [
+        0.6131,
+        0.5838,
+        0.5774,
+        0.572,
+        0.5588
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "ground",
+        "telemetry",
+        "地面",
+        "遥测"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "磁力计读数突变说明什么",
+      "kind": "zh_general",
+      "top1_score": 0.5567668676376343,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook EN",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.5568,
+        0.5486,
+        0.5185,
+        0.5042,
+        0.4837
+      ],
+      "source_hit_at_1": false,
+      "source_hit_at_k": true,
+      "kw_recall": 0.75,
+      "hit_terms": [
+        "magnetic",
+        "磁",
+        "磁力计"
+      ],
+      "rank_first_usable": 4,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "CADC0874通道对应什么物理量",
+      "kind": "project_fact",
+      "top1_score": 0.590508222579956,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Ruszczak OPS-SAT AD 2025",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.5905,
+        0.5758,
+        0.548,
+        0.4974,
+        0.482
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.6667,
+      "hit_terms": [
+        "CADC0874",
+        "磁力计"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "本项目最终方案的F1是多少",
+      "kind": "project_fact",
+      "top1_score": 0.5494003891944885,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "MAXWELL Mission Handbook",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.5494,
+        0.5383,
+        0.5304,
+        0.5031,
+        0.4999
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "0.6281",
+        "F1",
+        "gate_perchannel"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "磁力计和光电二极管两类通道的异常强度差异",
+      "kind": "project_fact",
+      "top1_score": 0.7534844875335693,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook CN"
+      ],
+      "topk_scores": [
+        0.7535,
+        0.6352,
+        0.6153,
+        0.4922,
+        0.4774
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "F1",
+        "光电二极管",
+        "磁力计"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+      "kind": "project_fact",
+      "top1_score": 0.5967099070549011,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Ruszczak OPS-SAT AD 2025",
+        "ITU Small Satellite Handbook CN"
+      ],
+      "topk_scores": [
+        0.5967,
+        0.5803,
+        0.5167,
+        0.4984,
+        0.4958
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "0.25",
+        "vote_threshold",
+        "网格搜索"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "段级异常率和点级异常率有什么区别",
+      "kind": "project_fact",
+      "top1_score": 0.5527291893959045,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook CN",
+        "Ruszczak OPS-SAT AD 2025"
+      ],
+      "topk_scores": [
+        0.5527,
+        0.545,
+        0.5232,
+        0.4776,
+        0.4467
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "20.4",
+        "33.0",
+        "段级",
+        "点级"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "OPS-SAT数据集的异常标注由谁完成",
+      "kind": "project_fact",
+      "top1_score": 0.6462204456329346,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Ruszczak OPS-SAT AD 2025",
+        "Ruszczak OPS-SAT AD 2025",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.6462,
+        0.5988,
+        0.5886,
+        0.5778,
+        0.5467
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "ESA",
+        "annotat",
+        "工程师",
+        "标注"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "EPS电源模块的故障模式",
+      "kind": "acronym",
+      "top1_score": 0.5688326358795166,
+      "top1_source": "MAXWELL Mission Handbook",
+      "topk_sources": [
+        "MAXWELL Mission Handbook",
+        "NASA SOA 2024",
+        "MAXWELL Mission Handbook",
+        "NASA SOA 2024",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.5688,
+        0.5682,
+        0.5602,
+        0.544,
+        0.5357
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.6667,
+      "hit_terms": [
+        "EPS",
+        "electrical power"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "thruster 推力器故障如何排查",
+      "kind": "acronym",
+      "top1_score": 0.5644887685775757,
+      "top1_source": "NASA SOA 2024",
+      "topk_sources": [
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook EN"
+      ],
+      "topk_scores": [
+        0.5645,
+        0.5546,
+        0.5453,
+        0.519,
+        0.5042
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.5,
+      "hit_terms": [
+        "propulsion",
+        "thruster"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "reaction wheel 反作用飞轮卡死",
+      "kind": "acronym",
+      "top1_score": 0.597862958908081,
+      "top1_source": "NASA SOA 2024",
+      "topk_sources": [
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook EN"
+      ],
+      "topk_scores": [
+        0.5979,
+        0.5792,
+        0.5708,
+        0.5597,
+        0.4992
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.5,
+      "hit_terms": [
+        "reaction wheel",
+        "wheel"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "safe mode 进入条件与恢复流程",
+      "kind": "acronym",
+      "top1_score": 0.6110501289367676,
+      "top1_source": "MAXWELL Mission Handbook",
+      "topk_sources": [
+        "MAXWELL Mission Handbook",
+        "MAXWELL Mission Handbook",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.6111,
+        0.5484,
+        0.5132,
+        0.5013,
+        0.4982
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "magnetometer anomaly detection",
+      "kind": "en_general",
+      "top1_score": 0.5964560508728027,
+      "top1_source": "Ruszczak OPS-SAT AD 2025",
+      "topk_sources": [
+        "Ruszczak OPS-SAT AD 2025",
+        "Ruszczak OPS-SAT AD 2025",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "MAXWELL Mission Handbook"
+      ],
+      "topk_scores": [
+        0.5965,
+        0.5884,
+        0.5837,
+        0.5818,
+        0.5799
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "anomal",
+        "magnetic",
+        "magnetometer"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "ADCS safe mode reaction wheel",
+      "kind": "en_general",
+      "top1_score": 0.5915697813034058,
+      "top1_source": "MAXWELL Mission Handbook",
+      "topk_sources": [
+        "MAXWELL Mission Handbook",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.5916,
+        0.5716,
+        0.5647,
+        0.5614,
+        0.5102
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.5,
+      "hit_terms": [
+        "ADCS",
+        "reaction wheel"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "photodiode zero value gap anomaly",
+      "kind": "en_general",
+      "top1_score": 0.49239417910575867,
+      "top1_source": "NASA SOA 2024",
+      "topk_sources": [
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook CN"
+      ],
+      "topk_scores": [
+        0.4924,
+        0.4918,
+        0.4855,
+        0.4751,
+        0.467
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.6667,
+      "hit_terms": [
+        "anomal",
+        "gap",
+        "zero",
+        "光电二极管"
+      ],
+      "rank_first_usable": 3,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "satellite attitude control magnetic torquer",
+      "kind": "en_general",
+      "top1_score": 0.6630210876464844,
+      "top1_source": "NASA SOA 2024",
+      "topk_sources": [
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook EN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "MAXWELL Mission Handbook"
+      ],
+      "topk_scores": [
+        0.663,
+        0.638,
+        0.6176,
+        0.6099,
+        0.5963
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.75,
+      "hit_terms": [
+        "attitude control",
+        "magnetic torquer",
+        "torque"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "小卫星的对地通信频段选择",
+      "kind": "zh_itu",
+      "top1_score": 0.7284163236618042,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook EN",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.7284,
+        0.6611,
+        0.6348,
+        0.632,
+        0.6318
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.8,
+      "hit_terms": [
+        "band",
+        "frequency",
+        "通信",
+        "频段"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "空间碎片减缓要求",
+      "kind": "zh_itu",
+      "top1_score": 0.7080072164535522,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "ITU Small Satellite Handbook CN",
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.708,
+        0.6289,
+        0.5949,
+        0.5397,
+        0.5381
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.75,
+      "hit_terms": [
+        "debris",
+        "减缓",
+        "碎片"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "立方体卫星标准化限制",
+      "kind": "zh_itu",
+      "top1_score": 0.6778388023376465,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "ITU Small Satellite Handbook CN",
+        "ITU Small Satellite Handbook CN",
+        "ITU Small Satellite Handbook EN",
+        "ITU Small Satellite Handbook CN"
+      ],
+      "topk_scores": [
+        0.6778,
+        0.6294,
+        0.6232,
+        0.619,
+        0.6129
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.6,
+      "hit_terms": [
+        "CubeSat",
+        "标准",
+        "立方体"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "遥测零值与传感器故障如何区分",
+      "kind": "diagnosis",
+      "top1_score": 0.555366575717926,
+      "top1_source": "NASA SOA 2024",
+      "topk_sources": [
+        "NASA SOA 2024",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook CN",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.5554,
+        0.5363,
+        0.5233,
+        0.5123,
+        0.5023
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.8,
+      "hit_terms": [
+        "sensor",
+        "zero",
+        "故障",
+        "零值"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "太阳电池阵输出功率下降的原因",
+      "kind": "diagnosis",
+      "top1_score": 0.6043518781661987,
+      "top1_source": "ITU Small Satellite Handbook EN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook EN",
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.6044,
+        0.6042,
+        0.587,
+        0.5717,
+        0.5041
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.6667,
+      "hit_terms": [
+        "power",
+        "solar cell",
+        "太阳",
+        "电池"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "陀螺仪漂移与温度的关系",
+      "kind": "diagnosis",
+      "top1_score": 0.5241760611534119,
+      "top1_source": "NASA SOA 2024",
+      "topk_sources": [
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook EN",
+        "MAXWELL Mission Handbook"
+      ],
+      "topk_scores": [
+        0.5242,
+        0.5236,
+        0.5176,
+        0.4766,
+        0.4766
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.2,
+      "hit_terms": [
+        "temperature"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    }
+  ],
+  "tag": "orig",
+  "index_ntotal": 4868,
+  "n_documents": 4868
+}

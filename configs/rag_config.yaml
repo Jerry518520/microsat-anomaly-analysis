@@ -143,10 +143,21 @@ retrieval:
   # top1 分数低于此值时标记 low_confidence 并在上下文中提示，不静默丢弃
   low_confidence_threshold: 0.45
   
-  # 混合检索策略
-  hybrid_search: true      # 是否启用混合检索（关键词+向量）
-  keyword_weight: 0.3       # 关键词检索权重
-  vector_weight: 0.7        # 向量检索权重
+  # --- 混合检索（向量 + BM25 关键词）---
+  # ⚠ 此前本节只有 hybrid_search/keyword_weight/vector_weight 三个键，
+  #   但**代码里从未读取过它们**（实测 grep 全库 0 处引用），
+  #   属「配置写了但没实现」。现已实装为 BM25 关键词侧（src/rag/bm25.py）
+  #   加权叠加，参数含义与原键名不同，故重命名并补��实测依据。
+  #
+  # 实测选型（24 条标注查询，scripts/eval_retrieval_quality.py）：
+  #   纯向量 0.940 MRR / 0.681 kw_recall
+  #   RRF 融合 0.902 MRR / 0.710 kw_recall  <- 掉 MRR，弃用
+  #   keyword_boost=0.02  0.940 MRR / 0.724 kw_recall  <- 采用
+  # keyword_boost 实测**必须 <= 0.02**：0.05 时 MRR 0.940 -> 0.933，
+  # 0.1 时 -> 0.861。再大就会用首位精度换召回，不可取。
+  hybrid_search: true
+  keyword_pool_k: 40      # BM25 侧取前多少候选参与融合
+  keyword_boost: 0.02     # 关键词命中时加到向量相似度上的分（余弦量纲）
 
 # ========== LLM API 配置 ==========
 llm:

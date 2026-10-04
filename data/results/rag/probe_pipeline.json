@@ -1,0 +1,1310 @@
+{
+ "baseline (现状)": [
+  {
+   "q": "立方体卫星姿态控制失稳的常见原因",
+   "kind": "zh_general",
+   "top1": 0.6269152164459229,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 2,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "电源系统电压跌落如何诊断",
+   "kind": "zh_general",
+   "top1": 0.5503085255622864,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "遥测数据缺失在地面站如何处理",
+   "kind": "zh_general",
+   "top1": 0.6131260991096497,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计读数突变说明什么",
+   "kind": "zh_general",
+   "top1": 0.5567668676376343,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 4,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "CADC0874通道对应什么物理量",
+   "kind": "project_fact",
+   "top1": 0.590508222579956,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6666666666666666
+  },
+  {
+   "q": "本项目最终方案的F1是多少",
+   "kind": "project_fact",
+   "top1": 0.5494003891944885,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计和光电二极管两类通道的异常强度差异",
+   "kind": "project_fact",
+   "top1": 0.7534844875335693,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+   "kind": "project_fact",
+   "top1": 0.5967099070549011,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "段级异常率和点级异常率有什么区别",
+   "kind": "project_fact",
+   "top1": 0.5527291893959045,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "OPS-SAT数据集的异常标注由谁完成",
+   "kind": "project_fact",
+   "top1": 0.6462204456329346,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "EPS电源模块的故障模式",
+   "kind": "acronym",
+   "top1": 0.5688326358795166,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6666666666666666
+  },
+  {
+   "q": "thruster 推力器故障如何排查",
+   "kind": "acronym",
+   "top1": 0.5644887685775757,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "reaction wheel 反作用飞轮卡死",
+   "kind": "acronym",
+   "top1": 0.597862958908081,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "safe mode 进入条件与恢复流程",
+   "kind": "acronym",
+   "top1": 0.6110501289367676,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "magnetometer anomaly detection",
+   "kind": "en_general",
+   "top1": 0.5964560508728027,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "ADCS safe mode reaction wheel",
+   "kind": "en_general",
+   "top1": 0.5915697813034058,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "photodiode zero value gap anomaly",
+   "kind": "en_general",
+   "top1": 0.49239417910575867,
+   "top1_src": "NASA SOA 2024",
+   "first": null,
+   "usable": false,
+   "kws": 0.75
+  },
+  {
+   "q": "satellite attitude control magnetic torquer",
+   "kind": "en_general",
+   "top1": 0.6630210876464844,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "小卫星的对地通信频段选择",
+   "kind": "zh_itu",
+   "top1": 0.7284163236618042,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.8
+  },
+  {
+   "q": "空间碎片减缓要求",
+   "kind": "zh_itu",
+   "top1": 0.7080072164535522,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "立方体卫星标准化限制",
+   "kind": "zh_itu",
+   "top1": 0.6778388023376465,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测零值与传感器故障如何区分",
+   "kind": "diagnosis",
+   "top1": 0.555366575717926,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.8
+  },
+  {
+   "q": "太阳电池阵输出功率下降的原因",
+   "kind": "diagnosis",
+   "top1": 0.6043518781661987,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "陀螺仪漂移与温度的关系",
+   "kind": "diagnosis",
+   "top1": 0.5241760611534119,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.2
+  }
+ ],
+ "vector only": [
+  {
+   "q": "立方体卫星姿态控制失稳的常见原因",
+   "kind": "zh_general",
+   "top1": 0.6269152164459229,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 2,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "电源系统电压跌落如何诊断",
+   "kind": "zh_general",
+   "top1": 0.5503085255622864,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "遥测数据缺失在地面站如何处理",
+   "kind": "zh_general",
+   "top1": 0.6131260991096497,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "磁力计读数突变说明什么",
+   "kind": "zh_general",
+   "top1": 0.5567668676376343,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 4,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "CADC0874通道对应什么物理量",
+   "kind": "project_fact",
+   "top1": 0.590508222579956,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "本项目最终方案的F1是多少",
+   "kind": "project_fact",
+   "top1": 0.5494003891944885,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计和光电二极管两类通道的异常强度差异",
+   "kind": "project_fact",
+   "top1": 0.7534844875335693,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+   "kind": "project_fact",
+   "top1": 0.5967099070549011,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "段级异常率和点级异常率有什么区别",
+   "kind": "project_fact",
+   "top1": 0.5527291893959045,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "OPS-SAT数据集的异常标注由谁完成",
+   "kind": "project_fact",
+   "top1": 0.6462204456329346,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "EPS电源模块的故障模式",
+   "kind": "acronym",
+   "top1": 0.5688326358795166,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "thruster 推力器故障如何排查",
+   "kind": "acronym",
+   "top1": 0.5644887685775757,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "reaction wheel 反作用飞轮卡死",
+   "kind": "acronym",
+   "top1": 0.597862958908081,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "safe mode 进入条件与恢复流程",
+   "kind": "acronym",
+   "top1": 0.6110501289367676,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "magnetometer anomaly detection",
+   "kind": "en_general",
+   "top1": 0.5964560508728027,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "ADCS safe mode reaction wheel",
+   "kind": "en_general",
+   "top1": 0.5915697813034058,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "photodiode zero value gap anomaly",
+   "kind": "en_general",
+   "top1": 0.49239417910575867,
+   "top1_src": "NASA SOA 2024",
+   "first": null,
+   "usable": false,
+   "kws": 0.75
+  },
+  {
+   "q": "satellite attitude control magnetic torquer",
+   "kind": "en_general",
+   "top1": 0.6630210876464844,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "小卫星的对地通信频段选择",
+   "kind": "zh_itu",
+   "top1": 0.7284163236618042,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "空间碎片减缓要求",
+   "kind": "zh_itu",
+   "top1": 0.7080072164535522,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "立方体卫星标准化限制",
+   "kind": "zh_itu",
+   "top1": 0.6778388023376465,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测零值与传感器故障如何区分",
+   "kind": "diagnosis",
+   "top1": 0.555366575717926,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.8
+  },
+  {
+   "q": "太阳电池阵输出功率下降的原因",
+   "kind": "diagnosis",
+   "top1": 0.6043518781661987,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "陀螺仪漂移与温度的关系",
+   "kind": "diagnosis",
+   "top1": 0.5241760611534119,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.2
+  }
+ ],
+ "BM25 only": [
+  {
+   "q": "立方体卫星姿态控制失稳的常见原因",
+   "kind": "zh_general",
+   "top1": 70.38822174072266,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "电源系统电压跌落如何诊断",
+   "kind": "zh_general",
+   "top1": 20.226125717163086,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测数据缺失在地面站如何处理",
+   "kind": "zh_general",
+   "top1": 45.4309196472168,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "磁力计读数突变说明什么",
+   "kind": "zh_general",
+   "top1": 48.516822814941406,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 4,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "CADC0874通道对应什么物理量",
+   "kind": "project_fact",
+   "top1": 39.290618896484375,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "本项目最终方案的F1是多少",
+   "kind": "project_fact",
+   "top1": 27.83984375,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计和光电二极管两类通道的异常强度差异",
+   "kind": "project_fact",
+   "top1": 156.3227996826172,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+   "kind": "project_fact",
+   "top1": 57.69744110107422,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "段级异常率和点级异常率有什么区别",
+   "kind": "project_fact",
+   "top1": 76.91168212890625,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "OPS-SAT数据集的异常标注由谁完成",
+   "kind": "project_fact",
+   "top1": 66.477294921875,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "EPS电源模块的故障模式",
+   "kind": "acronym",
+   "top1": 38.6237907409668,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6666666666666666
+  },
+  {
+   "q": "thruster 推力器故障如何排查",
+   "kind": "acronym",
+   "top1": 22.06890296936035,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "reaction wheel 反作用飞轮卡死",
+   "kind": "acronym",
+   "top1": 29.89329719543457,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 3,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "safe mode 进入条件与恢复流程",
+   "kind": "acronym",
+   "top1": 18.12502098083496,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "magnetometer anomaly detection",
+   "kind": "en_general",
+   "top1": 14.318376541137695,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "ADCS safe mode reaction wheel",
+   "kind": "en_general",
+   "top1": 19.411907196044922,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "photodiode zero value gap anomaly",
+   "kind": "en_general",
+   "top1": 11.704694747924805,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "satellite attitude control magnetic torquer",
+   "kind": "en_general",
+   "top1": 24.414167404174805,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "小卫星的对地通信频段选择",
+   "kind": "zh_itu",
+   "top1": 49.183387756347656,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "空间碎片减缓要求",
+   "kind": "zh_itu",
+   "top1": 64.64334106445312,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "立方体卫星标准化限制",
+   "kind": "zh_itu",
+   "top1": 55.67513656616211,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测零值与传感器故障如何区分",
+   "kind": "diagnosis",
+   "top1": 73.16568756103516,
+   "top1_src": "Experiment Knowledge Base",
+   "first": null,
+   "usable": false,
+   "kws": 0.6
+  },
+  {
+   "q": "太阳电池阵输出功率下降的原因",
+   "kind": "diagnosis",
+   "top1": 75.45611572265625,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "陀螺仪漂移与温度的关系",
+   "kind": "diagnosis",
+   "top1": 25.981000900268555,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": null,
+   "usable": false,
+   "kws": 0.2
+  }
+ ],
+ "hybrid RRF": [
+  {
+   "q": "立方体卫星姿态控制失稳的常见原因",
+   "kind": "zh_general",
+   "top1": 0.03225806451612903,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "电源系统电压跌落如何诊断",
+   "kind": "zh_general",
+   "top1": 0.029571646010002173,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 4,
+   "usable": true,
+   "kws": 0.2
+  },
+  {
+   "q": "遥测数据缺失在地面站如何处理",
+   "kind": "zh_general",
+   "top1": 0.032266458495966696,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "磁力计读数突变说明什么",
+   "kind": "zh_general",
+   "top1": 0.03252247488101534,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 5,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "CADC0874通道对应什么物理量",
+   "kind": "project_fact",
+   "top1": 0.03278688524590164,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "本项目最终方案的F1是多少",
+   "kind": "project_fact",
+   "top1": 0.032018442622950824,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计和光电二极管两类通道的异常强度差异",
+   "kind": "project_fact",
+   "top1": 0.03278688524590164,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+   "kind": "project_fact",
+   "top1": 0.032266458495966696,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "段级异常率和点级异常率有什么区别",
+   "kind": "project_fact",
+   "top1": 0.03278688524590164,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "OPS-SAT数据集的异常标注由谁完成",
+   "kind": "project_fact",
+   "top1": 0.03278688524590164,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "EPS电源模块的故障模式",
+   "kind": "acronym",
+   "top1": 0.023809523809523808,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6666666666666666
+  },
+  {
+   "q": "thruster 推力器故障如何排查",
+   "kind": "acronym",
+   "top1": 0.02862400327131466,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 3,
+   "usable": true,
+   "kws": 0.25
+  },
+  {
+   "q": "reaction wheel 反作用飞轮卡死",
+   "kind": "acronym",
+   "top1": 0.03200204813108039,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "safe mode 进入条件与恢复流程",
+   "kind": "acronym",
+   "top1": 0.032018442622950824,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "magnetometer anomaly detection",
+   "kind": "en_general",
+   "top1": 0.03278688524590164,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "ADCS safe mode reaction wheel",
+   "kind": "en_general",
+   "top1": 0.03200204813108039,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "photodiode zero value gap anomaly",
+   "kind": "en_general",
+   "top1": 0.02649122807017544,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": 2,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "satellite attitude control magnetic torquer",
+   "kind": "en_general",
+   "top1": 0.031024531024531024,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "小卫星的对地通信频段选择",
+   "kind": "zh_itu",
+   "top1": 0.032266458495966696,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "空间碎片减缓要求",
+   "kind": "zh_itu",
+   "top1": 0.03278688524590164,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "立方体卫星标准化限制",
+   "kind": "zh_itu",
+   "top1": 0.03278688524590164,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测零值与传感器故障如何区分",
+   "kind": "diagnosis",
+   "top1": 0.03225806451612903,
+   "top1_src": "Experiment Knowledge Base",
+   "first": null,
+   "usable": false,
+   "kws": 0.6
+  },
+  {
+   "q": "太阳电池阵输出功率下降的原因",
+   "kind": "diagnosis",
+   "top1": 0.03252247488101534,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "陀螺仪漂移与温度的关系",
+   "kind": "diagnosis",
+   "top1": 0.01639344262295082,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  }
+ ],
+ "vector -> rerank": [
+  {
+   "q": "立方体卫星姿态控制失稳的常见原因",
+   "kind": "zh_general",
+   "top1": 0.248971089720726,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 2,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "电源系统电压跌落如何诊断",
+   "kind": "zh_general",
+   "top1": 0.0147367799654603,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 3,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "遥测数据缺失在地面站如何处理",
+   "kind": "zh_general",
+   "top1": 0.4113495945930481,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计读数突变说明什么",
+   "kind": "zh_general",
+   "top1": 0.07710780948400497,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 3,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "CADC0874通道对应什么物理量",
+   "kind": "project_fact",
+   "top1": 0.9016258716583252,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "本项目最终方案的F1是多少",
+   "kind": "project_fact",
+   "top1": 0.34840625524520874,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计和光电二极管两类通道的异常强度差异",
+   "kind": "project_fact",
+   "top1": 0.9942290782928467,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+   "kind": "project_fact",
+   "top1": 0.9615928530693054,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "段级异常率和点级异常率有什么区别",
+   "kind": "project_fact",
+   "top1": 0.8406550884246826,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "OPS-SAT数据集的异常标注由谁完成",
+   "kind": "project_fact",
+   "top1": 0.9659819006919861,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "EPS电源模块的故障模式",
+   "kind": "acronym",
+   "top1": 0.14393235743045807,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "thruster 推力器故障如何排查",
+   "kind": "acronym",
+   "top1": 0.1352410614490509,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "reaction wheel 反作用飞轮卡死",
+   "kind": "acronym",
+   "top1": 0.1701960414648056,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "safe mode 进入条件与恢复流程",
+   "kind": "acronym",
+   "top1": 0.1705980747938156,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "magnetometer anomaly detection",
+   "kind": "en_general",
+   "top1": 0.18502487242221832,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "ADCS safe mode reaction wheel",
+   "kind": "en_general",
+   "top1": 0.6329156756401062,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "photodiode zero value gap anomaly",
+   "kind": "en_general",
+   "top1": 0.9438704252243042,
+   "top1_src": "Experiment Knowledge Base",
+   "first": null,
+   "usable": false,
+   "kws": 0.75
+  },
+  {
+   "q": "satellite attitude control magnetic torquer",
+   "kind": "en_general",
+   "top1": 0.8470312356948853,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "小卫星的对地通信频段选择",
+   "kind": "zh_itu",
+   "top1": 0.9900950193405151,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "空间碎片减缓要求",
+   "kind": "zh_itu",
+   "top1": 0.997706413269043,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "立方体卫星标准化限制",
+   "kind": "zh_itu",
+   "top1": 0.8706461787223816,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测零值与传感器故障如何区分",
+   "kind": "diagnosis",
+   "top1": 0.45279544591903687,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 4,
+   "usable": true,
+   "kws": 0.8
+  },
+  {
+   "q": "太阳电池阵输出功率下降的原因",
+   "kind": "diagnosis",
+   "top1": 0.12070884555578232,
+   "top1_src": "NASA SOA 2024",
+   "first": 2,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "陀螺仪漂移与温度的关系",
+   "kind": "diagnosis",
+   "top1": 0.08135533332824707,
+   "top1_src": "NASA SOA 2024",
+   "first": 2,
+   "usable": true,
+   "kws": 0.2
+  }
+ ],
+ "hybrid -> rerank": [
+  {
+   "q": "立方体卫星姿态控制失稳的常见原因",
+   "kind": "zh_general",
+   "top1": 0.248971089720726,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 2,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "电源系统电压跌落如何诊断",
+   "kind": "zh_general",
+   "top1": 0.005774360615760088,
+   "top1_src": "Experiment Knowledge Base",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "遥测数据缺失在地面站如何处理",
+   "kind": "zh_general",
+   "top1": 0.4113495945930481,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计读数突变说明什么",
+   "kind": "zh_general",
+   "top1": 0.07710780948400497,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 3,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "CADC0874通道对应什么物理量",
+   "kind": "project_fact",
+   "top1": 0.9016258716583252,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "本项目最终方案的F1是多少",
+   "kind": "project_fact",
+   "top1": 0.34840625524520874,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "磁力计和光电二极管两类通道的异常强度差异",
+   "kind": "project_fact",
+   "top1": 0.9942290782928467,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+   "kind": "project_fact",
+   "top1": 0.9615928530693054,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "段级异常率和点级异常率有什么区别",
+   "kind": "project_fact",
+   "top1": 0.8406550288200378,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "OPS-SAT数据集的异常标注由谁完成",
+   "kind": "project_fact",
+   "top1": 0.9659819006919861,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "EPS电源模块的故障模式",
+   "kind": "acronym",
+   "top1": 0.07262493669986725,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "thruster 推力器故障如何排查",
+   "kind": "acronym",
+   "top1": 0.1352410614490509,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.5
+  },
+  {
+   "q": "reaction wheel 反作用飞轮卡死",
+   "kind": "acronym",
+   "top1": 0.1701960414648056,
+   "top1_src": "NASA SOA 2024",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "safe mode 进入条件与恢复流程",
+   "kind": "acronym",
+   "top1": 0.1705980747938156,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": null,
+   "usable": false,
+   "kws": 0.0
+  },
+  {
+   "q": "magnetometer anomaly detection",
+   "kind": "en_general",
+   "top1": 0.18502487242221832,
+   "top1_src": "Ruszczak OPS-SAT AD 2025",
+   "first": 1,
+   "usable": true,
+   "kws": 0.3333333333333333
+  },
+  {
+   "q": "ADCS safe mode reaction wheel",
+   "kind": "en_general",
+   "top1": 0.6329156756401062,
+   "top1_src": "MAXWELL Mission Handbook",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "photodiode zero value gap anomaly",
+   "kind": "en_general",
+   "top1": 0.9438704252243042,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 3,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "satellite attitude control magnetic torquer",
+   "kind": "en_general",
+   "top1": 0.8470312356948853,
+   "top1_src": "ITU Small Satellite Handbook EN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.75
+  },
+  {
+   "q": "小卫星的对地通信频段选择",
+   "kind": "zh_itu",
+   "top1": 0.9900950193405151,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.4
+  },
+  {
+   "q": "空间碎片减缓要求",
+   "kind": "zh_itu",
+   "top1": 0.997706413269043,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 1.0
+  },
+  {
+   "q": "立方体卫星标准化限制",
+   "kind": "zh_itu",
+   "top1": 0.8706461787223816,
+   "top1_src": "ITU Small Satellite Handbook CN",
+   "first": 1,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "遥测零值与传感器故障如何区分",
+   "kind": "diagnosis",
+   "top1": 0.45279544591903687,
+   "top1_src": "Experiment Knowledge Base",
+   "first": 4,
+   "usable": true,
+   "kws": 0.8
+  },
+  {
+   "q": "太阳电池阵输出功率下降的原因",
+   "kind": "diagnosis",
+   "top1": 0.12070884555578232,
+   "top1_src": "NASA SOA 2024",
+   "first": 2,
+   "usable": true,
+   "kws": 0.6
+  },
+  {
+   "q": "陀螺仪漂移与温度的关系",
+   "kind": "diagnosis",
+   "top1": 0.032565806061029434,
+   "top1_src": "NASA SOA 2024",
+   "first": 3,
+   "usable": true,
+   "kws": 0.4
+  }
+ ]
+}
