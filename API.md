@@ -271,7 +271,9 @@ per-channel IsolationForest 连续判分 → 越限(训练集分数 95 分位数
 
 3. 复制 `.env.example` 为 `.env`，填入 `VOLCENGINE_API_KEY`（向队长索取）。
 
-4. （可选）若本地已有 BGE-M3 模型，在 `.env` 加 `EMBEDDING_MODEL_PATH=models/Xorbits/bge-m3`；不填则首次运行自动从 HuggingFace 镜像下载 `BAAI/bge-m3`。
+4. 在 `.env` 设 `EMBEDDING_MODEL_PATH=models/Xorbits/bge-m3`（**离线环境必填**）。
+   留空不会自动下载，会直接抛异常——实测 `huggingface.co` 直连 8s 超时不可达。
+   ⚠ 本仓库 `models/bge-m3/` 是下载中断的残留（0 个权重文件），请勿使用。
 
 5. 启动：
    ```bash

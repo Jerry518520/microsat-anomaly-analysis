@@ -39,7 +39,9 @@ cd microsat-anomaly-analysis
 cp .env.example .env
 ```
 
-编辑 `.env`，填入队长给你的 `VOLCENGINE_API_KEY`。其余保持默认即可（不填模型路径时，首次运行自动从 HuggingFace 镜像下载 `BAAI/bge-m3`）。
+编辑 `.env`，填入队长给你的 `VOLCENGINE_API_KEY`。
+另需设 `EMBEDDING_MODEL_PATH=models/Xorbits/bge-m3`（**离线环境必填**）——
+留空不会自动下载模型，会直接抛异常。注意 `models/bge-m3/` 是下载中断的残留，不可用。
 
 ---
 

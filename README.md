@@ -63,7 +63,11 @@ unzip data_share.zip
 cp .env.example .env        # 然后编辑 .env
 ```
 - `VOLCENGINE_API_KEY`：**RAG 问答接口必需**；若只做看板/检测/波形联调可暂时留空。
-- `EMBEDDING_MODEL_PATH`：选填。留空则首次调用 RAG 时自动从 HuggingFace 镜像（hf-mirror.com）下载 `BAAI/bge-m3`；若已拿到本地模型，设为 `models/Xorbits/bge-m3`。
+- `EMBEDDING_MODEL_PATH`：**离线环境必填**。指向本地嵌入模型目录，例如 `models/Xorbits/bge-m3`。
+  建索引（`scripts/build_index.py`）与运行时检索共用同一解析逻辑（`src/rag/embedding.py:resolve_embedding_model_path`），
+  不存在路径分叉。留空时不会静默下载，而是抛出明确异常——实测 `huggingface.co` 直连 8s 超时不可达，
+  隐式下载会每次冷启动卡 2.2GB。
+  ⚠ 本仓库 `models/bge-m3/` 是历史下载中断的残留（**0 个权重文件**），不要使用；可用模型是 `models/Xorbits/bge-m3`。
 
 ### 第 5 步：启动
 **Windows（推荐，一键启动后端+前端）：**
@@ -360,8 +364,9 @@ VOLCENGINE_API_KEY=your_api_key_here
 # 可选：HuggingFace 镜像（加速 BGE-M3 下载）
 HF_ENDPOINT=https://hf-mirror.com
 
-# 可选：本地嵌入模型路径。留空则使用 BAAI/bge-m3 自动下载；
-#       若已拿到本地模型则设为 models/Xorbits/bge-m3
+# 嵌入模型本地路径（离线环境必填，无默认值、不自动下载）
+EMBEDDING_MODEL_PATH=models/Xorbits/bge-m3
+# 注：models/bge-m3/ 是历史下载中断的残留（0 个权重文件），不可用
 EMBEDDING_MODEL_PATH=
 ```
 
@@ -549,9 +554,11 @@ evaluation:
 RAG 系统配置：
 
 ```yaml
-# 嵌入模型
+# 嵌入模型。留空则强制使用环境变量 EMBEDDING_MODEL_PATH 指向的本地模型；
+# 离线环境下不设该变量会直接抛异常（不做隐式下载）。
+# 建索引与运行时检索共用 src/rag/embedding.py:resolve_embedding_model_path，不存在路径分叉。
 embedding:
-  model_name: "BAAI/bge-m3"  # 默认从 HuggingFace 镜像自动下载；可用环境变量 EMBEDDING_MODEL_PATH 覆盖为本地路径
+  model_name: null
   device: "cuda"
   batch_size: 32
   max_length: 512
