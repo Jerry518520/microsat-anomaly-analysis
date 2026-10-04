@@ -1,0 +1,614 @@
+{
+  "top_k": 5,
+  "n_queries": 24,
+  "overall": {
+    "n": 24,
+    "source_hit@1": 0.375,
+    "source_hit@k": 0.4167,
+    "usable@k": 0.375,
+    "kw_recall": 0.3403,
+    "mrr": 0.9167,
+    "top1_score_mean": 0.2605,
+    "top1_score_min": 0.0,
+    "low_conf_ratio": 0.0
+  },
+  "by_kind": {
+    "acronym": {
+      "n": 4,
+      "source_hit@1": 0.0,
+      "source_hit@k": 0.0,
+      "usable@k": 0.0,
+      "kw_recall": 0.0,
+      "mrr": 0.0,
+      "top1_score_mean": 0.0,
+      "top1_score_min": 0.0,
+      "low_conf_ratio": 0.0
+    },
+    "diagnosis": {
+      "n": 3,
+      "source_hit@1": 0.0,
+      "source_hit@k": 0.0,
+      "usable@k": 0.0,
+      "kw_recall": 0.0,
+      "mrr": 0.0,
+      "top1_score_mean": 0.0,
+      "top1_score_min": 0.0,
+      "low_conf_ratio": 0.0
+    },
+    "en_general": {
+      "n": 4,
+      "source_hit@1": 0.0,
+      "source_hit@k": 0.0,
+      "usable@k": 0.0,
+      "kw_recall": 0.0,
+      "mrr": 0.0,
+      "top1_score_mean": 0.0,
+      "top1_score_min": 0.0,
+      "low_conf_ratio": 0.0
+    },
+    "project_fact": {
+      "n": 6,
+      "source_hit@1": 1.0,
+      "source_hit@k": 1.0,
+      "usable@k": 1.0,
+      "kw_recall": 0.9028,
+      "mrr": 1.0,
+      "top1_score_mean": 0.6443,
+      "top1_score_min": 0.581,
+      "low_conf_ratio": 0.0
+    },
+    "zh_general": {
+      "n": 4,
+      "source_hit@1": 0.75,
+      "source_hit@k": 1.0,
+      "usable@k": 0.75,
+      "kw_recall": 0.6875,
+      "mrr": 0.75,
+      "top1_score_mean": 0.5967,
+      "top1_score_min": 0.5503,
+      "low_conf_ratio": 0.0
+    },
+    "zh_itu": {
+      "n": 3,
+      "source_hit@1": 0.0,
+      "source_hit@k": 0.0,
+      "usable@k": 0.0,
+      "kw_recall": 0.0,
+      "mrr": 0.0,
+      "top1_score_mean": 0.0,
+      "top1_score_min": 0.0,
+      "low_conf_ratio": 0.0
+    }
+  },
+  "source_slot_share": {
+    "Experiment Knowledge Base": 27,
+    "NASA SOA 2024": 9,
+    "ITU Small Satellite Handbook CN": 5,
+    "Ruszczak OPS-SAT AD 2025": 4,
+    "ITU Small Satellite Handbook EN": 3,
+    "MAXWELL Mission Handbook": 2
+  },
+  "results": [
+    {
+      "q": "立方体卫星姿态控制失稳的常见原因",
+      "kind": "zh_general",
+      "top1_score": 0.64255501761422,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "ITU Small Satellite Handbook EN",
+        "NASA SOA 2024",
+        "MAXWELL Mission Handbook"
+      ],
+      "topk_scores": [
+        0.6426,
+        0.6015,
+        0.5803,
+        0.5616,
+        0.548
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "attitude",
+        "control",
+        "姿态",
+        "控制"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "电源系统电压跌落如何诊断",
+      "kind": "zh_general",
+      "top1_score": 0.5503085255622864,
+      "top1_source": "ITU Small Satellite Handbook EN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook EN",
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.5503,
+        0.5299,
+        0.508,
+        0.4984,
+        0.4895
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "遥测数据缺失在地面站如何处理",
+      "kind": "zh_general",
+      "top1_score": 0.6299623657344131,
+      "top1_source": "ITU Small Satellite Handbook CN",
+      "topk_sources": [
+        "ITU Small Satellite Handbook CN",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "NASA SOA 2024",
+        "Ruszczak OPS-SAT AD 2025"
+      ],
+      "topk_scores": [
+        0.63,
+        0.5838,
+        0.5774,
+        0.572,
+        0.5588
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "ground",
+        "telemetry",
+        "地面",
+        "遥测"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "磁力计读数突变说明什么",
+      "kind": "zh_general",
+      "top1_score": 0.5640686345100403,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook EN",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.5641,
+        0.5615,
+        0.5324,
+        0.5042,
+        0.4837
+      ],
+      "source_hit_at_1": false,
+      "source_hit_at_k": true,
+      "kw_recall": 0.75,
+      "hit_terms": [
+        "magnetic",
+        "磁",
+        "磁力计"
+      ],
+      "rank_first_usable": 4,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "CADC0874通道对应什么物理量",
+      "kind": "project_fact",
+      "top1_score": 0.6436424417410063,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.6436,
+        0.6203,
+        0.5774,
+        0.5743,
+        0.5475
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.6667,
+      "hit_terms": [
+        "CADC0874",
+        "磁力计"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "本项目最终方案的F1是多少",
+      "kind": "project_fact",
+      "top1_score": 0.5809551832105825,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "MAXWELL Mission Handbook",
+        "NASA SOA 2024"
+      ],
+      "topk_scores": [
+        0.581,
+        0.5675,
+        0.5538,
+        0.5031,
+        0.4999
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "0.6281",
+        "F1",
+        "gate_perchannel"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "磁力计和光电二极管两类通道的异常强度差异",
+      "kind": "project_fact",
+      "top1_score": 0.6770193319032455,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.677,
+        0.6546,
+        0.6343,
+        0.6251,
+        0.5973
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "F1",
+        "光电二极管",
+        "磁力计"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "投票阈值 vote_threshold 0.25 是怎么来的",
+      "kind": "project_fact",
+      "top1_score": 0.6049390318603081,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Ruszczak OPS-SAT AD 2025",
+        "ITU Small Satellite Handbook CN"
+      ],
+      "topk_scores": [
+        0.6049,
+        0.5974,
+        0.5457,
+        0.4984,
+        0.4958
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "0.25",
+        "vote_threshold",
+        "网格搜索"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "段级异常率和点级异常率有什么区别",
+      "kind": "project_fact",
+      "top1_score": 0.6927238008929186,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base",
+        "ITU Small Satellite Handbook CN"
+      ],
+      "topk_scores": [
+        0.6927,
+        0.6781,
+        0.6741,
+        0.6245,
+        0.4776
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 1.0,
+      "hit_terms": [
+        "20.4",
+        "33.0",
+        "段级",
+        "点级"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "OPS-SAT数据集的异常标注由谁完成",
+      "kind": "project_fact",
+      "top1_score": 0.6662204456329346,
+      "top1_source": "Experiment Knowledge Base",
+      "topk_sources": [
+        "Experiment Knowledge Base",
+        "Ruszczak OPS-SAT AD 2025",
+        "Ruszczak OPS-SAT AD 2025",
+        "Experiment Knowledge Base",
+        "Experiment Knowledge Base"
+      ],
+      "topk_scores": [
+        0.6662,
+        0.5988,
+        0.5886,
+        0.5521,
+        0.5507
+      ],
+      "source_hit_at_1": true,
+      "source_hit_at_k": true,
+      "kw_recall": 0.75,
+      "hit_terms": [
+        "ESA",
+        "工程师",
+        "标注"
+      ],
+      "rank_first_usable": 1,
+      "usable_at_k": true,
+      "low_confidence": false
+    },
+    {
+      "q": "EPS电源模块的故障模式",
+      "kind": "acronym",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "thruster 推力器故障如何排查",
+      "kind": "acronym",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "reaction wheel 反作用飞轮卡死",
+      "kind": "acronym",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "safe mode 进入条件与恢复流程",
+      "kind": "acronym",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "magnetometer anomaly detection",
+      "kind": "en_general",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "ADCS safe mode reaction wheel",
+      "kind": "en_general",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "photodiode zero value gap anomaly",
+      "kind": "en_general",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "satellite attitude control magnetic torquer",
+      "kind": "en_general",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "小卫星的对地通信频段选择",
+      "kind": "zh_itu",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "空间碎片减缓要求",
+      "kind": "zh_itu",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "立方体卫星标准化限制",
+      "kind": "zh_itu",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "遥测零值与传感器故障如何区分",
+      "kind": "diagnosis",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "太阳电池阵输出功率下降的原因",
+      "kind": "diagnosis",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    },
+    {
+      "q": "陀螺仪漂移与温度的关系",
+      "kind": "diagnosis",
+      "top1_score": 0.0,
+      "top1_source": "<empty>",
+      "topk_sources": [],
+      "topk_scores": [],
+      "source_hit_at_1": false,
+      "source_hit_at_k": false,
+      "kw_recall": 0.0,
+      "hit_terms": [],
+      "rank_first_usable": null,
+      "usable_at_k": false,
+      "low_confidence": false
+    }
+  ],
+  "tag": "run",
+  "index_ntotal": 4895,
+  "n_documents": 4895
+}
