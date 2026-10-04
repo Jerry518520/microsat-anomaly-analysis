@@ -29,9 +29,14 @@
 
 ### 前置要求
 - **Python 3.13**（本项目锁定 `faiss-cpu==1.14.2`，3.11/3.12 亦可；3.13 无 `faiss-gpu` wheel）
-- **NVIDIA 显卡 + CUDA 11.8+**（**仅 BGE-M3 嵌入计算需要**；向量检索用 `faiss-cpu` 走 CPU，不依赖 GPU）
+- **磁盘 ≥ 10 GB 可用**（嵌入模型 2.2 GiB + 依赖约 2 GiB + 索引 22 MiB）
+- **网络需能访问 `hf-mirror.com`**（仅第 4 步下载模型时需要）
 - **Node.js 18+**（仅前端开发需要）
 - Git
+
+> **不需要独立显卡。** 嵌入模型在 CPU 上实测 1.6 秒加载完成、正常输出
+> 1024 维向量（`device='cpu'`）。有 CUDA 会更快，但不是必需条件。
+> 向量检索用 `faiss-cpu` 走 CPU，本就不依赖 GPU。
 
 ### 第 1 步：克隆（必须 `-b main`）
 ```bash
@@ -47,29 +52,55 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 第 3 步：解压数据包（已随仓库分发，无需额外索取）
-仓库根目录的 `data_share.zip`（约 22MB）包含运行所需的全部数据：
-`data/raw/segments.csv` + `data/results/*.json` + `data/vectorstore/*`。
-在**项目根目录**解压即可（解压后应与 `src/`、`frontend/` 同级出现 `data/`）：
+> 依赖含 `fastapi` / `uvicorn` / `requests` / `matplotlib` / `seaborn` / RAG 全链路，
+> 已按实测版本锁定。**不要再手工装包**，照此清单装即可跑起来。
+
+### 第 3 步：数据（**已随仓库分发，无需解压**）
+
+`data/raw/segments.csv`、`data/results/*.json`、`data/vectorstore/*` 均已入库，
+克隆后直接可用。
+
+> ⚠ **不要解压 `data_share.zip`。** 该压缩包是 2026-05 的历史快照，其中的
+> `faiss_index.bin` md5 = `800d2d2f…`，而仓库内已修复的新索引
+> md5 = `30fbefc4…`。解压会用旧索引覆盖新索引，导致 2026-10 修复的检索质量
+> （剔除 197 条 PDF 残片、priority 排序生效）全部失效。
+
+### 第 4 步：下载嵌入模型（**必做，约 2.2 GiB**）
+
+模型**不入 git**（`.gitignore` 忽略 `models/`），须本地下载一次：
+
 ```bash
-# Windows：右键解压，或 PowerShell
-Expand-Archive data_share.zip -DestinationPath .
-# Linux / macOS
-unzip data_share.zip
+.venv\Scripts\python.exe scripts\download_model.py          # Windows
+# .venv/bin/python scripts/download_model.py               # Linux / macOS
 ```
 
-### 第 4 步：配置环境变量
+常用参数：
+
+| 参数 | 用途 |
+|---|---|
+| `--check` | 只校验完整性，不下载 |
+| `--skip-weights` | 只下配置文件，跳过 2.2 GiB 权重 |
+| `--source official` | 换用 `huggingface.co`（默认走 hf-mirror） |
+| `--target <dir>` | 指定存放目录（须与 `.env` 一致） |
+
+> 脚本默认走 `hf-mirror`——实测 `huggingface.co` 直连 **502** 不可达、
+> hf-mirror **0.5 s 可达**；且必须带 User-Agent（空 UA 会 403），
+> 失败会重试 3 次，权重支持断点续传。
+
+### 第 5 步：配置环境变量
 ```bash
 cp .env.example .env        # 然后编辑 .env
 ```
-- `VOLCENGINE_API_KEY`：**RAG 问答接口必需**；若只做看板/检测/波形联调可暂时留空。
-- `EMBEDDING_MODEL_PATH`：**离线环境必填**。指向本地嵌入模型目录，例如 `models/Xorbits/bge-m3`。
-  建索引（`scripts/build_index.py`）与运行时检索共用同一解析逻辑（`src/rag/embedding.py:resolve_embedding_model_path`），
-  不存在路径分叉。留空时不会静默下载，而是抛出明确异常——实测 `huggingface.co` 直连 8s 超时不可达，
-  隐式下载会每次冷启动卡 2.2GB。
-  ⚠ 本仓库 `models/bge-m3/` 是历史下载中断的残留（**0 个权重文件**），不要使用；可用模型是 `models/Xorbits/bge-m3`。
+- `DEEPSEEK_API_KEY`：**RAG 解释功能必需**。若只做看板/检测/波形联调可暂时留空。
+  （`configs/rag_config.yaml` 的 `llm.provider=deepseek`，`api_key_env` 指向此变量）
+- `EMBEDDING_MODEL_PATH`：**离线环境必填**，指向第 4 步下载的模型目录，
+  默认值 `models/Xorbits/bge-m3` 即可。
+  建索引（`scripts/build_index.py`）与运行时检索共用同一解析逻辑
+  （`src/rag/embedding.py:resolve_embedding_model_path`），**不存在路径分叉**。
+  留空不会静默下载，而是抛明确异常。
+  ⚠ 不要指向 `models/bge-m3/`——那是历史下载中断的残留（**0 个权重文件**）。
 
-### 第 5 步：启动
+### 第 6 步：启动
 **Windows（推荐，一键启动后端+前端）：**
 ```bash
 python scripts/start_ui.py
@@ -88,10 +119,38 @@ cd frontend && npm install && npm run dev
 - 前端界面：http://localhost:5180
 - 后端 API 文档：http://localhost:8000/docs
 
+### 第 7 步：冒烟验证
+```bash
+.venv\Scripts\python.exe -m pytest -q        # 应 128 passed, 1 skipped
+```
+端到端跑一次检测 + RAG：
+```bash
+.venv\Scripts\python.exe -c "
+import sys; sys.path.insert(0,'.')
+import warnings; warnings.filterwarnings('ignore')
+from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
+p = AnomalyRAGPipeline()
+r = p.detect_and_explain(max_explanations=3)
+print('完成，解释条数 =', len(r))
+"
+```
+预期：生产 `SegF1 = 0.644628`，3 条 RAG 解释正常生成。
+
+> ⚠ 本机若配置了代理，`curl http://127.0.0.1:8000/api/health` 可能返回 502
+> （代理拦截本机地址）。用 Python 绕过：
+> ```python
+> import urllib.request
+> op = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+> print(op.open('http://127.0.0.1:8000/api/health', timeout=10).read())
+> ```
+
 ### 接口对齐（前端开发）
 - 接口契约见 **`API.md`**（/api/health、/api/dashboard、/api/detection、/api/explanation）。
 - 对接清单与分工见 **`HANDOFF.md`**。
-- **除 `/api/explanation/query`（RAG 问答）需要 4.4GB 嵌入模型外，其余接口仅需 `data_share.zip` 数据即可联调**，无需模型权重。
+- **除 `/api/explanation/query`（RAG 问答）需要 2.2 GiB 嵌入模型外，其余接口仅需仓库内数据即可联调**，无需模型权重。
+
+### 完整部署文档
+见 **`DEPLOY.md`**（含常见问题 5 条：依赖缺失、`No module named 'src'`、模型未下、faiss 版本、溯源 `git_dirty` 说明）。
 
 ---
 
@@ -238,17 +297,80 @@ microsat-anomaly-analysis/
 
 ### 通道说明
 
-| 通道 ID | 物理含义 | 类型 |
-|---------|----------|------|
-| CADC0872 | Magnetometer X-axis (磁力计X轴) | 强通道 |
-| CADC0873 | Magnetometer Y-axis (磁力计Y轴) | 强通道 |
-| CADC0874 | Magnetometer Z-axis (磁力计Z轴) | 强通道 |
-| CADC0884 | Photodiode 1 (光电二极管1) | 弱通道 |
-| CADC0886 | Photodiode 2 (光电二极管2) | 弱通道 |
-| CADC0888 | Photodiode 3 (光电二极管3) | 弱通道 |
-| CADC0890 | Photodiode 4 (光电二极管4) | 弱通道 |
-| CADC0892 | Photodiode 5 (光电二极管5) | 弱通道 |
-| CADC0894 | Photodiode 6 (光电二极管6) | 弱通道 |
+通道名与物理含义依据官方基准论文
+（*Scientific Data* 2024, DOI 10.1038/s41597-025-05035-3；arXiv:2407.04730）：
+
+> "They include 3 magnetometer telemetry channels: I_B_FB_MM_0 (CADC0872),
+> I_B_FB_MM_1 (CADC0873), I_B_FB_MM_2 (CADC0874), and 6 photo diode (PD) channels:
+> I_PD1_THETA (CADC0884), I_PD2_THETA (CADC0886), I_PD3_THETA (CADC0888),
+> I_PD4_THETA (CADC0890), I_PD5_THETA (CADC0892), and I_PD6_THETA (CADC0894)."
+
+| 通道 ID | WebMUST 源名 | 物理含义 | 采样 | 值域（实测） |
+|---------|-------------|---------|------|------------|
+| CADC0872 | `I_B_FB_MM_0` | 磁力计 0 号 | 1 s | ±5e-5 |
+| CADC0873 | `I_B_FB_MM_1` | 磁力计 1 号 | 1 s | ±5e-5 |
+| CADC0874 | `I_B_FB_MM_2` | 磁力计 2 号 | 1 s | ±5e-5 |
+| CADC0884 | `I_PD1_THETA` | 光电二极管 1 **测角** | 5 s | 0 ~ π/2 |
+| CADC0886 | `I_PD2_THETA` | 光电二极管 2 **测角** | 5 s | 0 ~ π/2 |
+| CADC0888 | `I_PD3_THETA` | 光电二极管 3 **测角** | 5 s | 0 ~ π/2 |
+| CADC0890 | `I_PD4_THETA` | 光电二极管 4 **测角** | 5 s | 0 ~ π/2 |
+| CADC0892 | `I_PD5_THETA` | 光电二极管 5 **测角** | 1 s | 0 ~ π/2 |
+| CADC0894 | `I_PD6_THETA` | 光电二极管 6 **测角** | 1 s | 0 ~ π/2 |
+
+**两点须注意：**
+
+1. **磁力计未定义轴向。** 官方只给 `I_B_FB_MM_0/1/2` 编号，**未说明**哪路对应
+   哪轴，也未说明 `I_` 前缀是否表示输出电流。早期版本文档写「X/Y/Z 轴」属臆测，已更正。
+2. **`_THETA` 意味着测的是角度。** 实测 `CADC0884` 与 `CADC0892` 的取值上界
+   **恰为 1.5708 = π/2**（弧度），可确证为角度量纲，非光强。
+   这解释了为何 6 路测角通道与 3 路磁力计数值**相差 6 个数量级**。
+
+**官方给出的异常表现**（论文原文列举）：
+
+> "Several types of signal distortions are depicted, including peaks, deformations,
+> **noise (CADC0873)**, **irregular periodicity (CADC0886)**,
+> **short (CADC0892, CADC0894)** and **long data gaps (CADC0874)**."
+
+| 通道 | 官方指出的异常表现 | 本项目用原始文件实测印证 |
+|------|------------------|----------------------|
+| CADC0873 | 噪声 noise | 异常段一阶差分 std 3.56e-6 vs 正常 1.34e-6（**2.65 倍**） |
+| CADC0886 | 不规则周期性 | 自相关 lag5 由 +0.483 降至 +0.185（周期性被破坏） |
+| CADC0892/0894 | 短数据缺口 | 异常段**零值占比 33% / 46%**，最高 82% / 88% |
+| CADC0874 | 长数据缺口 | 异常段长中位 **493** 点 vs 正常 **78** 点（**6.3 倍**） |
+
+**`label` 列的 `a2` / `a3` / `a4` 官方论文未给出含义**，只做
+Nominal(1689 段) / Anomalous(434 段) 二分类。**不得猜测其物理类型。**
+
+> **CADC0884 在 fit/val/test 三个集合上正类均为 0**（97/25/36 段，0 异常），
+> 因此从段级判定中排除。依据是「全部可用数据上无正类样本」，
+> **不是**「test 上全错」——后者属用测试集信息做决策。
+
+### 融合策略：逐通道门控（当前生效）
+
+生产与论文使用的是**逐通道门控**（`gate_perchannel`）—— 9 个通道各自在
+验证集上从 `{rule, if, AND, OR}` 四个算子中选一个。不是「强/弱通道」二分。
+
+| 通道 | 选中算子 | 通道 | 选中算子 |
+|------|---------|------|---------|
+| CADC0872 | rule | CADC0888 | rule |
+| CADC0873 | AND | CADC0890 | rule |
+| CADC0874 | if | CADC0892 | if |
+| CADC0884 | rule | CADC0894 | if |
+| CADC0886 | rule | | |
+
+配方存放在 `data/results/v3/fusion.json` 的
+`results.selection.gate_perchannel_choice`，生产管线启动时读该文件
+（缺失会显式提示并回退，不会静默降级）。
+
+**两个口径说明**（答辩常被问）：
+
+| | 训练数据 | 是否排除 0884 | test F1 |
+|---|---|---|---|
+| **论文口径** | fit 1275 段 | 否 | **0.6281** |
+| 生产口径 | train 全集 1594 段 | 是 | 0.6446 |
+
+生产高 0.0165 = 多用 319 段训练（+0.0060）+ 排除无正类的 0884（+0.0106）。
+**两者口径不同，不能直接比大小。** 论文用 0.6281（与实验侧其他数字同口径、可相减）。
 
 ---
 
@@ -485,7 +607,7 @@ results = vectorstore.search("磁力计异常", top_k=5)
 prompt_data = prompts.get_anomaly_analysis_prompt(
     channel_id="CADC0872",
     anomaly_type="unusual_shapes",
-    anomaly_description="磁力计X轴异常",
+    anomaly_description="磁力计0号通道读数异常",
     context=context
 )
 answer = llm.generate(prompt=prompt_data["user"], system_prompt=prompt_data["system"])
