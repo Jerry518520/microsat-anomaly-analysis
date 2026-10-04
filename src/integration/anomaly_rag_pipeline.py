@@ -21,7 +21,7 @@
 使用：
     pipeline = AnomalyRAGPipeline()
     results = pipeline.detect_and_explain()
-    # results = [{"segment": 123, "channel": "CADC0874", "anomaly_type": "peaks",
+    # results = [{"segment": 123, "channel": "CADC0874", "anomaly_type": "intermittent_spikes",
     #             "explanation": "...", "sources": [...]}]
 """
 
@@ -41,7 +41,10 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from src.utils.data_loader import load_segments, load_config, get_project_root
-from src.utils.constants import CHANNEL_PHYSICS, META_COLS, NO_ANOMALY_CHANNELS
+from src.utils.constants import (
+    CHANNEL_PHYSICS, META_COLS, NO_ANOMALY_CHANNELS,
+    FEATURE_SUMMARY_KEYS, TYPE_THRESHOLDS, ANOMALY_TYPE_LABELS,
+)
 from src.utils.stat_rules import compute_stat_thresholds, apply_stat_rules
 from src.features.segment_features import run_segment_baseline
 from src.rag.pipeline import RAGPipeline, get_rag_pipeline
@@ -53,7 +56,7 @@ class AnomalyResult:
     segment: int
     channel: str
     anomaly_score: float  # 段级异常率 (0-1)
-    anomaly_type: str  # peaks/zero_values/unusual_shapes/gaps
+    anomaly_type: str  # intermittent_spikes/high_freq_jitter/low_activity/unusual_shapes
     feature_summary: Dict[str, float]  # 关键特征统计
     is_anomaly: bool = True
 
@@ -484,42 +487,74 @@ class AnomalyRAGPipeline:
         return min(max(confidence, 0.0), 1.0)
     
     def _extract_feature_summary(self, seg_windows, feature_cols):
-        """提取该段的关键特征统计"""
+        """提取该段的关键特征统计。
+
+        ⚠ 历史 bug：本方法曾读 `n_peaks_1.0` / `crest_factor` / `impulse_factor` /
+        `min` / `max` / `zero_crossing_rate`，这些列在数据集里**全部不存在**
+        （实际列见 framework.FEATURE_COLS，共 18 个），因此除 mean/std 外
+        全部取不到值、summary 里只剩两项，其余键在下游表现为「缺失」。
+        现改为按 FEATURE_SUMMARY_KEYS 取真实存在的列。
+        """
         summary = {}
-        key_features = ["mean", "std", "min", "max", "n_peaks_1.0", "zero_crossing_rate", 
-                        "crest_factor", "impulse_factor"]
-        
-        for feat in key_features:
+        # 段级数据每段只有一行；窗口级数据按段内均值聚合，两种都能用
+        for feat in FEATURE_SUMMARY_KEYS:
             if feat in seg_windows.columns:
-                summary[feat] = float(seg_windows[feat].mean())
-        
+                vals = pd.to_numeric(seg_windows[feat], errors="coerce").dropna()
+                if len(vals) > 0:
+                    summary[feat] = float(vals.mean())
+
         return summary
-    
+
     def _classify_anomaly_type(self, feat_summary: Dict, channel: str) -> str:
-        """
-        根据特征统计分类异常类型
-        
+        """根据段级特征统计判定异常形态。
+
         Returns:
-            str: peaks / zero_values / unusual_shapes / gaps
+            str: intermittent_spikes / high_freq_jitter / low_activity / unusual_shapes
+
+        规则依据（阈值与富集度见 utils/constants.py，均由 fit 集标定、val 集验证）：
+          - intermittent_spikes：n_peaks>=3（一阶差分峰<=2）
+              实测「n_peaks>=3 & diff_peaks<=2」象限异常率 1.000（fit 16/16、
+              val 1/1），富集度 4.96 —— 数据中唯一强判别形态。
+          - high_freq_jitter：diff_peaks>=10
+              异常段一阶差分峰数 p80=13，正常段中位仅 6。
+          - low_activity：n_peaks<=1 且 diff2_peaks<=5
+              异常段二阶差分峰数 p20=1，峰数与差分同时压低= 信号近乎静止。
+          - 其余一律 fallback，不编造数据不支持的类型。
+            （原 zero_values / gaps 已被移除：实测 var<1e-10 的段异常率 0.217
+              与基准 0.201 无差异；gaps_squared 全体 AUC 0.452，弱于随机，
+              不足以支撑「数据间隙」这一类型。）
+
+        ⚠ 只用跨通道可比的计数特征。std/var/mean 跨通道差4 个数量级
+          （磁力计 ≈2e-5 vs 光电二极管 ≈0.3），不做绝对阈值判定。
+          channel 参数保留给下游按通道物理含义二次加工，当前规则不依赖它。
         """
-        mean_val = feat_summary.get("mean", 0)
-        min_val = feat_summary.get("min", 0)
-        n_peaks = feat_summary.get("n_peaks_1.0", 0)
-        crest_factor = feat_summary.get("crest_factor", 1)
-        
-        # 零值判断：均值接近0且最小值接近0
-        if abs(mean_val) < 1e-6 and abs(min_val) < 1e-6:
-            return "zero_values"
-        
-        # 尖峰判断：峰值数多 + 波峰因子高
-        if n_peaks > 2 and crest_factor > 3:
-            return "peaks"
-        
-        # 数据间隙：这个需要原始数据判断，这里暂时归为unusual_shapes
-        # 实际中可通过seg_windows长度与预期长度的差异判断
-        
+        th = TYPE_THRESHOLDS
+
+        n_peaks = feat_summary.get("n_peaks")
+        diff_peaks = feat_summary.get("diff_peaks")
+        diff2_peaks = feat_summary.get("diff2_peaks")
+
+        # 特征缺失时无法判定，直接 fallback（不做任何猜测）
+        if n_peaks is None or diff_peaks is None or diff2_peaks is None:
+            return "unusual_shapes"
+
+        # 1) 间歇性尖峰：峰数高于正常段中位，且帧间差分极低
+        if (n_peaks >= th["intermittent_spikes_n_peaks_min"]
+                and diff_peaks <= th["intermittent_spikes_diff_peaks_max"]):
+            return "intermittent_spikes"
+
+        # 2) 持续高频抖动：一阶差分峰数超过异常段 p80
+        if diff_peaks >= th["high_freq_jitter_diff_peaks_min"]:
+            return "high_freq_jitter"
+
+        # 3) 低活动：峰数与二阶差分同时处于低分位
+        if (n_peaks <= th["low_activity_n_peaks_max"]
+                and diff2_peaks <= th["low_activity_diff2_peaks_max"]):
+            return "low_activity"
+
+        # 4) fallback
         return "unusual_shapes"
-    
+
     # ===== Step 2: RAG解释 =====
     
     def explain(self, anomaly: AnomalyResult) -> RAGExplanation:
@@ -563,15 +598,20 @@ class AnomalyRAGPipeline:
             f"异常得分: {anomaly.anomaly_score:.2f} (阈值{self.vote_threshold})",
         ]
         
-        # 添加关键特征
+        # 添加关键特征（键名与 _extract_feature_summary 产出一致）
         feat = anomaly.feature_summary
-        if "mean" in feat:
-            desc_parts.append(f"均值: {feat['mean']:.4f}")
-        if "std" in feat:
-            desc_parts.append(f"标准差: {feat['std']:.4f}")
-        if "n_peaks_1.0" in feat:
-            desc_parts.append(f"峰值数: {feat['n_peaks_1.0']:.1f}")
-        
+        label = ANOMALY_TYPE_LABELS.get(anomaly.anomaly_type, anomaly.anomaly_type)
+        desc_parts[1] = f"异常类型: {anomaly.anomaly_type}（{label}）"
+        for feat_key, desc_fmt in (
+            ("mean", "均值: {:.4g}"),
+            ("std", "标准差: {:.4g}"),
+            ("kurtosis", "峰度: {:.3f}"),
+            ("n_peaks", "峰值数: {:.1f}"),
+            ("diff_peaks", "一阶差分峰数: {:.1f}"),
+        ):
+            if feat_key in feat:
+                desc_parts.append(desc_fmt.format(feat[feat_key]))
+
         return "; ".join(desc_parts)
     
     # ===== Step 3: 联合Pipeline =====
