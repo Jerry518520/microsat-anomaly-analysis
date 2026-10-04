@@ -34,9 +34,21 @@
 - **Node.js 18+**（仅前端开发需要）
 - Git
 
-> **不需要独立显卡。** 嵌入模型在 CPU 上实测 1.6 秒加载完成、正常输出
-> 1024 维向量（`device='cpu'`）。有 CUDA 会更快，但不是必需条件。
-> 向量检索用 `faiss-cpu` 走 CPU，本就不依赖 GPU。
+### 关于显卡
+
+**分两个环节，需求不同：**
+
+| 环节 | 是否需要显卡 | 实测 |
+|---|---|---|
+| **BGE-M3 向量化**（建索引 / 编码新文本） | **强烈建议有** | 编码 128 条：CPU **2.17 s** vs GPU **0.26 s**（**8.3 倍**） |
+| FAISS 向量检索 | **不需要** | `faiss-cpu` 纯 CPU 检索，9 通道 4868 chunk 实测正常 |
+
+- `configs/rag_config.yaml` 的 `embedding.device` 默认配的是 **`cuda`**。
+  **若无 NVIDIA 显卡会把这一项改成 `cpu`**，否则建索引阶段会因找不到 CUDA 设备而失败。
+  只做检测/看板（不生成 RAG 解释）时无需改，因为不触发向量化。
+- 项目里也**不要求** `faiss-gpu`——实测该包在 Python 3.13 + Windows 下
+  `No matching distribution`，实际可用的是 `faiss-cpu`（纯 CPU 检索）。
+- 有 CUDA 会让建索引与 RAG 解释快约 8 倍；无 CUDA 也能跑，只是慢。
 
 ### 第 1 步：克隆（必须 `-b main`）
 ```bash

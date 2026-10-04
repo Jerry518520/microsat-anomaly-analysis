@@ -15,6 +15,27 @@
 | Python | 3.13（本项目在 3.13.13 验证） | `pyproject.toml` 声明 `>=3.11` |
 | 磁盘 | **≥ 10 GB 可用** | 模型 2.2 GiB + 索引 22 MiB + 依赖约 2 GiB |
 | 网络 | 需能访问 `hf-mirror.com` | 见 0.4 |
+| 显卡 | **可选，但强烈建议** | 见下方说明 |
+
+**关于显卡（两个环节需求不同）**
+
+| 环节 | 需要显卡吗 | 实测 |
+|---|---|---|
+| BGE-M3 向量化（建索引 / 编码） | **强烈建议有** | 编码 128 条：CPU **2.17 s** vs GPU **0.26 s**（**8.3 倍**） |
+| FAISS 检索 | 不需要 | `faiss-cpu` 纯 CPU，4868 chunk 实测正常 |
+
+`configs/rag_config.yaml` 的 `embedding.device` 默认是 **`cuda`**。
+无 NVIDIA 显卡时**必须改成 `cpu`**，否则建索引会因找不到 CUDA 设备而失败：
+
+```yaml
+embedding:
+  device: cpu        # 无显卡时改这一行
+```
+
+只做检测/看板（不生成 RAG 解释）时无需改 —— 该路径不触发向量化。
+
+**不需要 `faiss-gpu`**：实测该包在 Python 3.13 + Windows 下
+`No matching distribution`，实际可用的是 `faiss-cpu`（纯 CPU 检索）。
 
 ### 0.2 克隆与安装依赖
 
@@ -150,6 +171,8 @@ curl http://127.0.0.1:8000/api/health
 |---|---|---|
 | `No module named 'fastapi'` | 依赖没装全 | 重跑 0.2 的 pip install |
 | `No module named 'src'` | 用了裸 `uvicorn` | 改 `python -m uvicorn` |
+| `Found no NVIDIA driver` / CUDA 设备报错 | 配置里 `device: cuda` 但无显卡 | `configs/rag_config.yaml` 的 `embedding.device` 改 `cpu` |
+| 建索引很慢 | 无显卡，CPU 编码比 GPU 慢约 8 倍 | 属正常；加显卡可显著提速 |
 | 嵌入模型相关异常 | 模型没下或路径不对 | 跑 `download_model.py --check` |
 | 索引读不出 | faiss 版本不符 | 确认 `faiss-cpu==1.14.2` |
 | 修改代码后 `git_dirty=True` | 自指循环，见下 | 正常，非缺陷 |
@@ -157,6 +180,10 @@ curl http://127.0.0.1:8000/api/health
 > **关于 `meta.git_dirty` 恒为 True**：结果 JSON 每次生成都会改写自身，
 > 因此记录 meta 的那一刻工作区必然非干净。**这不是缺陷**。
 > 溯源是否可信以 `meta.git_commit` 是否与 HEAD 一致、以及数字能否独立复算为准。
+
+> **关于 faiss-gpu**：`requirements.txt` 用的是 `faiss-cpu==1.14.2`，**不要**改成
+> `faiss-gpu` —— 实测该包在 Python 3.13 + Windows 下 `No matching distribution`，
+> 装不上。检索走 CPU 即可，向量化才需要 GPU。
 
 ---
 
