@@ -31,3 +31,24 @@ torch
 torchvision==0.27.0
 pypdf
 pyyaml
+
+# ---- API 层（P0：此前完全未声明，干净环境无法启动后端）----
+# 实测：src/api/main.py 直接 import fastapi/uvicorn，但本文件从未声明，
+#       任何按 README 装环境的新机器都会 ModuleNotFoundError 起不来。
+# 版本按 .venv 实测锁定（2026-10-04）。
+fastapi==0.138.1
+uvicorn==0.48.0
+requests==2.34.2
+
+# ---- 绘图（P0：模块 import 即崩）----
+# src/utils/visualization.py 与 src/evaluation/feature_importance.py 顶层
+# import matplotlib / seaborn，但两者未声明也未安装，实测
+# ModuleNotFoundError: No module named 'matplotlib'。
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# ---- RAG 链路 ----
+langchain==1.3.2
+langchain-community==0.4.2
+sentence-transformers==5.5.1
+transformers==5.9.0

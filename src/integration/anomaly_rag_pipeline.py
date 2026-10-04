@@ -218,9 +218,21 @@ class AnomalyRAGPipeline:
         #   两者口径不同是有意的，且都正确：
         #   - 实验侧拆 fit/val 是为了在同口径下公平比较超参（防过拟合 val）；
         #   - 生产侧上线时全部历史数据都可用，用全集拟合参数更强。
-        #   实测差异：生产 SegF1=0.6446 vs 实验 0.6281，仅差 2~3 个段
-        #   （实验 TP76/FP53/FN37，生产 TP78/FP51/FN35），CI 高度重叠。
+        #   实测差异：生产 SegF1=0.6446 vs 实验 0.6281（TP78/FP51/FN35 vs
+        #   TP76/FP53/FN37），两者 CI 高度重叠。
         #   若要与论文数字严格对齐，可改用 framework.load_split() 取 fit。
+        #
+        # ⚠⚠ 必须按 segment 显式排序，否则结果依赖 CSV 的物理行序。
+        #   机理：IsolationForest 的 max_samples 子采样按**行索引**取样本，
+        #   而 offset_ = percentile(训练集自身分数, 100*contamination)
+        #   （sklearn/ensemble/_iforest.py:389）。random_state 只固定了随机数
+        #   发生器，固定不了「哪些行被选中」—— 行序一变，被选中的具体样本就变，
+        #   集成结构随之改变，offset_ 改变，最终预测改变。
+        #   实测：同一 random_state=42、同一配方，仅改行序（CSV原序 / segment排序 /
+        #   洗牌seed1 / 洗牌seed2），判异常数 138~144，F1 0.3294~0.3347，极差 0.0052。
+        #   故此处按 segment 排序，使结果与文件物理顺序解耦。
+        features_df = features_df.sort_values("segment").reset_index(drop=True)
+        train_mask = features_df["train"] == 1
         train_df = features_df[train_mask]
         test_df = features_df[~train_mask].copy()
 

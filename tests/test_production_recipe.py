@@ -164,6 +164,73 @@ def test_production_prediction_does_not_read_labels():
         assert bad not in gate_src, f"门控融合引用了标签：{bad}"
 
 
+def test_dataset_is_sorted_by_segment_deterministically():
+    """生产管线必须按 segment 显式排序，使结果与 CSV 物理行序解耦。
+
+    机理：IsolationForest 的 max_samples 子采样按**行索引**取样本，
+    而 offset_ = percentile(训练集自身分数, 100*contamination)
+    （sklearn/ensemble/_iforest.py:389）。random_state 只固定随机数发生器，
+    固定不了「哪些行被选中」—— 行序一变，被选中的具体样本就变，
+    集成结构与 offset_ 随之改变。
+
+    实测（random_state=42、同一配方）：CSV原序/segment排序 F1=0.334661，
+    洗牌 seed1 F1=0.329412，洗牌 seed2 F1=0.334630，极差 0.0052。
+    """
+    src = PIPELINE_PY.read_text(encoding="utf-8")
+    assert 'sort_values("segment")' in src, (
+        "生产管线未按 segment 排序，结果会依赖 CSV 物理行序"
+    )
+    # 排序必须在切分之前
+    sort_pos = src.index('sort_values("segment")')
+    split_pos = src.index('train_mask = features_df["train"] == 1', sort_pos)
+    assert sort_pos < split_pos, "排序须在 train/test 切分之前"
+
+
+def test_declared_requirements_match_installed():
+    """requirements.txt 里用 == 锁版本的包，实际安装版本必须一致。
+
+    用途：干净环境按 requirements 装出来的版本应与本机验收环境相同。
+    缺声明或版本漂移都会让「本机能跑」变成「别人跑不起来」。
+    """
+    import importlib.metadata as meta
+    import re
+
+    req = (ROOT / "requirements.txt").read_text(encoding="utf-8")
+    pinned = dict(re.findall(r"^([A-Za-z0-9_-]+)==([0-9.]+)$", req, re.M))
+
+    # 三个包曾经完全未声明，导致干净环境无法启动后端
+    for must in ("fastapi", "uvicorn", "requests"):
+        assert must in pinned or f"{must}>=" in req, (
+            f"requirements.txt 未声明 {must}，干净环境装完无法启动后端"
+        )
+
+    bad = []
+    for p, v in sorted(pinned.items()):
+        try:
+            actual = meta.version(p)
+        except meta.PackageNotFoundError:
+            bad.append(f"{p}: 声明 {v} 但未安装")
+            continue
+        if actual != v:
+            bad.append(f"{p}: 声明 {v} 实际 {actual}")
+    assert not bad, "requirements 与实际安装版本不符：" + "; ".join(bad)
+
+
+def test_readme_uses_python_dash_m_uvicorn():
+    """README 必须写 `python -m uvicorn`，不能直接 `uvicorn`。
+
+    实测：直接跑 uvicorn.exe 会使 sys.path[0] 变成 venv/Scripts，
+    导致 `import src` 失败。新人照文档操作第一天就起不来服务。
+    """
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    for line in readme.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("uvicorn "):
+            raise AssertionError(
+                f"README 有裸 uvicorn 命令（会 ModuleNotFoundError: No module named 'src'）：{line.strip()[:60]}"
+            )
+
+
 def test_segment_baseline_is_dead_when_recipe_present():
     """有配方时，9 通道算子不含 seg_baseline，段级基线 IF 结果不应生效。
 

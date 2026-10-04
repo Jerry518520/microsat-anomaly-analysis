@@ -73,8 +73,10 @@ python scripts/start_ui.py
 **Linux / macOS（`start_ui.py` 为 Windows 专用，需手动启动）：**
 ```bash
 # 终端 1：后端
-.venv/bin/activate
-uvicorn src.api.main:app --port 8000 --host 127.0.0.1
+# ⚠ 必须用 `python -m uvicorn`，不能直接 `uvicorn`。
+#   实测：直接跑 uvicorn 会使 sys.path[0] 变成 venv/Scripts 目录，
+#   导致 `import src` 失败（ModuleNotFoundError: No module named 'src'）。
+python -m uvicorn src.api.main:app --port 8000 --host 127.0.0.1
 # 终端 2：前端
 cd frontend && npm install && npm run dev
 ```
@@ -494,7 +496,9 @@ answer = llm.generate(prompt=prompt_data["user"], system_prompt=prompt_data["sys
 
 **启动方式**:
 ```bash
-uvicorn src.api.main:app --reload --port 8000
+# ⚠ 必须用 `python -m uvicorn`（裸 uvicorn 会让 sys.path[0] 变成 venv/Scripts，
+#   导致 import src 失败）。详见上文「Linux / macOS」启动段。
+python -m uvicorn src.api.main:app --reload --port 8000
 ```
 
 ### 5. React 前端 (`frontend/`)
