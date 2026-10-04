@@ -2,15 +2,26 @@
 异常检测 + RAG解释 联合Pipeline
 
 功能：
-1. 运行完整异常检测流程（Scheme G + threshold 0.25 + psi=128）
+1. 运行完整异常检测流程
+   - 有 fusion.json 配方时：按 gate_perchannel 逐通道选 rule/if/AND/OR
+     （9 个通道各自独立，参数由 scripts/fusion_v3.py 在 val 上选出）
+   - 无配方时：回退 Scheme G（强通道 IF+OR 规则 / 弱通道段级 baseline）
+   - psi=128 为工程固定参数；vote_threshold=0.25 为工程设定值（无 val 选优）
 2. 对检测到的异常自动生成RAG解释查询
 3. 调用RAG pipeline获取知识库支撑的分析报告
 4. 返回结构化的联合结果
 
+标签依赖说明：
+- 推理链路（阈值计算 / IF 训练 / 门控融合 / 段级聚合）不读取 `anomaly` 标签
+- 超参 best_k / best_contamination_per_channel / gate_choice 由
+  scripts/fusion_v3.py 在 val 集上选出，属离线阶段，与线上推理无关
+- last_seg_results 中的 y_true 字段仅供离线评估与前端可视化，
+  不参与任何预测计算
+
 使用：
     pipeline = AnomalyRAGPipeline()
     results = pipeline.detect_and_explain()
-    # results = [{"segment": 123, "channel": "CADC0874", "anomaly_type": "peaks", 
+    # results = [{"segment": 123, "channel": "CADC0874", "anomaly_type": "peaks",
     #             "explanation": "...", "sources": [...]}]
 """
 
@@ -124,9 +135,16 @@ class AnomalyRAGPipeline:
         self.config_path = config_path
         self.rag_pipeline = None  # 延迟初始化
 
-        # 检测参数（最优配置）
-        self.vote_threshold = 0.25  # 最优投票阈值
-        self.psi = 128  # 最优子采样参数
+        # 检测参数
+        # ⚠ vote_threshold 是**无选优过程的工程设定值**，注释原文写「最优投票阈值」
+        #   不准确。fusion_v3.py 中不存在同名参数，被 val 选出的是各软融合策略的
+        #   tau（soft_global=0.15 / soft_perchannel 各通道 0.05~0.35 / soft_calibrated=0.2），
+        #   语义是「归一化分数阈值」；本值语义是「异常窗口占比阈值」，两者不同。
+        #   数值同为 0.25 属巧合，无因果关系。
+        #   段级数据每段仅 1 行（n_windows==1），该阈值实际作用于
+        #   _compute_segment_confidence 输出的连续分数。
+        self.vote_threshold = 0.25  # 工程设定值，非 val 选出
+        self.psi = 128  # 子采样数，工程固定参数
 
         # 论文配方（val 选出）。载入失败时 recipe=None，走原有硬编码分支。
         self.recipe = self.load_recipe()
@@ -327,14 +345,20 @@ class AnomalyRAGPipeline:
         train_mask = dataset_df["train"] == 1
         X_train = dataset_df.loc[train_mask, feat_cols].values
         X_test = dataset_df.loc[~train_mask, feat_cols].values
-        y_test = dataset_df.loc[~train_mask, "anomaly"].values
         test_segments = dataset_df.loc[~train_mask, "segment"].values
-        
+
+        # ⚠ contamination=0.25 是**无选优过程的工程设定值**，不是 val 搜出来的。
+        #   fusion_v3.py 的 select_if_contamination 是分通道搜索，产出的
+        #   best_contamination_per_channel 里没有「全局段级 IF」这一项。
+        #   故此值不可声称「由 val 最优选出」，只能称工程设定。
+        #   且当 fusion.json 配方存在时，本函数的结果在 _build_scheme_g 中
+        #   不会被使用（9 个通道的 op 全为 rule/if/AND/OR，无 seg_baseline），
+        #   仅在配方缺失的回退路径生效。
         model = IsolationForest(
-            n_estimators=100, 
+            n_estimators=100,
             max_samples=self.psi,
-            contamination=0.25, 
-            random_state=42, 
+            contamination=0.25,
+            random_state=42,
             n_jobs=-1
         )
         model.fit(X_train)
@@ -410,10 +434,16 @@ class AnomalyRAGPipeline:
 
         seg["is_anomaly"] = seg["anomaly_score"] >= threshold
 
-        # Agent D：排除无异常通道（如 CADC0884，测试集无真值异常）。
-        # 该通道为纯误报来源，在段级判定阶段直接标记为非异常，
-        # 不影响 Isolation Forest / 分段 / Scheme G 等任何算法逻辑，
-        # 也不改 contamination / psi / vote_threshold 等超参。
+        # ⚠ 排除「全集合无正类样本」的通道。
+        #   依据：CADC0884 在 fit=97段/val=25段/test=36段 上正类均为 0
+        #   （三集合实测，见 tests/test_production_recipe.py 的断言）。
+        #   即该通道在整个可用数据上无正类，训练与评估都无法进行。
+        #
+        #   ⚠ 不要把依据写成「test 上无真值异常」—— 那是拿测试集标签做决策。
+        #     本常量只允许由「全集合无正类」推出，且须有测试断言守护。
+        #
+        #   注：门控配方里 0884 的 op="rule"、val_f1=0.0，门控本身就会忽略该通道，
+        #       此处显式排除是冗余保护，不改变结果。
         if NO_ANOMALY_CHANNELS:
             no_anom_mask = seg["channel"].isin(NO_ANOMALY_CHANNELS)
             seg.loc[no_anom_mask, "is_anomaly"] = False

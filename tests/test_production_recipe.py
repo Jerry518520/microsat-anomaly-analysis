@@ -108,3 +108,76 @@ def test_no_anomaly_channel_has_no_positive_in_any_split():
                 f"{ch} 在 {name} 上有 {int(sub.anomaly.sum())} 个异常段，"
                 f"不满足排除条件（排除依据应为全集合无正类）"
             )
+
+
+def test_hardcoded_params_not_claimed_as_optimal():
+    """两个硬编码常量不得被注释或文档说成「最优」。
+
+    `vote_threshold=0.25` 与段级基线 `contamination=0.25` 都**没有 val 选优过程**：
+    - fusion_v3.py 中不存在 vote_threshold 这个参数，被 val 选出的是各软融合
+      策略的 tau（语义为「归一化分数阈值」），与本值语义不同；
+    - select_if_contamination 是分通道搜索，产出的
+      best_contamination_per_channel 里没有「全局段级 IF」这一项。
+
+    两者数值同为 0.25 属巧合。论文与注释不得称其为最优。
+    """
+    src = PIPELINE_PY.read_text(encoding="utf-8")
+
+    # 「最优投票阈值」「最优子采样参数」不得作为结论性描述。
+    # 允许出现在纠错说明里（如「原文写『最优投票阈值』不准确」），
+    # 判据：该行须带 ⚠ 标记或含否定词。
+    for i, line in enumerate(src.splitlines()):
+        if "最优投票阈值" in line or "最优子采样参数" in line:
+            assert ("⚠" in line) or ("不准确" in line) or ("非" in line), (
+                f"第 {i + 1} 行把无选优过程的参数说成最优：{line.strip()[:70]}"
+            )
+
+    # 必须有工程设定值的标注
+    assert "工程设定值" in src, "缺少「工程设定值」标注"
+    # 段级基线 contamination 必须说明无选优过程
+    assert "无选优过程的工程设定值" in src, "段级基线 contamination 缺来源说明"
+    # 文件头 docstring 不得再宣称 Scheme G + 0.25 是唯一流程
+    head = src[: src.index('"""', 3)]
+    assert "Scheme G + threshold 0.25" not in head, (
+        "docstring 仍把 Scheme G + 0.25 写成唯一流程，未说明配方优先"
+    )
+
+
+def test_production_prediction_does_not_read_labels():
+    """生产推理路径不得读取标签来影响预测。
+
+    允许：把真值放进 last_seg_results 供离线评估、API 返回真值做可视化。
+    禁止：y_test/y_true 参与 _build_scheme_g 或 is_anomaly 的计算。
+    """
+    src = PIPELINE_PY.read_text(encoding="utf-8")
+    # 死代码已删
+    assert 'y_test = dataset_df.loc[~train_mask, "anomaly"].values' not in src, (
+        "y_test 死代码仍在，线上代码不应出现标签变量"
+    )
+    # is_anomaly 的判定只能依赖 anomaly_score 与 threshold
+    assert 'seg["is_anomaly"] = seg["anomaly_score"] >= threshold' in src, (
+        "is_anomaly 判定口径被改动"
+    )
+    # 门控融合不得引用任何标签
+    gate_src = src[src.index("def _build_scheme_g"):src.index("def _segment_aggregate")]
+    for bad in ["y_test", "y_true", '["anomaly"]']:
+        assert bad not in gate_src, f"门控融合引用了标签：{bad}"
+
+
+def test_segment_baseline_is_dead_when_recipe_present():
+    """有配方时，9 通道算子不含 seg_baseline，段级基线 IF 结果不应生效。
+
+    若将来给某通道选了 seg_baseline 算子，此测试会失败——那时
+    contamination=0.25 才会真正影响结果，必须先给它补上选优过程。
+    """
+    from src.integration.anomaly_rag_pipeline import AnomalyRAGPipeline
+
+    recipe = AnomalyRAGPipeline.load_recipe()
+    if recipe is None:
+        pytest.skip("无配方文件")
+    ops = set(recipe["gate_choice"].values())
+    assert "seg_baseline" not in ops, (
+        f"配方含 seg_baseline 算子，段级基线 IF 的 contamination=0.25 将生效，"
+        f"而该值无选优过程 —— 须先补选优"
+    )
+
