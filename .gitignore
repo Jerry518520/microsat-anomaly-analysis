@@ -61,8 +61,15 @@ data/results/v3/_backups/
 models/
 
 # FAISS index (large binary)
+# ⚠ data/vectorstore/ 已纳入版本库（22MB），不要忽略。
+#   理由：模型 models/Xorbits/bge-m3 有 4.3GB，不便入库；而 FAISS 索引只有
+#   22MB。若索引不入库，新机器 clone 后没有索引，RAG 无法工作（只能现场重建，
+#   而重建前提是先备好 4.3GB 模型）。22MB 换「clone 即得可用 RAG」划算。
+#   重建方式：./.venv/Scripts/python.exe scripts/build_index.py（约 2.5 分钟）
+#   注意：嵌入模型路径已统一为 .env 的 EMBEDDING_MODEL_PATH（本地模型），
+#   离线环境下不要改成 BAAI/bge-m3，否则本地无权重会加载失败。
 faiss_store/
-data/vectorstore/
+# data/vectorstore/   ← 已入库，见上方说明
 
 # Embeddings cache
 data/embeddings_cache/
