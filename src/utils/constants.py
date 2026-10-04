@@ -17,16 +17,41 @@ CHANNEL_MAP = {
 }
 
 # 英文通道描述（用于 RAG prompt）
+# 通道物理含义 —— 依据官方基准论文（Scientific Data 2024, DOI 10.1038/s41597-025-05035-3）
+# 与 arXiv:2407.04730 原文：
+#   "They include 3 magnetometer telemetry channels: I_B_FB_MM_0 (CADC0872),
+#    I_B_FB_MM_1 (CADC0873), I_B_FB_MM_2 (CADC0874), and 6 photo diode (PD)
+#    channels: I_PD1_THETA (CADC0884), I_PD2_THETA (CADC0886),
+#    I_PD3_THETA (CADC0888), I_PD4_THETA (CADC0890), I_PD5_THETA (CADC0892),
+#    and I_PD6_THETA (CADC0894)."
+#
+# ⚠ 更正记录（此前本表有两处臆测，均已按官方原文修正）：
+#   1. 磁力计原写 "X-axis/Y-axis/Z-axis" —— **官方未定义轴向**，只给出
+#      I_B_FB_MM_0/1/2 编号。不得臆断为三轴。原文亦未说明 I_ 前缀是否表示
+#      输出电流及具体单位。
+#   2. 光电二极管原写 "Photodiode N angle" 但漏了通道名中的 _THETA，
+#      且中文只写「光电二极管N」。官方通道名为 I_PD*_THETA。
+#
+# 采样率与实测值域（本项目 segments.csv 实测，供 LLM 解释时参考）：
+#   MM 系列（0872/0873/0874）：sampling=1s，value 量级 ~1e-5（±5e-5）
+#   PD_THETA 系列（0884~0894）：sampling=5s，value ∈ [0, π/2]，
+#     CADC0884 与 CADC0892 上界实测恰为 1.5708 = π/2 → **确为角度量纲（弧度）**，
+#     非光强。这解释了为何其数值与磁力计差 6 个数量级。
+#
+# 官方论文明确给出的异常表现（原文列举，用于 RAG 解释的物理依据）：
+#   "Several types of signal distortions are depicted, including peaks,
+#    deformations, noise (CADC0873), irregular periodicity (CADC0886),
+#    short (CADC0892, CADC0894) and long data gaps (CADC0874)."
 CHANNEL_PHYSICS = {
-    "CADC0872": "Magnetometer X-axis 磁力计X轴",
-    "CADC0873": "Magnetometer Y-axis 磁力计Y轴",
-    "CADC0874": "Magnetometer Z-axis 磁力计Z轴",
-    "CADC0884": "Photodiode 1 angle 光电二极管1",
-    "CADC0886": "Photodiode 2 angle 光电二极管2",
-    "CADC0888": "Photodiode 3 angle 光电二极管3",
-    "CADC0890": "Photodiode 4 angle 光电二极管4",
-    "CADC0892": "Photodiode 5 angle 光电二极管5",
-    "CADC0894": "Photodiode 6 angle 光电二极管6",
+    "CADC0872": "Magnetometer 0 (I_B_FB_MM_0) 磁力计0号，1s采样，量级~1e-5",
+    "CADC0873": "Magnetometer 1 (I_B_FB_MM_1) 磁力计1号，官方示出异常表现=噪声(noise)",
+    "CADC0874": "Magnetometer 2 (I_B_FB_MM_2) 磁力计2号，官方示出异常表现=长数据缺口(long data gap)",
+    "CADC0884": "Photodiode 1 theta (I_PD1_THETA) 光电二极管1测角，5s采样，量纲=弧度",
+    "CADC0886": "Photodiode 2 theta (I_PD2_THETA) 光电二极管2测角，官方示出异常表现=不规则周期性(irregular periodicity)",
+    "CADC0888": "Photodiode 3 theta (I_PD3_THETA) 光电二极管3测角，量纲=弧度",
+    "CADC0890": "Photodiode 4 theta (I_PD4_THETA) 光电二极管4测角，量纲=弧度",
+    "CADC0892": "Photodiode 5 theta (I_PD5_THETA) 光电二极管5测角，官方示出异常表现=短数据缺口(short data gap)",
+    "CADC0894": "Photodiode 6 theta (I_PD6_THETA) 光电二极管6测角，官方示出异常表现=短数据缺口(short data gap)",
 }
 
 # 无异常通道（数据集中始终为正常）
