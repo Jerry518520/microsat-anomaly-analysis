@@ -62,6 +62,14 @@ cd "F:/F盘/微小卫星项目/microsat-anomaly-analysis"
 
 配置：`psi(max_samples)=128`、`vote_threshold=0.25`、`rule_ratio>=0.2`、全局段级 baseline `contamination=0.25`、强通道 ['CADC0872', 'CADC0873', 'CADC0874']、`random_state=42`。
 
+> ⚠ **本节为「改前」配置，参数已被后续修改，不得当作现行配置引用。**
+> 两处已变更：
+> 1. `rule_ratio>=0.2` → 现行用 `违规数 >= best_k`（`best_k=2`，由 val 选出）
+> 2. 融合方式 → 现行按 `fusion.json` 的 `gate_perchannel` 配方逐通道选 rule/if/AND/OR
+>
+> 另：`vote_threshold=0.25` 与段级 `contamination=0.25` **均无 val 选优过程**，
+> 属工程设定值（详见 `src/integration/anomaly_rag_pipeline.py` 内注释）。
+
 ### 九通道明细（改前实测）
 
 | 通道 | n_test | n_anomaly | 检出 | TP | FP | F1 | P | R |

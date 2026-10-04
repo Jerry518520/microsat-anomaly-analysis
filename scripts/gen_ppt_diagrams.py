@@ -109,7 +109,7 @@ def gen_tech_route():
 
     # Row 3: Core algorithms
     draw_box(ax, 1.5, 3.2, 5, 1.5, C['detect'], '异常检测算法',
-             'Isolation Forest 分通道建模\n多策略融合\n投票阈值优化\n强/弱通道差异化处理')
+             'Isolation Forest 分通道建模\n多策略融合\n逐通道门控选算子\n强/弱通道差异化处理')
     draw_box(ax, 9, 3.2, 5.5, 1.5, C['rag'], 'RAG智能解释生成',
              '异常段 → 检索词具体化\n向量检索 + 多源去重\nLLM 结构化生成\n输出: 原因分析 + 知识来源\n全链路自动解释')
 
