@@ -18,6 +18,15 @@
 - last_seg_results 中的 y_true 字段仅供离线评估与前端可视化，
   不参与任何预测计算
 
+口径声明（生产 vs 论文，勿混用）：
+- 本管线用 train 全集 1594 段拟合，实测 test F1 = **0.6446280991735537**
+  （TP78/FP51/FN35/TN365）。
+- 论文 gate_perchannel 的0.628099173553719 对应的是「fit 1275 段拟合 +
+  不排除 CADC0884」，是**另一套口径**，不是本管线的输出。
+- 两者差 +0.016529 = 排除 0884（+0.010556）+ 拟合口径（+0.005973）。
+- 引用纪律：0.6446 不能称作「论文结果复现」，0.6281 也不能称作「生产实测」。
+  详细实测表与复现脚本见 detect() 内注释及 data/results/v3/PAPER_TABLE.md。
+
 使用：
     pipeline = AnomalyRAGPipeline()
     results = pipeline.detect_and_explain()
@@ -217,23 +226,53 @@ class AnomalyRAGPipeline:
 
         feature_cols = [c for c in features_df.columns if c not in META_COLS]
         train_mask = features_df["train"] == 1
-        # ⚠ 这里用 train 全集（1594 段）拟合阈值与 IF，而实验代码用 fit（1275 段）。
-        #   两者口径不同是有意的，且都正确：
-        #   - 实验侧拆 fit/val 是为了在同口径下公平比较超参（防过拟合 val）；
-        #   - 生产侧上线时全部历史数据都可用，用全集拟合参数更强。
-        #   实测差异：生产 SegF1=0.6446 vs 实验 0.6281（TP78/FP51/FN35 vs
-        #   TP76/FP53/FN37），两者 CI 高度重叠。
-        #   若要与论文数字严格对齐，可改用 framework.load_split() 取 fit。
+        # ⚠ 口径声明：生产用train 全集（1594 段）拟合，实验/论文用 fit（1275 段）。
+        #   两者不是同一个口径，**差异是真实且已量化的**，不要当成复现误差抹平。
         #
-        # ⚠⚠ 必须按 segment 显式排序，否则结果依赖 CSV 的物理行序。
+        #   已实测（同一 test 529 段、同一 gate_perchannel 配方、同一 evaluate()；
+        #   复现脚本 scripts/probe_caliber_attribution.py）：
+        #
+        #   口径                          TP  FP  FN  TNF1
+        #   (1) train1594 + 排除 0884       78  51  35  365    0.644628← 本管线现行
+        #   (2) train1594 + 不排除         78  59  35  357    0.624000
+        #   (3) fit1275  + 排除 0884       76  49  37  367    0.638655
+        #   (4) fit1275  + 不排除         76  53  37  363    0.628099← 论文口径
+        #
+        #   其中 (4) 与 fusion.json 的 gate_perchannel.test.f1 = 0.628099173553719
+        #   **逐位相同**，即论文数字对应「fit 拟合 + 不排除 0884」。
+        #
+        #   生产 (1) 与论文 (4) 的总差距 +0.016529，恰好拆成两项可加：
+        #     · 排除 NO_ANOMALY_CHANNELS(CADC0884)：+0.010556
+        #       （该通道 test 真值异常0 段，排除的是 4 个纯误报，零代价）
+        #     · 拟合口径 train1594 vs fit1275：    +0.005973
+        #
+        #   ⚠ 对外引用纪律（勿粉饰）：
+        #     - 生产数字 0.6446 **高于**论文 0.6281，差 0.0165，不是噪声，是口径差。
+        #     - 0.6446 绝不可被称为「论文方法的复现」或「论文结果」。
+        #     - 反过来0.6281 也不可当作生产系统的实测表现（生产跑出来就是 0.6446）。
+        #     - 两者 CI 高度重叠（见 data/results/v3/PAPER_TABLE.md），差异未达
+        #       统计显著，任何一侧都不应宣称「显著优于」另一侧。
+        #
+        #   为何生产用全集：上线时全部历史数据可用，fit 参数估计更稳。
+        #   为何论文用 fit：需与实验侧同口径公平比较超参（防过拟合 val）。
+        #   **两者各自成立，不要为了让数字好看而改动任一侧的超参。**
+        #   若要与论文数字严格对齐，改用 framework.load_split() 取 fit，
+        #   并注意 (3) 与 (4) 还差一个 0884 排除策略。
+        #
+        # ⚠⚠ 必须按segment 显式排序，否则结果依赖 CSV 的物理行序。
         #   机理：IsolationForest 的 max_samples 子采样按**行索引**取样本，
         #   而 offset_ = percentile(训练集自身分数, 100*contamination)
         #   （sklearn/ensemble/_iforest.py:389）。random_state 只固定了随机数
         #   发生器，固定不了「哪些行被选中」—— 行序一变，被选中的具体样本就变，
         #   集成结构随之改变，offset_ 改变，最终预测改变。
-        #   实测：同一 random_state=42、同一配方，仅改行序（CSV原序 / segment排序 /
-        #   洗牌seed1 / 洗牌seed2），判异常数 138~144，F1 0.3294~0.3347，极差 0.0052。
-        #   故此处按 segment 排序，使结果与文件物理顺序解耦。
+        #   实测（scripts/probe_caliber_and_determinism.py，train1594 口径）：
+        #   连跑 3 次，TP/FP/FN/TN/F1/precision/recall/mcc 的 repr() **逐位一致**；
+        #   另用「CSV 原序 / fit-then-val 重排 / 已按 segment 升序」三种写法各跑 2 次，
+        #   六次结果全部逐位相同（F1 恒为 0.6446280991735537），
+        #   即此处排序已完全消除行序影响。
+        #   （早期注释里「判异常数 138~144、F1 0.3294~0.3347、极差 0.0052」的
+        #     行序抖动数据是在门控配方接入**之前**的旧配置下测得，现已不适用，
+        #     勿再引用该组数字。）
         features_df = features_df.sort_values("segment").reset_index(drop=True)
         train_mask = features_df["train"] == 1
         train_df = features_df[train_mask]

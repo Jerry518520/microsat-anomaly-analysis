@@ -66,9 +66,66 @@ cd "F:/F盘/微小卫星项目/microsat-anomaly-analysis"
 > 两处已变更：
 > 1. `rule_ratio>=0.2` → 现行用 `违规数 >= best_k`（`best_k=2`，由 val 选出）
 > 2. 融合方式 → 现行按 `fusion.json` 的 `gate_perchannel` 配方逐通道选 rule/if/AND/OR
+> 3. 另新增 `NO_ANOMALY_CHANNELS = {'CADC0884'}` 段级排除
 >
 > 另：`vote_threshold=0.25` 与段级 `contamination=0.25` **均无 val 选优过程**，
 > 属工程设定值（详见 `src/integration/anomaly_rag_pipeline.py` 内注释）。
+
+## 二之二、生产系统现行实测（本次，端到端跑通）
+
+> 本节数字为**当前 HEAD 生产管线的真实输出**，与上节「改前」0.441687 不可混用。
+> 复现命令：
+> ```bash
+> cd "F:/F盘/微小卫星项目/microsat-anomaly-analysis"
+> ./.venv/Scripts/python.exe scripts/probe_caliber_and_determinism.py# 三口径 + 3次确定性
+> ./.venv/Scripts/python.exe scripts/probe_caliber_attribution.py   # 2x2 口径归因
+> ```
+
+**现行配置**：`train` 全集 1594 段拟合（`features_df["train"]==1`）、按 `segment` 显式排序、
+规则 `违规数 >= best_k(2)`、`gate_perchannel` 逐通道算子、`psi=128`、`vote_threshold=0.25`、
+排除 `NO_ANOMALY_CHANNELS={'CADC0884'}`、`random_state=42`。
+
+| 指标 | 值 |
+|---|---|
+| SegF1 | **0.6446280991735537** |
+| 95% CI（bootstrap 1000, seed=42） | [0.5752, 0.7078] |
+| Precision | 0.6047 |
+| Recall | 0.6903 |
+| MCC | 0.5418 |
+| TN / FP / FN / TP | 365 / 51 / 35 / 78 |
+| 检出数 | 129 / 529 |
+| 真值异常段 | 113 |
+
+**确定性验证**：生产管线连跑 **3 次**，TP/FP/FN/TN/F1/precision/recall/mcc 的
+`repr()` **逐位一致**（F1 恒为 `0.6446280991735537`）。另用「CSV 原序 / fit-then-val 重排 /
+已按 segment 升序」三种写法各跑 2 次，六次结果全部逐位相同——
+即 `sort_values("segment")` 已完全消除行序影响。
+
+### 与论文数字的口径差（2×2 归因，已实测）
+
+同一 test 529 段、同一配方、同一 `evaluate()`：
+
+| 口径 | TP | FP | FN | TN | test F1 |
+|---|---|---|---|---|---|
+| train1594 + 排除 0884（**生产现行**） | 78 | 51 | 35 | 365 | **0.644628** |
+| train1594 + 不排除 | 78 | 59 | 35 | 357 | 0.624000 |
+| fit1275 + 排除 0884 | 76 | 49 | 37 | 367 | 0.638655 |
+| fit1275 + 不排除（**论文口径**） | 76 | 53 | 37 | 363 | **0.628099** |
+
+生产现行与论文口径差 **+0.016529**，恰好拆成两项可加：
+- 排除 `CADC0884`（test 真值异常 0 段，排除的是 4 个纯误报）：**+0.010556**
+- 拟合口径 train1594 vs fit1275：**+0.005973**
+
+第四行 `0.628099173553719` 与 `fusion.json` 的 `gate_perchannel.test.f1`
+**逐位相同**，据此确认论文数字对应「fit 拟合 + 不排除 0884」。
+
+> ⚠ **引用纪律**：0.6446 不得称作「论文方法复现」，0.6281 不得称作「生产实测」。
+> 两者 95% CI 高度重叠（重叠宽度 0.119），差异未达统计显著，
+> 任何一侧都不应宣称「显著优于」另一侧。
+
+> ⚠ **`production_fixed.json` 的 0.4648 不可再作为生产表现引用**：其
+> `meta.git_commit = 658b37c`、`git_dirty = true`，产生于门控配方接入**之前**，
+> 与现行 0.6446 不是同一套配置。
 
 ### 九通道明细（改前实测）
 
