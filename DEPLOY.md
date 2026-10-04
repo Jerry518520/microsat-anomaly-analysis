@@ -187,7 +187,124 @@ curl http://127.0.0.1:8000/api/health
 
 ---
 
-## 1. 公网分享（ngrok）
+## 1. 实时数据接入（`ingest` 通道）
+
+系统**可以接收外部实时遥测数据**，不只回放历史 CSV。实测验证过完整链路。
+
+### 1.1 两种数据源
+
+| 模式 | 用途 | 段 id 来源 | 界面标注 |
+|---|---|---|---|
+| `replay` | 回放 `data/raw/segments.csv`（18 天历史） | 数据自带，**与官方段完全一致** | 须标 `SIMULATED LIVE` |
+| **`ingest`** | **外部数据源实时推送** | 无 id 时按采样间隔规则近似切段 | 正常 live |
+
+> OPS-SAT 已于 2024-05-22 离轨，**不存在真实时流**，
+> 所以默认用 `replay` 演示；`ingest` 是为将来接入真实地面站数据准备的通道。
+
+### 1.2 推送数据
+
+```bash
+POST /api/stream/ingest
+Content-Type: application/json
+
+{
+  "frames": [
+    {"ts": 1767225600.0, "channel": "CADC0892", "value": 0.0,   "sampling": 1},
+    {"ts": 1767225601.0, "channel": "CADC0892", "value": 0.545, "sampling": 1}
+  ]
+}
+```
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `ts` | **float（unix 秒）** | **不是 ISO 字符串** |
+| `channel` | str | 通道 ID，如 `CADC0892` |
+| `value` | float | 遥测读数 |
+| `segment_id` | int? | 可选。有则按官方段 id 分组；**缺省则按采样间隔近似切段** |
+| `sampling` | int | 采样间隔（秒），默认 1 |
+
+返回：
+
+```json
+{"accepted": 27, "rejected": 0}
+```
+
+`rejected > 0` 通常表示该通道正在回放（同一时刻只允许一个数据源）。
+
+### 1.3 段闭合与判定
+
+**判定只在段闭合时发生。** 切段规则（`src/streaming/segmenter.py`）：
+
+> 相邻点时间差超过 `max(3 × sampling, 5s)` 即切段。
+
+因此推完一批点后，**需再推一个时间跳跃的点触发切段**，才会产生判定：
+
+```python
+# 第 1 批：一个真实异常段的 27 个点
+POST /ingest {"frames": [... ts=t0..t0+26 ...]}
+# 第 2 批：时间跳跃，触发段闭合 → 立刻判定
+POST /ingest {"frames": [{"ts": t0+9999, "channel": "CADC0892", "value": 0.0}]}
+```
+
+### 1.4 双层语义（诚实性设计）
+
+| 层 | 时机 | 是否出告警 |
+|---|---|---|
+| **正式判定层** | 段闭合时 | ✅ 是 |
+| 增长段预览层 | 段未闭合时（每点刷新曲线） | ❌ 否，一律带 `provisional: true` |
+
+预览分仅供大屏曲线着色，**不是判定边界**。阈值由训练分 τ95 + σ 分级决定。
+
+### 1.5 订阅告警（WebSocket）
+
+```
+WS /api/stream/ws
+```
+
+| 帧类型 | 内容 |
+|---|---|
+| `snapshot` | 连接时的全量状态快照 |
+| `batch` | 批量分数更新 |
+| `alert` | **新告警**（含段 id、通道、严重度、规则违例数、段统计） |
+
+### 1.6 实测验证结果
+
+用 `data/raw/segments.csv` 中两个**真实标注为 anomaly 的段**经 `/ingest` 推入：
+
+| 段 | 通道 | 判定 | 规则违例 |
+|---|---|---|---|
+| `CADC0892` seg235 | 光电二极管 5 | **critical** | 17 条（≥2 判异常） |
+| `CADC0888` seg1043 | 光电二极管 3 | **critical** | 11 条 |
+
+`/api/stream/state` 返回 `judged_segments: 2`、`alerts: 2`，告警记录含
+段统计（`len` / `mean` / `std`）与规则命中数。WebSocket 收到 `snapshot` + `batch` 帧。
+
+> 判定参数（`Stage 2: 强通道 IF(c=0.2) OR 3σ/IQR 规则; 弱通道纯规则; 段闭合判定`）
+> 与离线 `fusion_v3.py` 的口径差异是刻意的：`fusion_v3.py` 用 val 选出的
+> 逐通道门控配方（`gate_perchannel`），而 Stage 2 用统一的强/弱通道规则。
+> **两套数字不可直接相减。**
+
+### 1.7 未实现
+
+- **无 Kafka / MQTT 接入** —— 目前是 HTTP POST 推送。若地面站走消息队列，
+  需自行加一层转发。
+- **无结果持久化** —— 告警只存内存 `deque(maxlen=200)`，进程重启即丢失。
+- **无鉴权** —— `/api/stream/ingest` 与 `/api/stream/ws` 均无认证，
+  公网暴露前必须加（见 1.8）。
+
+### 1.8 公网暴露前必做
+
+`ingest` 与 `ws` 是**写接口**且**无认证**，任何人可推送数据、订阅告警。
+公网部署前至少补：
+
+1. API Key 或 JWT 认证
+2. 限流（防止刷爆 LLM 配额与 CPU）
+3. 结构化日志（便于追查谁推了什么）
+
+---
+
+## 2. 公网分享（ngrok）
+
 
 本项目使用 Streamlit 构建前端，支持通过 ngrok 内网穿透实现公网远程访问。
 
