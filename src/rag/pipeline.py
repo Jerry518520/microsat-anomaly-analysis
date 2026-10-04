@@ -81,7 +81,9 @@ class RAGPipeline:
         
         # 检索参数
         self.top_k = self.retrieval_config.get("top_k", 5)
-        self.score_threshold = self.retrieval_config.get("score_threshold", 0.7)
+        # 缺省值与 configs/rag_config.yaml 及 vectorstore.py 保持一致：
+        # BGE-M3 在本库实测 top-15 为 0.45~0.67，0.7 会让检索恒返回空
+        self.score_threshold = self.retrieval_config.get("score_threshold", 0.3)
         self.max_tokens = self.retrieval_config.get("max_tokens", 2000)
         
         # 性能监控

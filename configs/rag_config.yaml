@@ -85,8 +85,39 @@ document:
 retrieval:
   # 检索参数
   top_k: 5                  # 返回 top-k 相关文档块
-  score_threshold: 0.3      # 相似度阈值（BGE-M3余弦相似度在0.3-0.7范围，0.7太严会过滤有效结果）
-  max_tokens: 2000          # 检索内容最大 token 数
+  # 相似度阈值。BGE-M3 归一化向量在本库实测 top-15 落在 0.45~0.67（p50≈0.52，
+  # P(score>=0.7)=0%），故 0.7 会让检索恒返回空，0.3 实测 100% 通过、
+  # 等价于不设限。这里保留 0.3 作为「绝对下限」，真正的把关靠rel_delta +
+  # filter_low_quality，低分结果改为标记 low_confidence 而非丢弃。
+  score_threshold: 0.3
+  max_tokens: 2000          # 检索内容最大token 数
+
+  # 候选池深度：priority 保留席位 + 每源上限需要比 top_k 更深的候选
+  candidate_pool_k: 40
+
+  # --- priority 融合（BGE-M3 分数区间窄，不做简单加权，见 src/rag/retrieval_policy.py）---
+  # 相对竞争区宽度：分数低于 top_score - rel_delta 的候选不享受 priority 保留席位
+  rel_delta: 0.12
+  # priority <= 该值的源可占用保留席位（0=项目实验结论，2=OPS-SAT 论文）
+  reserve_priority_max: 2
+  # 保留席位数上限，null = max(1, top_k//2)，保证 priority 最多影响一半结果
+  max_reserved: null
+  # priority -> 同源入选上限（priority 数字越小越优先）
+  priority_caps:
+    0: 3
+    1: 3
+    2: 2
+    3: 2
+    4: 1
+    5: 1
+
+  # --- 低质量片段过滤（PDF 换页残片/ 目录页）---
+  filter_low_quality: true
+  min_chunk_chars: 80      # 有效字符数下限
+  max_junk_ratio: 0.55     # 标点空白占比上限
+
+  # top1 分数低于此值时标记 low_confidence 并在上下文中提示，不静默丢弃
+  low_confidence_threshold: 0.45
   
   # 混合检索策略
   hybrid_search: true      # 是否启用混合检索（关键词+向量）

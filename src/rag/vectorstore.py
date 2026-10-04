@@ -26,6 +26,7 @@ except ImportError as e:
 
 # 导入嵌入模块
 from .embedding import BGE_M3_Embedder, get_embedder
+from .retrieval_policy import default_priority_caps, is_low_quality, select_candidates
 
 # 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
@@ -84,7 +85,23 @@ class FAISSVectorStore:
         
         # 检索参数
         self.top_k = self.retrieval_config.get("top_k", 5)
-        self.score_threshold = self.retrieval_config.get("score_threshold", 0.7)
+        self.score_threshold = self.retrieval_config.get("score_threshold", 0.3)
+        # 候选池大小：priority 保留席位 + 每源上限需要更深的候选才能填满 top_k
+        self.candidate_pool_k = self.retrieval_config.get("candidate_pool_k", 40)
+        # 相对竞争区宽度：分数低于 top_score - rel_delta 的候选不享受 priority 保留席位
+        self.rel_delta = self.retrieval_config.get("rel_delta", 0.12)
+        # 低质量 chunk 过滤（PDF 残片/目录页）
+        self.filter_low_quality = self.retrieval_config.get("filter_low_quality", True)
+        self.min_chunk_chars = self.retrieval_config.get("min_chunk_chars", 80)
+        self.max_junk_ratio = self.retrieval_config.get("max_junk_ratio", 0.55)
+        # priority -> 同源入选上限
+        self.priority_caps = self.retrieval_config.get("priority_caps") or default_priority_caps()
+        self.reserve_priority_max = self.retrieval_config.get("reserve_priority_max", 2)
+        self.max_reserved = self.retrieval_config.get("max_reserved")
+        # 置信度提示阈值：top1 低于此值时在结果里标注「置信度低」而非静默丢弃
+        self.low_confidence_threshold = self.retrieval_config.get(
+            "low_confidence_threshold", 0.45
+        )
         
         # 初始化组件
         self.index: Optional[faiss.Index] = None
@@ -343,28 +360,33 @@ class FAISSVectorStore:
                 - content: 文档内容
                 - score: 相似度分数
                 - metadata: 文档元数据
+                - low_confidence: top1 分数偏低时为 True（结果仍返回，不静默丢弃）
         """
         if self.index is None or len(self.documents) == 0:
             logger.warning("向量库为空，请先添加文档")
             return []
         
-        # 参数处理
-        top_k = top_k or self.top_k
-        score_threshold = score_threshold or self.score_threshold
+        # 参数处理（用 is None 判断，避免显式传 0 被 `or` 覆盖）
+        top_k = top_k if top_k is not None else self.top_k
+        score_threshold = (score_threshold if score_threshold is not None
+                           else self.score_threshold)
         
         try:
             # 编码查询
             query_embedding = self.embedder.encode(query)
             
-            # 检索更多结果以支持源多样性
-            search_k = max(top_k * 3, 15)  # 检索3倍或至少15个
+            # 取更深的候选池：priority 保留席位与每源上限需要足够候选才能填满 top_k
+            search_k = max(self.candidate_pool_k, top_k * 8, top_k)
             scores, indices = self.index.search(query_embedding, search_k)
             
             # 处理结果
             results = []
+            n_filtered_quality = 0
             for score, idx in zip(scores[0], indices[0]):
                 if idx == -1:  # FAISS 返回 -1 表示无效结果
                     continue
+                
+                score = float(score)
                 
                 # 应用阈值过滤
                 if score < score_threshold:
@@ -382,37 +404,47 @@ class FAISSVectorStore:
                 else:
                     content = str(doc)
                 
+                # 过滤低质量片段：PDF 换页截断产生的孤立句子、目录页残片。
+                # 这类片段维度低、极易与任意查询相似，曾多次占据 top1。
+                if self.filter_low_quality and is_low_quality(
+                    content, self.min_chunk_chars, self.max_junk_ratio
+                ):
+                    n_filtered_quality += 1
+                    continue
+                
                 results.append({
                     "content": content,
-                    "score": float(score),
+                    "score": score,
                     "metadata": metadata
                 })
             
-            # 源多样性过滤：确保不同来源的文档都有机会被选中
+            if n_filtered_quality:
+                logger.info(f"过滤低质量片段 {n_filtered_quality} 条（min_chars={self.min_chunk_chars}）")
+            
+            # priority 感知的融合：priority 决定「是否入选」，score 决定「最终顺序」
             if len(results) > top_k:
-                from collections import defaultdict
-                by_source = defaultdict(list)
+                results, debug = select_candidates(
+                    results,
+                    top_k=top_k,
+                    rel_delta=self.rel_delta,
+                    max_reserved=self.max_reserved,
+                    reserve_priority_max=self.reserve_priority_max,
+                    priority_caps=self.priority_caps,
+                )
+                logger.debug(f"priority 融合：{debug}")
+            elif results:
+                results = sorted(results, key=lambda x: x["score"], reverse=True)[:top_k]
+            
+            # 置信度标注：阈值不设为「够不到」的死线，改为低分时显式标记
+            if results:
+                low_conf = results[0]["score"] < self.low_confidence_threshold
+                if low_conf:
+                    logger.info(
+                        f"top1 分数 {results[0]['score']:.4f} < "
+                        f"{self.low_confidence_threshold}，标记为低置信度"
+                    )
                 for r in results:
-                    src = r["metadata"].get("source_name", "unknown")
-                    by_source[src].append(r)
-                
-                # 轮询选取：每个来源最多取 ceil(top_k/num_sources)+1 个
-                diverse_results = []
-                num_sources = len(by_source)
-                max_per_source = max(2, (top_k // num_sources) + 1)
-                
-                # 先按分数全局排序，然后限制每源数量
-                sorted_results = sorted(results, key=lambda x: x["score"], reverse=True)
-                source_count = defaultdict(int)
-                for r in sorted_results:
-                    src = r["metadata"].get("source_name", "unknown")
-                    if source_count[src] < max_per_source:
-                        diverse_results.append(r)
-                        source_count[src] += 1
-                    if len(diverse_results) >= top_k:
-                        break
-                
-                results = diverse_results
+                    r["low_confidence"] = low_conf
             
             logger.info(f"检索完成，查询：{query[:50]}...，返回 {len(results)} 个结果")
             return results
@@ -449,15 +481,27 @@ class FAISSVectorStore:
         context_parts = []
         current_tokens = 0
         
+        # Token 估算 helper：中文字符约2token，英文字符约0.25token
+        def _estimate(text: str) -> int:
+            chinese = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+            return chinese * 2 + (len(text) - chinese) * 0.25
+        
+        # 低置信度时在上下文开头显式提示，避免 LLM 把弱相关片段当权威依据
+        low_conf = bool(results) and results[0].get("low_confidence", False)
+        if low_conf:
+            warning = (
+                f"【检索置信度低】最佳片段相似度仅 {results[0]['score']:.4f}，"
+                f"低于 {self.low_confidence_threshold}，以下内容可能与问题无关，"
+                f"请勿据此编造结论。\n\n"
+            )
+            context_parts.append(warning)
+            current_tokens += _estimate(warning)
+        
         for result in results:
             content = result["content"]
             metadata = result["metadata"]
             
-            # Token 估算：中文字符约2token，英文字符约0.25token
-            # 知识库以英文PDF为主，用混合估算更准确
-            chinese_chars = sum(1 for c in content if '\u4e00' <= c <= '\u9fff')
-            other_chars = len(content) - chinese_chars
-            estimated_tokens = chinese_chars * 2 + other_chars * 0.25
+            estimated_tokens = _estimate(content)
             
             if current_tokens + estimated_tokens > max_tokens:
                 break
@@ -637,6 +681,10 @@ def search_knowledge(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         List[Dict]: 检索结果
     """
     vectorstore = get_vectorstore()
+    # 首次调用时索引尚未载入，search() 会因「向量库为空」直接返回空列表。
+    # 这里按需懒加载，避免该便捷函数恒返回空。
+    if vectorstore.index is None:
+        vectorstore.load()
     return vectorstore.search(query, top_k)
 
 

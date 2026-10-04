@@ -1,12 +1,19 @@
 """Build FAISS index from knowledge base PDFs/MDs and test retrieval."""
 import os, sys, yaml, pickle
-import faiss, numpy as np
+import faiss, numpy as np, torch
 
-os.environ['HF_HUB_OFFLINE'] = '1'
-os.environ['TRANSFORMERS_OFFLINE'] = '1'
+os.environ.setdefault('HF_HUB_OFFLINE', '1')
+os.environ.setdefault('TRANSFORMERS_OFFLINE', '1')
 
 # Change to project root
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# 加载 .env（EMBEDDING_MODEL_PATH 等在此配置；参见 src/ui/app.py 的做法）
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.getcwd(), '.env'), override=True)
+except ImportError:
+    print('WARN: python-dotenv 未安装，EMBEDDING_MODEL_PATH 将取不到值')
 
 # 1. Load config
 with open('configs/rag_config.yaml', 'r', encoding='utf-8') as f:
@@ -65,11 +72,46 @@ splitter = RecursiveCharacterTextSplitter(
 chunks = splitter.split_documents(all_docs)
 print(f'After splitting: {len(chunks)} chunks')
 
+# 4b.剔除低质量片段（PDF 换页残片 / 目录页）
+# 这类 chunk 维度低、极易与任意查询相似，实测曾多次占据 top1
+# （如 ITU EN p69 的孤立句子 'returned due to non-completion of coordination.'）
+# 规则定义在 src/rag/retrieval_policy.py，与检索时过滤保持一致
+sys.path.insert(0, os.getcwd())
+from src.rag.retrieval_policy import is_low_quality
+
+retrieval_cfg = config.get('retrieval', {})
+min_chunk_chars = retrieval_cfg.get('min_chunk_chars', 80)
+max_junk_ratio = retrieval_cfg.get('max_junk_ratio', 0.55)
+
+before = len(chunks)
+kept, dropped = [],0
+for c in chunks:
+    if is_low_quality(c.page_content, min_chunk_chars, max_junk_ratio):
+        dropped += 1
+    else:
+        kept.append(c)
+chunks = kept
+print(f'Filtered {dropped} low-quality chunks (min_chars={min_chunk_chars}, '
+      f'max_junk_ratio={max_junk_ratio}), kept {len(chunks)}')
+
 # 4. Embed
 print('\nLoading BGE-M3 model...')
+from pathlib import Path
 from sentence_transformers import SentenceTransformer
-model_path = config['embedding']['model_name']
-embedder = SentenceTransformer(model_path, device='cuda')
+
+# 模型路径解析与 src/rag/embedding.py 保持一致：
+# 优先环境变量 EMBEDDING_MODEL_PATH（本地模型），否则用配置里的 model_name。
+# 原先直接用 config['embedding']['model_name']（BAAI/bge-m3），在离线环境
+# 下即使本地已有模型也会因无法连接 HuggingFace 而失败。
+model_name = os.getenv('EMBEDDING_MODEL_PATH') or config['embedding']['model_name']
+_project_root = Path(os.getcwd())
+_local = _project_root / model_name
+model_path = str(_local) if _local.is_dir() else model_name
+print(f'Model path: {model_path}')
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f'Device: {device}')
+embedder = SentenceTransformer(model_path, device=device)
 embedder.max_seq_length = config['embedding']['max_length']
 
 print('Encoding chunks (this may take a few minutes)...')
