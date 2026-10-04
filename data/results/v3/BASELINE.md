@@ -97,9 +97,9 @@ cd "F:/F盘/微小卫星项目/microsat-anomaly-analysis"
 | 真值异常段 | 113 |
 
 **确定性验证**：生产管线连跑 **3 次**，TP/FP/FN/TN/F1/precision/recall/mcc 的
-`repr()` **逐位一致**（F1 恒为 `0.6446280991735537`）。另用「CSV 原序 / fit-then-val 重排 /
-已按 segment 升序」三种写法各跑 2 次，六次结果全部逐位相同——
-即 `sort_values("segment")` 已完全消除行序影响。
+`repr()` **逐位一致**（F1 恒为 `0.6446280991735537`）。脚本另做行序解耦验证 ——
+「CSV 原序 / fit-then-val 重排 / 已按segment 升序」三种行序各跑 2 次，
+**六次结果全部逐位相同**，即 `sort_values("segment")` 已完全消除行序影响。
 
 ### 与论文数字的口径差（2×2 归因，已实测）
 

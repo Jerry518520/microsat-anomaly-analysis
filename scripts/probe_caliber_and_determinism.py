@@ -76,6 +76,26 @@ def run_once(caliber, tmpdir, fit_ids=None, order=None):
     return seg
 
 
+def run_once_df(raw, tmpdir, fname):
+    """把给定 DataFrame 原样写成临时 CSV 后跑真实 detect()（不改train 列）。
+
+    用于行序解耦验证：只变行序、不变 train 列语义。
+    """
+    import hashlib
+    tmp_csv = os.path.join(tmpdir, fname)
+    raw.to_csv(tmp_csv, index=False, encoding="utf-8")
+    sha = hashlib.sha256(open(tmp_csv, "rb").read()).hexdigest()[:16]
+
+    pipe = AnomalyRAGPipeline()
+    pipe.config["data"]["raw_dir"] = tmpdir
+    pipe.config["data"]["features_file"] = fname
+    pipe.detect(segments_df=pd.DataFrame())
+    seg = pipe.last_seg_results
+    seg.attrs["_sha"] = sha
+    seg.attrs["_n_train"] = int(raw["train"].sum())
+    return seg
+
+
 def score(seg, test_ids):
     """按官方 test 段过滤后评估。"""
     s = seg[seg["segment"].isin(set(test_ids))]
@@ -222,6 +242,48 @@ def main():
         results["calibers"] = calibers
         results["a_equals_c"] = same_ac
         results["c_equals_cprime"] = same_cc
+
+        # ---------- 行序解耦：3 种行序 x 2 次，逐位比对 ----------
+        # 文档（BASELINE.md / anomaly_rag_pipeline.py 注释）声称
+        # 「CSV 原序 / fit-then-val 重排 / 已按 segment 升序三种写法各跑 2 次，
+        #   六次结果全部逐位相同」。此段即为该断言的可复现证据。
+        print("\n" + "=" * 70)
+        print("行序解耦验证：3 种行序 x 2 次")
+        print("=" * 70)
+        order_runs = {}
+        for oname, okey in (("csv原序", None),
+                            ("fit_then_val重排", "fit_then_val"),
+                            ("已按segment升序", "sorted")):
+            for rep in (1, 2):
+                if okey is None:
+                    seg_o = run_once("native", tmpdir)
+                else:
+                    df_o = _load_raw()
+                    if okey == "fit_then_val":
+                        _, val_df_o, _, _ = load_split()
+                        fv_o = list(fit_ids) + list(val_df_o["segment"])
+                        is_tr_o = df_o["train"] == 1
+                        tr_o = df_o[is_tr_o].set_index("segment").loc[fv_o].reset_index()
+                        df_o = pd.concat([tr_o, df_o[~is_tr_o]], ignore_index=True)
+                    else:  # sorted
+                        df_o = df_o.sort_values("segment").reset_index(drop=True)
+                    seg_o = run_once_df(df_o, tmpdir, f"ord_{okey}_{rep}.csv")
+                sc_o = score(seg_o, test_ids)
+                order_runs.setdefault(oname, []).append(sc_o)
+                print(f"  {oname:18s} 第{rep}次: TP={sc_o['tp']} FP={sc_o['fp']} "
+                      f"FN={sc_o['fn']} TN={sc_o['tn']} F1={sc_o['f1']!r}")
+
+        all_same = True
+        for oname, rs in order_runs.items():
+            s = all(repr(rs[0][k]) == repr(r[k]) for k in keys for r in rs)
+            all_same &= s
+            print(f"  {oname:18s} 两次自一致: {s}")
+        cross = len({repr(rs[0]['f1']) for rs in order_runs.values()}) == 1
+        print(f"\n  三种行序结果是否同一数字: {cross}")
+        print(f"  全部 6 次逐位一致: {all_same and cross}")
+        results["row_order_decoupling"] = {
+            "runs": order_runs, "all_six_bitwise_identical": bool(all_same and cross),
+        }
 
         # 与历史记录对比
         print("\n" + "=" * 70)
