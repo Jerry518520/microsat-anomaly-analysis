@@ -48,7 +48,24 @@ export function useLiveStream(active: boolean): LiveStream {
     const connect = () => {
       if (closed) return;
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      ws = new WebSocket(`${proto}://${location.host}/api/stream/ws`);
+      // ⚠ 浏览器的 WebSocket API **不能设置自定义请求头**（无可用的
+      //   `headers` 选项），所以 API Key 只能走 URL query 传。
+      //   后端 `src/api/security.py` 的 `require_api_key` 已同时检查
+      //   `?api_key=`（供 WS 使用）与 `X-API-Key` 头（供 HTTP 使用）。
+      //   注意：query 形式会进访问日志，部署时应在反向代理层限制
+      //   /api/stream/ws 的访问日志记录，或改用一次性 token。
+      const key = (() => {
+        const fromEnv = (import.meta as { env?: Record<string, string> }).env
+          ?.VITE_API_KEY;
+        if (fromEnv) return fromEnv;
+        try {
+          return window.localStorage.getItem('api_key') ?? '';
+        } catch {
+          return '';
+        }
+      })();
+      const qs = key ? `?api_key=${encodeURIComponent(key)}` : '';
+      ws = new WebSocket(`${proto}://${location.host}/api/stream/ws${qs}`);
 
       ws.onopen = () => { retry = 0; setConnected(true); };
       ws.onclose = () => {
