@@ -29,6 +29,7 @@ import pandas as pd
 from src.streaming.segmenter import ClosedSegment, OnlineSegmenter
 from src.streaming.segment_features import extract_segment_features, feature_vector
 from src.streaming.stage2 import METHOD_DESC, Verdict, load_or_train
+from src.streaming.persistence import init_db as init_alert_db, save_alert, save_verdict
 from src.utils.constants import CHANNEL_MAP
 
 ALERT_HISTORY = 200
@@ -44,6 +45,12 @@ class StreamEngine:
         self.judges = {}
         self.models_ready = False
         self._models_lock: Optional[asyncio.Lock] = None
+
+        # 告警/段判定持久化（SQLite）。建表失败不应让检测链路起不来。
+        try:
+            init_alert_db()
+        except Exception as e:  # noqa: BLE001
+            print(f"[StreamEngine] 告警持久化不可用（不影响检测）: {type(e).__name__}: {e}")
 
         self.segmenter = OnlineSegmenter()
         self.latest: dict[str, dict] = {}           # ch -> {ts, value, score, severity, provisional}
@@ -123,6 +130,17 @@ class StreamEngine:
             "ts": float(seg.timestamps[-1]), "score": round(disp, 4),
             "severity": verdict.severity, "provisional": False,
         }
+        # 无论是否异常都落库，便于事后回溯「哪些段被判过、各自结论是什么」
+        save_verdict(
+            seg_id=seg.seg_id,
+            channel=ch,
+            ts=float(seg.timestamps[-1]),
+            n_points=len(seg.values),
+            is_anomaly=bool(verdict.anomaly),
+            severity=verdict.severity,
+            score=float(disp),
+            features=feats if isinstance(feats, dict) else {},
+        )
         if verdict.anomaly:
             self._raise_alert(seg, verdict, feats)
 
@@ -150,6 +168,9 @@ class StreamEngine:
         }
         self.alerts.appendleft(alert)
         self.stats["alerts"] += 1
+        # 额外落 SQLite —— 内存 deque 只有 200 条且重启即丢，
+        # 运维无法回溯历史告警。落库失败不影响本链路（已在 persistence 内兜底）。
+        save_alert({**alert, "official": not str(seg.seg_id).startswith("LIVE-")})
         self._pending_alerts.append({"action": "new", "alert": alert})
 
     # ===== 增长段预览层(非正式判定) =====

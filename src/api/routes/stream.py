@@ -11,6 +11,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from src.streaming.engine import engine
+from src.streaming.persistence import query_alerts as query_alerts_db, stats as alert_db_stats
 
 router = APIRouter()
 
@@ -87,3 +88,32 @@ async def stream_ws(ws: WebSocket):
         pass
     finally:
         engine.unsubscribe(q)
+
+
+# ---------------------------------------------------------------- 告警查询（持久化）
+
+@router.get("/alerts")
+def query_alerts(
+    since: float | None = None,
+    until: float | None = None,
+    channel: str | None = None,
+    severity: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+):
+    """查询历史告警（SQLite）。
+
+    与 `/state` 内的 `alerts` 不同：那个只有内存中最近 200 条且**重启即丢**，
+    这里读的是持久化库，可按时间范围/通道/严重度检索。
+    """
+    items, total = query_alerts_db(
+        since=since, until=until, channel=channel, severity=severity,
+        limit=max(1, min(int(limit), 1000)), offset=max(0, int(offset)),
+    )
+    return {"total": total, "limit": limit, "offset": offset, "items": items}
+
+
+@router.get("/alerts/stats")
+def alerts_stats():
+    """告警汇总：总数、按严重度分布、按通道分布。"""
+    return alert_db_stats()

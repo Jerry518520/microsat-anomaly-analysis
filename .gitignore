@@ -99,3 +99,9 @@ node-runtime/
 # 论文草稿与参考资料（不入库，本地保留）
 docs/paper/
 docs/papers/
+
+# 告警持久化库（运行时生成）
+data/*.db
+data/*.db-wal
+data/*.db-shm
+logs/
