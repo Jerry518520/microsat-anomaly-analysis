@@ -21,6 +21,15 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
 VENV_PYTHON = os.path.join(PROJECT_ROOT, ".venv", "Scripts", "python.exe")
 
+# 自带 Node.js，不依赖 PATH。
+# 实测：项目内 node-runtime 只带 node.exe（v22.16.0），不含 npm
+#（node_modules 下只有 pnpm）；而 PATH 里的 npm 可能来自别的 Node 安装
+#（本机实测是 WorkBuddy 托管的 v22.22.2）。从 Explorer 双击 .bat 打开的
+# cmd 不一定有那套 PATH，裸 `npm run dev` 会直接失败。
+# 因此前端一律用「node.exe + vite.js」直接拉起，绕开 npm。
+NODE_EXE = os.path.join(PROJECT_ROOT, "node-runtime", "node.exe")
+VITE_JS = os.path.join(FRONTEND_DIR, "node_modules", "vite", "bin", "vite.js")
+
 API_PORT = 8000
 WEB_PORT = 5180
 API_URL = f"http://localhost:{API_PORT}"
@@ -35,6 +44,20 @@ child_pids = []
 def log(tag, msg):
     icons = {"OK": "[OK]", "ERR": "[!!]", "WAIT": "[..]", "INFO": "[>>]"}
     print(f"  {icons.get(tag, '   ')} {msg}")
+
+
+def child_env(name, value):
+    """子进程环境副本：名字未显式设置时用给定默认值，其余全部继承。
+
+    **为什么后端默认关鉴权**：``.env`` 被 ``.gitignore:51`` 忽略，队友
+    clone 下来 ``.env`` 里没有 ``API_AUTH_KEYS``，而 ``src/api/security.py``
+    的语义是「未配置即拒绝全部」—— 于是除 ``/api/health`` 外所有接口
+    返回 503，前端满屏报错。启动器是本地开发入口，这里兜底关掉；
+    生产部署由 K8s/Docker 显式注入变量开启，不依赖本文件。
+    """
+    env = os.environ.copy()
+    env.setdefault(name, value)
+    return env
 
 
 def port_in_use(port):
@@ -115,15 +138,25 @@ def check_python():
 
 
 def check_node():
+    """校验自带 Node.js。
+
+    不再用裸 ``node`` —— 双击启动器时 PATH 里可能没有 Node。
+    """
+    if not os.path.exists(NODE_EXE):
+        log("ERR", f"未找到 Node.js: {NODE_EXE}")
+        return False
     try:
-        r = subprocess.run(["node", "--version"], capture_output=True, text=True, timeout=5)
+        # encoding/errors 必须显式给：默认按 locale 解码，中文 Windows 下
+        # Node 输出一个非 GBK 字节就会抛 UnicodeDecodeError（实测发生过）。
+        r = subprocess.run(
+            [NODE_EXE, "--version"],
+            capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=15,
+        )
         log("OK", f"Node.js {r.stdout.strip()}")
         return True
-    except FileNotFoundError:
-        log("ERR", "未找到 Node.js，请先安装 https://nodejs.org/")
-        return False
-    except Exception:
-        log("ERR", "Node.js 检查失败")
+    except Exception as e:
+        log("ERR", f"Node.js 检查失败: {e}")
         return False
 
 
@@ -131,9 +164,12 @@ def check_node_modules():
     pkg = os.path.join(FRONTEND_DIR, "node_modules", ".package-lock.json")
     if not os.path.exists(pkg):
         log("WAIT", "首次运行，正在安装前端依赖 (npm install)...")
-        r = subprocess.run(["npm", "install"], cwd=FRONTEND_DIR, shell=True, timeout=120)
+        # 不用 shell=True：会多起一层 cmd，且失败时拿不到真实原因。
+        # 这里仍然用裸 npm —— 只有首次安装才会走到，此时可以接受要求
+        # PATH 里有 Node.js（README 第 6 步已列为前置条件）。
+        r = subprocess.run(["npm", "install"], cwd=FRONTEND_DIR, timeout=300)
         if r.returncode != 0:
-            log("ERR", "npm install 失败")
+            log("ERR", "npm install 失败：请确认 PATH 里有 Node.js/npm")
             return False
         log("OK", "前端依赖安装完成")
     else:
@@ -143,11 +179,16 @@ def check_node_modules():
 
 def check_api_deps():
     code = "import fastapi, uvicorn, pandas"
-    r = subprocess.run([VENV_PYTHON, "-c", code], capture_output=True, text=True, timeout=15)
+    r = subprocess.run(
+        [VENV_PYTHON, "-c", code], capture_output=True, text=True,
+        encoding="utf-8", errors="replace", timeout=30,
+    )
     if r.returncode != 0:
         log("WAIT", "正在安装后端依赖...")
-        subprocess.run([VENV_PYTHON, "-m", "pip", "install", "fastapi", "uvicorn", "pandas"],
-                       capture_output=True, timeout=60)
+        subprocess.run(
+            [VENV_PYTHON, "-m", "pip", "install", "fastapi", "uvicorn", "pandas"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
+        )
     log("OK", "后端依赖已就绪")
     return True
 
@@ -178,6 +219,7 @@ def start_api():
         cwd=PROJECT_ROOT,
         stdout=lf,
         stderr=subprocess.STDOUT,
+        env=child_env("API_AUTH_DISABLED", "true"),
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0,
     )
     child_pids.append(p.pid)
@@ -207,11 +249,13 @@ def start_web():
     lf = open(log_file, "w", encoding="utf-8")
 
     p = subprocess.Popen(
-        ["npm", "run", "dev"],
+        # 直接 node + vite.js，不用 npm run dev：项目自带 node-runtime 无 npm，
+        # 且 PATH 里的 npm 可能来自另一套 Node 安装（双击启动时不在 PATH）。
+        [NODE_EXE, VITE_JS, "--port", str(WEB_PORT), "--strictPort"],
         cwd=FRONTEND_DIR,
-        shell=True,
         stdout=lf,
         stderr=subprocess.STDOUT,
+        env=child_env("BACKEND_URL", API_URL),
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0,
     )
     child_pids.append(p.pid)

@@ -114,9 +114,22 @@ cp .env.example .env        # 然后编辑 .env
 
 ### 第 6 步：启动
 **Windows（推荐，一键启动后端+前端）：**
+
+- **最省事**：双击项目根目录下的 `start_all.bat`（纯 ASCII、不依赖 PATH，
+  内部直接调 `.venv` 里的 Python 和项目自带的 `node-runtime\node.exe`）。
+- **等价的命令行写法**：
+
 ```bash
 python scripts/start_ui.py
 ```
+
+> `start_all.bat` 只是薄入口，真正的启动逻辑全在 `scripts/start_ui.py`
+> 里——保持单一真源，避免两套启动脚本各自漂移。如需不弹浏览器加 `--no-open`。
+
+> ⚠ 端口冲突处理：启动器会检查 8000/5180，占用时提示并（默认）终止占用进程。
+> 若 8000 被别的项目的服务占着（本机实测被「AI 财报分析助手」占过），
+> 会看到类似 `端口 8000 无法释放` 的提示；不想被终止就改 `start_ui.py`
+> 顶部的 `API_PORT` / `WEB_PORT`。
 **Linux / macOS（`start_ui.py` 为 Windows 专用，需手动启动）：**
 ```bash
 # 终端 1：后端
