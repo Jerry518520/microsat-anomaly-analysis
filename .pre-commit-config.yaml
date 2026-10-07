@@ -1,0 +1,18 @@
+# 提交前拦截硬编码密钥。
+#
+# 背景（2026-10-07）：`nvapi-...` 与 `ark-...` 两个真实 key 曾被硬编码进
+# `test_api.py` / `test_rag_*.py` 并推到 GitHub，是 GitGuardian 报出来的——
+# 也就是说此前本地完全没有闸门，只有仓库扫描器在兜底。
+#
+# 装到本机（只做一次）：
+#     ./.venv/Scripts/python.exe -m pip install detect-secrets pre-commit
+#     ./.venv/Scripts/python.exe -m pre_commit install
+#
+# 队友 clone 后跑上面第二条即可生效；pre-commit 会自己拉 detect-secrets。
+# 已有但属于误报的命中记在 .secrets.baseline，新出现的才会拦。
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']

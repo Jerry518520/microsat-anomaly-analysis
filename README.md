@@ -33,6 +33,15 @@
 - **网络需能访问 `hf-mirror.com`**（仅第 4 步下载模型时需要）
 - **Node.js 18+**（仅前端开发需要）
 - Git
+- **pre-commit（强烈建议，防密钥误提交）**：
+  ```bash
+  ./.venv/Scripts/python.exe -m pip install detect-secrets pre-commit
+  ./.venv/Scripts/python.exe -m pre_commit install
+  ```
+  装好后提交前会自动扫密钥；`.secrets.baseline` 里已登记的误报不会拦。
+  > 背景：2026-10-07 巡查发现仓库历史里曾硬编码过 `nvapi-` 与 `ark-`
+  > 两个真实 key（当前 HEAD 已清洗），是 GitGuardian 报出来的。
+  > **两个 key 仍需到 NVIDIA NGC / 火山方舟控制台吊销**，重写历史不等于失效。
 
 ### 关于显卡
 
