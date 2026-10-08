@@ -59,31 +59,32 @@ def get_rag_config():
 
 @router.get("/experiments")
 def get_experiments():
-    """实验演进路线 F1 Benchmark"""
-    pipeline_data = load_json("pipeline_segment_18d_output.json")
+    """实验演进路线 F1 Benchmark
 
-    stage0_f1 = None
-    stages = {}
-    if pipeline_data:
-        stages = pipeline_data.get("stages_performance", {})
-        stage0_f1 = stages.get("stage0_global_if", {}).get("metrics", {}).get("f1")
+    口径：`data/results/v3/fusion.json` 的 **论文口径 test 段级 F1**
+    （官方 train 1594 段 → fit 1275 / val 319，官方 test 529 段只评估一次）。
+    三档对应论文第四节叙述的递进：纯规则 → 硬 AND → 逐通道门控。
+    """
+    fusion_data = load_json("fusion.json")
+    methods = (fusion_data or {}).get("results", {}).get("methods", {})
 
     ordered = [
-        ("Stage 0", "stage0_global_if", "全局 IForest (c=0.2)"),
-        ("Stage 1", "stage1_per_channel", "分通道独立 IForest"),
-        ("Stage 2", "stage2_fusion", "IF + 规则融合"),
+        ("Stage 0", "rule_only", "纯规则（零模型，3σ / IQR）"),
+        ("Stage 1", "if_and_rule", "IF + 规则硬 AND 融合"),
+        ("Stage 2", "gate_perchannel", "IF + 规则逐通道门控融合"),
     ]
 
     experiments = []
+    base_f1 = None
     for version, key, strategy in ordered:
-        f1 = stages.get(key, {}).get("metrics", {}).get("f1")
-        if f1 is None:
+        f1 = methods.get(key, {}).get("test", {}).get("f1")
+        if not isinstance(f1, (int, float)):
             continue
-        if stage0_f1 and key != "stage0_global_if":
-            delta = (f1 - stage0_f1) / stage0_f1 * 100
-            improvement = f"{delta:+.1f}%"
-        else:
+        if base_f1 is None:
+            base_f1 = float(f1)
             improvement = "—"
+        else:
+            improvement = f"{(float(f1) - base_f1) / base_f1 * 100:+.1f}%"
         experiments.append({
             "version": version,
             "strategy": strategy,
@@ -93,9 +94,9 @@ def get_experiments():
 
     if not experiments:
         experiments = [
-            {"version": "Stage 0", "strategy": "全局 IForest (c=0.2)", "f1": 0.2996, "improvement": "—"},
-            {"version": "Stage 1", "strategy": "分通道独立 IForest", "f1": 0.5381, "improvement": "+79.6%"},
-            {"version": "Stage 2", "strategy": "IF + 规则融合", "f1": 0.5683, "improvement": "+89.7%"},
+            {"version": "Stage 0", "strategy": "纯规则（零模型，3σ / IQR）", "f1": 0.5882, "improvement": "—"},
+            {"version": "Stage 1", "strategy": "IF + 规则硬 AND 融合", "f1": 0.6038, "improvement": "+2.7%"},
+            {"version": "Stage 2", "strategy": "IF + 规则逐通道门控融合", "f1": 0.6281, "improvement": "+6.8%"},
         ]
 
     return {"experiments": experiments}

@@ -149,7 +149,7 @@ export default function App() {
           )}
         </div>
         <div className="shrink-0 px-3 h-full hidden md:flex items-center border-l border-[rgba(94,234,212,0.14)] font-mono text-[9px] tx-3">
-          IF × RAG · F1 0.5683
+          IF × RAG · F1 0.6281
         </div>
       </footer>
 

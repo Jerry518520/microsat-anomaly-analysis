@@ -10,7 +10,7 @@
 **数据规模**：基于 ESA OPS-SAT 公开数据集 —— 30.3 万行采样点 / 2123 段 / 9 通道 / 段级异常率 20.4%。
 
 <p align="center">
-  <img alt="实时告警中心 Dashboard" src="docs/assets/dashboard.png" width="70%">
+  <img alt="实时告警中心" src="docs/assets/dashboard.png" width="31%"> <img alt="算法实验" src="docs/assets/detection.png" width="31%"> <img alt="深度诊断" src="docs/assets/rag_explain.png" width="31%">
 </p>
 
 ## 关键结果
@@ -22,7 +22,7 @@
 | RAG 引用溯源 | **200 / 200** |
 | 检索中位耗时 | **25 ms** |
 | 向量化加速（GPU vs CPU） | 128 条 2.17 s → 0.26 s（**8.3×**） |
-| 知识库规模 | **5064** 分块 |
+| 知识库规模 | **4,898** 分块 |
 
 ## 30 秒上手
 
@@ -858,7 +858,7 @@ git merge feature/xxx
 | 环节 | 是否需要显卡 | 实测 |
 |---|---|---|
 | **BGE-M3 向量化**（建索引 / 编码新文本） | **强烈建议有** | 编码 128 条：CPU **2.17 s** vs GPU **0.26 s**（**8.3 倍**） |
-| FAISS 向量检索 | **不需要** | `faiss-cpu` 纯 CPU 检索，9 通道 5064 分块实测正常 |
+| FAISS 向量检索 | **不需要** | `faiss-cpu` 纯 CPU 检索，9 通道 4,898 分块实测正常 |
 
 - `configs/rag_config.yaml` 的 `embedding.device` 默认配的是 **`cuda`**。
   **若无 NVIDIA 显卡会把这一项改成 `cpu`**，否则建索引阶段会因找不到 CUDA 设备而失败。

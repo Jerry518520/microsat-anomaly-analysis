@@ -44,7 +44,15 @@ def get_core_metrics():
     ss_data = load_json("subsampling_sweep_1.9_results.json")
     df_seg = _load_segments()
 
-    best_f1 = ss_data.get("best_seg_f1", 0.425) if ss_data else 0.425
+    # 最佳 SegF1：取 v3 论文口径的逐通道门控（gate_perchannel）test 段级 F1，
+    # 与 /api/detection/experiments 的 Stage 2 同源，避免两处各说一套。
+    fusion_data = load_json("fusion.json")
+    best_f1 = (
+        (fusion_data or {}).get("results", {}).get("methods", {})
+        .get("gate_perchannel", {}).get("test", {}).get("f1")
+    )
+    if not isinstance(best_f1, (int, float)):
+        best_f1 = ss_data.get("best_seg_f1", 0.425) if ss_data else 0.425
 
     total_anomalies = 0
     fault_count = 0
