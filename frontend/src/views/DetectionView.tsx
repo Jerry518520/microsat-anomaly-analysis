@@ -42,6 +42,11 @@ export default function DetectionView() {
 
   const sortedF1 = [...channelF1].sort((a, b) => b.f1 - a.f1);
 
+  // 总增益由数据算出，不再写死（此前硬编码 +89.7%，数据换成论文口径后会与图自相矛盾）
+  const firstF1 = experiments[0]?.f1;
+  const lastF1 = experiments.length > 0 ? experiments[experiments.length - 1].f1 : undefined;
+  const totalGain = firstF1 && lastF1 ? ((lastF1 - firstF1) / firstF1) * 100 : null;
+
   return (
     <div className="h-full overflow-y-auto space-y-3 pr-1">
       <div className="grid grid-cols-12 gap-3">
@@ -69,7 +74,11 @@ export default function DetectionView() {
         <div className="col-span-12 xl:col-span-9 deck-panel rise rise-1">
           <div className="deck-head justify-between">
             <span className="flex items-center gap-2"><span className="tick" /> 实验演进轨迹 · SEGF1 TRAJECTORY</span>
-            <span className="font-mono text-[10px] text-[#2dd4a7] normal-case tracking-normal">+89.7% TOTAL GAIN</span>
+            {totalGain !== null && (
+              <span className="font-mono text-[10px] text-[#2dd4a7] normal-case tracking-normal">
+                {`${totalGain >= 0 ? '+' : ''}${totalGain.toFixed(1)}% TOTAL GAIN`}
+              </span>
+            )}
           </div>
           <div className="h-[240px] p-1">
             {experiments.length > 0 && (
@@ -92,13 +101,13 @@ export default function DetectionView() {
                 layout={{
                   autosize: true,
                   paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-                  margin: { l: 46, r: 20, t: 34, b: 34 },
+                  margin: { l: 46, r: 20, t: 34, b: 48 },
                   font: { family: 'IBM Plex Mono, monospace', color: '#47616c', size: 10 },
                   xaxis: {
                     gridcolor: 'rgba(94,234,212,0.05)', linecolor: 'rgba(94,234,212,0.2)',
                     tickmode: 'array',
                     tickvals: experiments.map((_, i) => i),
-                    ticktext: experiments.map(e => e.version),
+                    ticktext: experiments.map(e => `${e.version}<br>${e.strategy}`),
                     range: [-0.45, experiments.length - 0.55],
                   },
                   yaxis: { gridcolor: 'rgba(94,234,212,0.07)', linecolor: 'rgba(94,234,212,0.2)', range: [0, 0.78] },
