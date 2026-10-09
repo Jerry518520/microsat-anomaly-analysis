@@ -3,7 +3,7 @@ name = "microsat-anomaly-analysis"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Jerry518520",email = "jerrylbj@foxmail.com"}
+    {name = "Bingjie Li",email = "jerrylbj@foxmail.com"}
 ]
 readme = "README.md"
 # P0-A1 修复：原为 "^3.11"（等价于 >=3.11,<4.0），与实际运行环境冲突。
