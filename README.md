@@ -1,5 +1,7 @@
 # 微小卫星遥测智能异常检测与RAG解释辅助系统
 
+<p align="right"><a href="README.en.md">English</a> | <b>中文</b></p>
+
 > Shanghai Dianji University — 大学生创新创业训练计划项目
 > 周期：2026.4 - 2027.3 | 指导教师：芦立华
 
@@ -9,9 +11,7 @@
 
 **数据规模**：基于 ESA OPS-SAT 公开数据集 —— 30.3 万行采样点 / 2123 段 / 9 通道 / 段级异常率 20.4%。
 
-<p align="center">
-  <img alt="实时告警中心" src="docs/assets/dashboard.png" width="31%"> <img alt="算法实验" src="docs/assets/detection.png" width="31%"> <img alt="深度诊断" src="docs/assets/rag_explain.png" width="31%">
-</p>
+<p align="center"><img alt="实时告警中心" src="docs/assets/dashboard.png" width="31%"> <img alt="算法实验" src="docs/assets/detection.png" width="31%"> <img alt="深度诊断" src="docs/assets/rag_explain.png" width="31%"></p>
 
 ## 关键结果
 
