@@ -1,0 +1,13 @@
+...................F..                                                   [100%]
+================================== FAILURES ===================================
+___________________ test_offline_rejects_empty_point_table ____________________
+
+    def test_offline_rejects_empty_point_table():
+>       with pytest.raises(ValueError, match="empty"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:90: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_feature_consistency.py::test_offline_rejects_empty_point_table
+1 failed, 21 passed in 1.71s

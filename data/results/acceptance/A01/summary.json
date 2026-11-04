@@ -1,0 +1,916 @@
+{
+  "raw_points": 303493,
+  "segments": 2123,
+  "identity": {
+    "feature_version": "18d-canonical-v1",
+    "feature_cols": [
+      "duration",
+      "len",
+      "mean",
+      "var",
+      "std",
+      "kurtosis",
+      "skew",
+      "n_peaks",
+      "smooth10_n_peaks",
+      "smooth20_n_peaks",
+      "diff_peaks",
+      "diff2_peaks",
+      "diff_var",
+      "diff2_var",
+      "gaps_squared",
+      "len_weighted",
+      "var_div_duration",
+      "var_div_len"
+    ],
+    "feature_spec_sha256": "77614c777156ea1780f5522cd07f7b27dfd19f43bc0e1fa6a7b93ae58854562a",
+    "spec": {
+      "version": "18d-canonical-v1",
+      "columns": [
+        "duration",
+        "len",
+        "mean",
+        "var",
+        "std",
+        "kurtosis",
+        "skew",
+        "n_peaks",
+        "smooth10_n_peaks",
+        "smooth20_n_peaks",
+        "diff_peaks",
+        "diff2_peaks",
+        "diff_var",
+        "diff2_var",
+        "gaps_squared",
+        "len_weighted",
+        "var_div_duration",
+        "var_div_len"
+      ],
+      "input": "1D contiguous float64; same lengths; N>=3; finite; nondecreasing unix seconds; positive integer sampling seconds; preserve duplicates and order",
+      "time": "floor(delta_seconds) modulo 86400; reject negative deltas; sum squared adjacent components",
+      "moments": "numpy mean/var/std ddof=0; scipy kurtosis Fisher,bias=True and skew bias=True; exact constant kurtosis/skew=0",
+      "peaks": "scipy.find_peaks prominence=0.1*(max-min); exact equal plateau midpoint rounded down; exclude endpoints; no quantization",
+      "smoothing": "math.fsum of each zero-padded window divided by 10 or 20; full convolution crop start=(min(N,W)-1)//2; length=max(N,W)",
+      "differences": "numpy.diff n=1/2; population variance and same peak rule",
+      "derived": "sampling*len; var/duration (0 when duration=0); var/len",
+      "output": "18 float64-compatible finite values or explicit ValueError; no imputation downstream",
+      "tolerances": {
+        "duration": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "len": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "mean": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        },
+        "var": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        },
+        "std": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        },
+        "kurtosis": {
+          "atol": 1e-10,
+          "rtol": 1e-10
+        },
+        "skew": {
+          "atol": 1e-10,
+          "rtol": 1e-10
+        },
+        "n_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "smooth10_n_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "smooth20_n_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "diff_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "diff2_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "diff_var": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        },
+        "diff2_var": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        },
+        "gaps_squared": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "len_weighted": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "var_div_duration": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        },
+        "var_div_len": {
+          "atol": 1e-12,
+          "rtol": 1e-10
+        }
+      }
+    },
+    "source_sha256": {
+      "src/features/segment_spec.py": "3953231c0751e07870a82789bada71f63ba803167828a18c96e38bd4b7a65096",
+      "src/features/extract_segments_18d.py": "359547a3343a508916bb322e8e552eacb59aa9a661b22b06641041c55e15729a",
+      "src/streaming/segment_features.py": "d11597ac2b577cf331e7326897d8d3aa435d84bdf4ede446c8e0cf5af8f79183"
+    },
+    "dependencies": {
+      "python": "3.13.13",
+      "numpy": "2.4.6",
+      "pandas": "3.0.3",
+      "scipy": "1.17.1"
+    }
+  },
+  "input_sha256": {
+    "data\\raw\\segments.csv": "dab2e01e873c93590692b50a7cc312d9cce4d5ba7e69ce8015603c47a8ffb97b",
+    "data\\raw\\dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "data\\processed\\segments_18d.csv": "213942b3e16bc348cb1a9588b62b3a662e673f494444b5c929bd4244085f9a98",
+    "data\\models\\stage2_detector.joblib": "89c84f3ed8277431f346694cb316b668803931ce14c8387a6db226543088ac31"
+  },
+  "canonical_dataset": "data\\processed\\segments_18d_18d-canonical-v1.csv",
+  "canonical_dataset_sha256": "09d613cfd8cd33987ac3a5a9b87f6accb10b6baf3d830d82cb3bc6948e49bc8f",
+  "tolerances_registered_before_run": {
+    "duration": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "len": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "mean": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    },
+    "var": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    },
+    "std": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    },
+    "kurtosis": {
+      "atol": 1e-10,
+      "rtol": 1e-10
+    },
+    "skew": {
+      "atol": 1e-10,
+      "rtol": 1e-10
+    },
+    "n_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "smooth10_n_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "smooth20_n_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "diff_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "diff2_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "diff_var": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    },
+    "diff2_var": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    },
+    "gaps_squared": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "len_weighted": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "var_div_duration": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    },
+    "var_div_len": {
+      "atol": 1e-12,
+      "rtol": 1e-10
+    }
+  },
+  "comparisons": {
+    "official_vs_processed": {
+      "segments": 2123,
+      "different_segments": 10,
+      "different_cells": 10,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 4.440892098500626e-16
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 1.1102230246251565e-16
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 10,
+          "max_abs_difference": 2.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        }
+      },
+      "exact_count_match": false
+    },
+    "historical_stream_vs_official": {
+      "segments": 2123,
+      "different_segments": 11,
+      "different_cells": 11,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 9.71445146547012e-17
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 4.440892098500626e-16
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 11,
+          "max_abs_difference": 2.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.999054535747565e-17
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.996344030316351e-17
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 9.985502008591496e-17
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        }
+      },
+      "exact_count_match": false
+    },
+    "historical_stream_vs_processed": {
+      "segments": 2123,
+      "different_segments": 16,
+      "different_cells": 16,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 9.71445146547012e-17
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 4.440892098500626e-16
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 16,
+          "max_abs_difference": 2.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.999054535747565e-17
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.996344030316351e-17
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 9.985502008591496e-17
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        }
+      },
+      "exact_count_match": false
+    },
+    "canonical_offline_vs_stream": {
+      "segments": 2123,
+      "different_segments": 0,
+      "different_cells": 0,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        }
+      },
+      "exact_count_match": true
+    },
+    "canonical_vs_historical_stream": {
+      "segments": 2123,
+      "different_segments": 14,
+      "different_cells": 15,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 6,
+          "max_abs_difference": 2.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 9,
+          "max_abs_difference": 2.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        }
+      },
+      "exact_count_match": false
+    },
+    "canonical_vs_official": {
+      "segments": 2123,
+      "different_segments": 12,
+      "different_cells": 12,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 9.71445146547012e-17
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 4.440892098500626e-16
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 6,
+          "max_abs_difference": 2.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 6,
+          "max_abs_difference": 1.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.999054535747565e-17
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.996344030316351e-17
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 9.985502008591496e-17
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        }
+      },
+      "exact_count_match": false
+    },
+    "canonical_vs_processed": {
+      "segments": 2123,
+      "different_segments": 13,
+      "different_cells": 14,
+      "per_feature": {
+        "duration": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "mean": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        },
+        "std": {
+          "different_cells": 0,
+          "max_abs_difference": 9.71445146547012e-17
+        },
+        "kurtosis": {
+          "different_cells": 0,
+          "max_abs_difference": 4.440892098500626e-16
+        },
+        "skew": {
+          "different_cells": 0,
+          "max_abs_difference": 2.220446049250313e-16
+        },
+        "n_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "smooth10_n_peaks": {
+          "different_cells": 6,
+          "max_abs_difference": 2.0
+        },
+        "smooth20_n_peaks": {
+          "different_cells": 8,
+          "max_abs_difference": 2.0
+        },
+        "diff_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff2_peaks": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "diff_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.999054535747565e-17
+        },
+        "diff2_var": {
+          "different_cells": 0,
+          "max_abs_difference": 9.996344030316351e-17
+        },
+        "gaps_squared": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "len_weighted": {
+          "different_cells": 0,
+          "max_abs_difference": 0.0
+        },
+        "var_div_duration": {
+          "different_cells": 0,
+          "max_abs_difference": 9.985502008591496e-17
+        },
+        "var_div_len": {
+          "different_cells": 0,
+          "max_abs_difference": 9.974659986866641e-17
+        }
+      },
+      "exact_count_match": false
+    }
+  },
+  "all_18_model_vector_values_exact_equal": true,
+  "saved_csv_roundtrip_model_vector_exact_equal": true,
+  "same_model_prediction_differences": 0,
+  "historical_test_prediction_changes_vs_processed": [
+    {
+      "segment": 1763,
+      "channel": "CADC0894",
+      "train": 0,
+      "historical_stream": 0,
+      "processed": 1,
+      "canonical_offline": 1,
+      "canonical_stream": 1
+    },
+    {
+      "segment": 1788,
+      "channel": "CADC0894",
+      "train": 0,
+      "historical_stream": 0,
+      "processed": 1,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    }
+  ],
+  "canonical_prediction_changes_vs_historical": [
+    {
+      "segment": 675,
+      "channel": "CADC0884",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 0,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    },
+    {
+      "segment": 691,
+      "channel": "CADC0884",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 0,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    },
+    {
+      "segment": 698,
+      "channel": "CADC0884",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 0,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    },
+    {
+      "segment": 1546,
+      "channel": "CADC0888",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 0,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    },
+    {
+      "segment": 1564,
+      "channel": "CADC0888",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 1,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    },
+    {
+      "segment": 1763,
+      "channel": "CADC0894",
+      "train": 0,
+      "historical_stream": 0,
+      "processed": 1,
+      "canonical_offline": 1,
+      "canonical_stream": 1
+    },
+    {
+      "segment": 1767,
+      "channel": "CADC0894",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 1,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    },
+    {
+      "segment": 1784,
+      "channel": "CADC0894",
+      "train": 1,
+      "historical_stream": 1,
+      "processed": 1,
+      "canonical_offline": 0,
+      "canonical_stream": 0
+    }
+  ],
+  "hypotheses": {
+    "default_vs_roundtrip_value_changes": 0,
+    "layout_changed_convolution_segments": [],
+    "group_vs_subset_changed_convolution_segments": []
+  },
+  "traced_segments": [
+    663,
+    675,
+    691,
+    698,
+    699,
+    701,
+    1539,
+    1546,
+    1564,
+    1577,
+    1604,
+    1716,
+    1717,
+    1737,
+    1757,
+    1758,
+    1763,
+    1764,
+    1767,
+    1784,
+    1788,
+    1789
+  ],
+  "historical_provenance": "unknown: no verified environment/input order/smoothed vectors/peak indices at historical generation time; do not claim official reconstruction",
+  "protected_files_unchanged": true
+}

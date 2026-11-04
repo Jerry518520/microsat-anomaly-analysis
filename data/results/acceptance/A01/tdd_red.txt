@@ -1,0 +1,324 @@
+FFFFFFFF.FFFFFFFFFFF                                                     [100%]
+================================== FAILURES ===================================
+____________ test_float32_input_is_normalized_before_all_formulas _____________
+
+    def test_float32_input_is_normalized_before_all_formulas():
+        values = np.array([0, .1, .5, .9, .2, 0], dtype=np.float32)
+        actual = feature_vector(extract_segment_features(values, np.arange(len(values))))
+        expected = feature_vector(extract_segment_features(values.astype(np.float64), np.arange(len(values))))
+>       np.testing.assert_array_equal(actual, expected)
+E       AssertionError:
+E       Arrays are not equal
+E
+E       Mismatched elements: 9 / 18 (50%)
+E       First 5 mismatches are at indices:
+E        [2]: 0.28333333134651184 (ACTUAL), 0.2833333301047484 (DESIRED)
+E        [3]: 0.10472222417593002 (ACTUAL), 0.10472221714754908 (DESIRED)
+E        [4]: 0.3236081302165985 (ACTUAL), 0.32360812280835766 (DESIRED)
+E        [5]: -0.5550029277801514 (ACTUAL), -0.5550029153331306 (DESIRED)
+E        [6]: 0.9464460611343384 (ACTUAL), 0.9464459956522868 (DESIRED)
+E       Max absolute difference among violations: 6.54820516e-08
+E       Max relative difference among violations: 1.18185001e-07
+E        ACTUAL: array([ 5.      ,  6.      ,  0.283333,  0.104722,  0.323608, -0.555003,
+E               0.946446,  1.      ,  0.      ,  0.      ,  1.      ,  0.      ,
+E               0.172   ,  0.381875,  5.      ,  6.      ,  0.020944,  0.017454])
+E        DESIRED: array([ 5.      ,  6.      ,  0.283333,  0.104722,  0.323608, -0.555003,
+E               0.946446,  1.      ,  0.      ,  0.      ,  1.      ,  0.      ,
+E               0.172   ,  0.381875,  5.      ,  6.      ,  0.020944,  0.017454])
+
+tests\test_feature_consistency.py:26: AssertionError
+__________ test_zero_duration_and_duplicate_timestamps_match_offline __________
+
+    def test_zero_duration_and_duplicate_timestamps_match_offline():
+        frame = points([0., 2., 0., 1.], [10, 10, 10, 10])
+        offline = generate_dataset(frame).iloc[0]
+        stream = extract_segment_features(frame.value.to_numpy(), np.array([10.] * 4))
+>       np.testing.assert_array_equal(offline[FEATURE_COLS].to_numpy(dtype=float), feature_vector(stream))
+E       AssertionError:
+E       Arrays are not equal
+E
+E       inf location mismatch:
+E        ACTUAL: array([ 0.      ,  4.      ,  0.75    ,  0.6875  ,  0.829156, -1.371901,
+E               0.493382,  1.      ,  0.      ,  0.      ,  0.      ,  0.      ,
+E               2.888889, 12.25    ,  0.      ,  4.      ,       inf,  0.171875])
+E        DESIRED: array([ 0.      ,  4.      ,  0.75    ,  0.6875  ,  0.829156, -1.371901,
+E               0.493382,  1.      ,  0.      ,  0.      ,  0.      ,  0.      ,
+E               2.888889, 12.25    ,  0.      ,  4.      ,  0.      ,  0.171875])
+
+tests\test_feature_consistency.py:33: AssertionError
+---------------------------- Captured stdout call -----------------------------
+[Extract18D] Processing 1 segments...
+[Extract18D] Done. Shape: (1, 23)
+_ test_seconds_component_floors_fractional_seconds_and_keeps_cross_day_compatibility _
+
+    def test_seconds_component_floors_fractional_seconds_and_keeps_cross_day_compatibility():
+        result = extract_segment_features(np.array([0., 1., 0.]), np.array([0., 86400.9, 86401.8]))
+>       assert result["duration"] == 1
+E       assert 2.0 == 1
+
+tests\test_feature_consistency.py:39: AssertionError
+__ test_invalid_or_unsupported_segments_are_rejected[values0-timestamps0-1] ___
+
+values = [], timestamps = [], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values1-timestamps1-1] ___
+
+values = [1], timestamps = [0], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values2-timestamps2-1] ___
+
+values = [1, 2], timestamps = [0, 1], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values3-timestamps3-1] ___
+
+values = [1, nan, 2], timestamps = [0, 1, 2], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values4-timestamps4-1] ___
+
+values = [1, inf, 2], timestamps = [0, 1, 2], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values6-timestamps6-1] ___
+
+values = [1, 2, 3], timestamps = [0, 2, 1], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values7-timestamps7-1] ___
+
+values = [1, 2, 3], timestamps = [0, 1], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values8-timestamps8-1] ___
+
+values = [[1, 2, 3]], timestamps = [0, 1, 2], sampling = 1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+__ test_invalid_or_unsupported_segments_are_rejected[values9-timestamps9--1] __
+
+values = [1, 2, 3], timestamps = [0, 1, 2], sampling = -1
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+_ test_invalid_or_unsupported_segments_are_rejected[values10-timestamps10-0] __
+
+values = [1, 2, 3], timestamps = [0, 1, 2], sampling = 0
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+_ test_invalid_or_unsupported_segments_are_rejected[values11-timestamps11-nan] _
+
+values = [1, 2, 3], timestamps = [0, 1, 2], sampling = nan
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:52: Failed
+_________ test_constant_segment_has_explicit_finite_moment_sentinels __________
+
+    def test_constant_segment_has_explicit_finite_moment_sentinels():
+        result = extract_segment_features(np.ones(8), np.arange(8))
+>       assert result["kurtosis"] == result["skew"] == 0
+E       assert nan == nan
+
+tests\test_feature_consistency.py:58: AssertionError
+__________ test_raw_and_smoothing_peak_plateaus_keep_scipy_semantics __________
+
+    def test_raw_and_smoothing_peak_plateaus_keep_scipy_semantics():
+>       from src.features.segment_spec import peak_indices, smooth_values
+E       ModuleNotFoundError: No module named 'src.features.segment_spec'
+
+tests\test_feature_consistency.py:63: ModuleNotFoundError
+___________ test_fixed_sum_does_not_split_the_675_smoothing_plateau ___________
+
+    def test_fixed_sum_does_not_split_the_675_smoothing_plateau():
+        values = np.array([0, 0, .0192109, .0439221, .0686601, .115515, .187709,
+                           .25807, .315298, .353065, .355991, .321077, .263751,
+                           .193299, .132108, .0494165, .0219557, .00548852, 0, 0, 0, 0])
+        result = extract_segment_features(values, np.arange(len(values)))
+>       assert result["smooth20_n_peaks"] == 1
+E       assert 2.0 == 1
+
+tests\test_feature_consistency.py:79: AssertionError
+_________________ test_offline_rejects_inconsistent_metadata __________________
+
+    def test_offline_rejects_inconsistent_metadata():
+        frame = points([0., 1., 0.])
+        frame.loc[1, "sampling"] = 2
+>       with pytest.raises(ValueError, match="sampling"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:85: Failed
+---------------------------- Captured stdout call -----------------------------
+[Extract18D] Processing 1 segments...
+[Extract18D] Done. Shape: (1, 23)
+__________________ test_manifest_and_column_order_are_stable __________________
+
+    def test_manifest_and_column_order_are_stable():
+>       from src.features.segment_spec import FEATURE_VERSION, FEATURE_SPEC_SHA256, feature_manifest
+E       ModuleNotFoundError: No module named 'src.features.segment_spec'
+
+tests\test_feature_consistency.py:90: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_feature_consistency.py::test_float32_input_is_normalized_before_all_formulas
+FAILED tests/test_feature_consistency.py::test_zero_duration_and_duplicate_timestamps_match_offline
+FAILED tests/test_feature_consistency.py::test_seconds_component_floors_fractional_seconds_and_keeps_cross_day_compatibility
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values0-timestamps0-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values1-timestamps1-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values2-timestamps2-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values3-timestamps3-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values4-timestamps4-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values6-timestamps6-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values7-timestamps7-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values8-timestamps8-1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values9-timestamps9--1]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values10-timestamps10-0]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values11-timestamps11-nan]
+FAILED tests/test_feature_consistency.py::test_constant_segment_has_explicit_finite_moment_sentinels
+FAILED tests/test_feature_consistency.py::test_raw_and_smoothing_peak_plateaus_keep_scipy_semantics
+FAILED tests/test_feature_consistency.py::test_fixed_sum_does_not_split_the_675_smoothing_plateau
+FAILED tests/test_feature_consistency.py::test_offline_rejects_inconsistent_metadata
+FAILED tests/test_feature_consistency.py::test_manifest_and_column_order_are_stable
+19 failed, 1 passed in 1.77s

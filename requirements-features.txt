@@ -1,0 +1,4 @@
+# A01 feature-generation lock. Existing .venv is read-only during acceptance.
+numpy==2.4.6
+pandas==3.0.3
+scipy==1.17.1
