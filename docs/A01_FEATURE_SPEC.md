@@ -6,7 +6,9 @@
 
 唯一规范入口是 `src.features.segment_spec.extract_features`。离线 `generate_dataset` 与流式 `extract_segment_features` 都调用该入口。适配层只组织输入、元数据和输出。
 
-值和时间戳都转成连续的一维 `float64` 数组。时间戳采用 UTC Unix 秒。固定列序由 `FEATURE_COLS` 提供。`FEATURE_VERSION`、`FEATURE_SPEC_SHA256` 和 `feature_manifest()` 为 A02 提供版本身份。manifest 记录规范、列序、三个提取源码的 SHA256 和依赖版本。
+规范入口接受可转换为一维 `float64` 的数值数组。值和时间戳都转成连续的一维 `float64` 数组。时间戳采用 UTC Unix 秒。无法转换的 object 数组不在数值契约内，转换层可抛出 TypeError 或 ValueError。离线适配器会在转换前拒绝缺失值。
+
+固定列序由 `FEATURE_COLS` 提供。`FEATURE_VERSION`、`FEATURE_SPEC_SHA256` 和 `feature_manifest()` 为 A02 提供版本身份。manifest 记录规范、列序、三个提取源码的 SHA256 和依赖版本。
 
 特征依赖锁在 `requirements-features.txt`：NumPy 2.4.6、Pandas 3.0.3、SciPy 1.17.1。本轮使用已有环境，没有安装或修改依赖。跨平台的逐位复现未验收；本轮验收针对所记录的环境。
 
@@ -53,7 +55,7 @@
 | 3点以上的短段，N<W | 保留 same 的输出长度 max(N,W)。不截回N。 |
 | 精确常量段 | 所有值与首值精确相等时，mean取首值，var/std/diff方差为0。kurtosis/skew采用明确的有限哨兵0；它们不是常量分布的数学矩估计。不对近似常量使用阈值归零。 |
 | 其他数值导致未定义/非有限特征 | 拒绝。不让模型静默填补。有限输入的数值运算溢出统一抛出ValueError，并保留原始异常原因。 |
-| 缺失、NaN、Inf、数组长度或维数不一致 | 拒绝，抛出 ValueError。 |
+| 数值数组中的NaN、Inf、数组长度或维数不一致 | 拒绝，抛出 ValueError。离线适配器先拒绝缺失值。含pd.NA等无法转换的object数组不在数值契约内，转换层可抛出TypeError或ValueError。 |
 | sampling | 必须是实数类型的正整数秒。bool、字符串等非数值、零、负数和非有限值均以ValueError拒绝。 |
 | 乱序时间 | 拒绝。不排序，不把负间隔取模当成有效输入。 |
 | 相同时间戳、重复点 | 保留全部点，保留输入顺序。重复间隔为0。 |
