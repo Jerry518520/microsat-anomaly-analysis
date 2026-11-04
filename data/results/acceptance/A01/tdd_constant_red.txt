@@ -1,0 +1,16 @@
+................F.........                                               [100%]
+================================== FAILURES ===================================
+_______ test_exact_decimal_constant_has_exact_mean_and_zero_variance[3] _______
+
+count = 3
+
+    @pytest.mark.parametrize("count", [3, 8])
+    def test_exact_decimal_constant_has_exact_mean_and_zero_variance(count):
+        result = extract_segment_features(np.full(count, .1), np.arange(count))
+>       assert result["mean"] == .1
+E       assert 0.10000000000000002 == 0.1
+
+tests\test_feature_consistency.py:65: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_feature_consistency.py::test_exact_decimal_constant_has_exact_mean_and_zero_variance[3]
+1 failed, 25 passed in 1.73s

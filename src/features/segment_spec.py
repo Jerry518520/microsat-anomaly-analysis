@@ -6,6 +6,7 @@ official historical CSV. See docs/A01_FEATURE_SPEC.md before changing semantics.
 import hashlib
 import json
 import math
+from numbers import Real
 from pathlib import Path
 import platform
 
@@ -26,7 +27,7 @@ FEATURE_COLS = [
 COUNT_COLS = ["len", "n_peaks", "smooth10_n_peaks", "smooth20_n_peaks",
               "diff_peaks", "diff2_peaks"]
 # Normative acceptance is EXACT for all 18 values. Auxiliary relative checks
-# have no absolute floor: magnetometer variances can be far below 1e-12 V^2.
+# have no absolute floor: small-scale variances can be far below 1e-12.
 FEATURE_TOLERANCES = {
     name: {"atol": 0., "rtol": 1e-10}
     for name in FEATURE_COLS
@@ -36,14 +37,14 @@ for _name in COUNT_COLS + ["duration", "gaps_squared", "len_weighted"]:
 
 _SPEC = {
     "version": FEATURE_VERSION, "columns": FEATURE_COLS,
-    "input": "1D contiguous float64; same lengths; N>=3; finite; nondecreasing unix seconds; positive integer sampling seconds; preserve duplicates and order",
+    "input": "1D contiguous float64; same lengths; N>=3; finite; nondecreasing unix seconds; positive real integer sampling seconds, excluding bool and nonnumeric; preserve duplicates and order",
     "time": "floor(delta_seconds) modulo 86400; reject negative deltas; sum squared adjacent components",
-    "moments": "numpy mean/var/std ddof=0; scipy kurtosis Fisher,bias=True and skew bias=True; exact constant kurtosis/skew=0",
+    "moments": "numpy mean/var/std ddof=0; scipy kurtosis Fisher,bias=True and skew bias=True; exact constant mean=first value,var=std=kurtosis=skew=0; no near-constant threshold",
     "peaks": "scipy.find_peaks prominence=0.1*(max-min); exact equal plateau midpoint rounded down; exclude endpoints; no quantization",
     "smoothing": "math.fsum of each zero-padded window divided by 10 or 20; full convolution crop start=(min(N,W)-1)//2; length=max(N,W)",
     "differences": "numpy.diff n=1/2; population variance and same peak rule",
     "derived": "sampling*len; var/duration (0 when duration=0); var/len",
-    "output": "18 float64-compatible finite values or explicit ValueError; no imputation downstream",
+    "output": "18 float64-compatible finite values or explicit ValueError; numerical overflow retains exception cause; no imputation downstream",
     "acceptance": "all 18 values exactly equal; tolerances are auxiliary diagnostics only",
     "tolerances": FEATURE_TOLERANCES,
 }
@@ -140,8 +141,7 @@ TRANSFORMATIONS = {
 }
 
 
-def extract_features(values, timestamps, sampling=1):
-    """The only normative extraction entry; adapters do no feature arithmetic."""
+def _extract_features(values, timestamps, sampling):
     values = np.ascontiguousarray(values, dtype=np.float64)
     timestamps = np.ascontiguousarray(timestamps, dtype=np.float64)
     if values.ndim != 1 or timestamps.ndim != 1 or len(values) != len(timestamps):
@@ -152,11 +152,17 @@ def extract_features(values, timestamps, sampling=1):
         raise ValueError("values and timestamps must be finite and complete")
     if np.any(np.diff(timestamps) < 0):
         raise ValueError("timestamps must be nondecreasing; input is not reordered")
-    if not np.isscalar(sampling) or not np.isfinite(sampling) or sampling <= 0 or int(sampling) != sampling:
+    if isinstance(sampling, (bool, np.bool_)) or not isinstance(sampling, Real):
+        raise ValueError("sampling must be a positive integer in seconds, not bool or nonnumeric")
+    if not math.isfinite(sampling) or sampling <= 0 or int(sampling) != sampling:
         raise ValueError("sampling must be a positive integer in seconds")
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+    with np.errstate(over="raise", invalid="raise", divide="raise"):
         feats = {"duration": float(seconds_component(timestamps[-1] - timestamps[0]))}
         feats.update({name: float(fn(values)) for name, fn in TRANSFORMATIONS.items()})
+        if np.all(values == values[0]):
+            # The reduction mean of repeated decimals can differ from the input
+            # by one ULP. Apply the exact-constant contract without a threshold.
+            feats.update(mean=float(values[0]), var=0., std=0.)
         feats["gaps_squared"] = float(sum(seconds_component(d) ** 2 for d in np.diff(timestamps)))
         feats["len_weighted"] = float(sampling) * feats["len"]
         feats["var_div_duration"] = feats["var"] / feats["duration"] if feats["duration"] else 0.
@@ -164,3 +170,12 @@ def extract_features(values, timestamps, sampling=1):
     if not np.isfinite(list(feats.values())).all():
         raise ValueError("segment produces undefined or non-finite features")
     return feats
+
+
+def extract_features(values, timestamps, sampling=1):
+    """The only normative entry; reject numerical overflow with its cause."""
+    try:
+        with np.errstate(over="raise", invalid="raise", divide="raise"):
+            return _extract_features(values, timestamps, sampling)
+    except (OverflowError, FloatingPointError) as error:
+        raise ValueError("segment numerical overflow or invalid arithmetic") from error

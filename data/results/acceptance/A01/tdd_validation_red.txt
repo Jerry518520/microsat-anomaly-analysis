@@ -1,0 +1,167 @@
+...............FFFFF...........                                          [100%]
+================================== FAILURES ===================================
+_ test_invalid_or_unsupported_segments_are_rejected[values12-timestamps12-True] _
+
+values = [1, 2, 3], timestamps = [0, 1, 2], sampling = True
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+        ([1, 2, 3], [0, 1, 2], True),
+        ([1, 2, 3], [0, 1, 2], np.bool_(True)),
+        ([1, 2, 3], [0, 1, 2], "1"),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:55: Failed
+_ test_invalid_or_unsupported_segments_are_rejected[values13-timestamps13-sampling13] _
+
+values = [1, 2, 3], timestamps = [0, 1, 2], sampling = np.True_
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+        ([1, 2, 3], [0, 1, 2], True),
+        ([1, 2, 3], [0, 1, 2], np.bool_(True)),
+        ([1, 2, 3], [0, 1, 2], "1"),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_feature_consistency.py:55: Failed
+_ test_invalid_or_unsupported_segments_are_rejected[values14-timestamps14-1] __
+
+values = [1, 2, 3], timestamps = [0, 1, 2], sampling = '1'
+
+    @pytest.mark.parametrize("values,timestamps,sampling", [
+        ([], [], 1), ([1], [0], 1), ([1, 2], [0, 1], 1),
+        ([1, np.nan, 2], [0, 1, 2], 1), ([1, np.inf, 2], [0, 1, 2], 1),
+        ([1, 2, 3], [0, np.nan, 2], 1), ([1, 2, 3], [0, 2, 1], 1),
+        ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
+        ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
+        ([1, 2, 3], [0, 1, 2], np.nan),
+        ([1, 2, 3], [0, 1, 2], True),
+        ([1, 2, 3], [0, 1, 2], np.bool_(True)),
+        ([1, 2, 3], [0, 1, 2], "1"),
+    ])
+    def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
+        with pytest.raises(ValueError):
+>           extract_segment_features(np.asarray(values), np.asarray(timestamps), sampling)
+
+tests\test_feature_consistency.py:56:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\streaming\segment_features.py:12: in extract_segment_features
+    return extract_features(values, timestamps, sampling)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+values = array([1., 2., 3.]), timestamps = array([0., 1., 2.]), sampling = '1'
+
+    def extract_features(values, timestamps, sampling=1):
+        """The only normative extraction entry; adapters do no feature arithmetic."""
+        values = np.ascontiguousarray(values, dtype=np.float64)
+        timestamps = np.ascontiguousarray(timestamps, dtype=np.float64)
+        if values.ndim != 1 or timestamps.ndim != 1 or len(values) != len(timestamps):
+            raise ValueError("values and timestamps must be equally sized 1D arrays")
+        if len(values) < 3:
+            raise ValueError("at least 3 points are required; shorter segments are not applicable")
+        if not np.isfinite(values).all() or not np.isfinite(timestamps).all():
+            raise ValueError("values and timestamps must be finite and complete")
+        if np.any(np.diff(timestamps) < 0):
+            raise ValueError("timestamps must be nondecreasing; input is not reordered")
+>       if not np.isscalar(sampling) or not np.isfinite(sampling) or sampling <= 0 or int(sampling) != sampling:
+                                            ^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''
+
+src\features\segment_spec.py:155: TypeError
+_ test_finite_inputs_that_overflow_have_explicit_value_error_and_cause[values0-timestamps0] _
+
+values = [1e+308, 1e+308, 1e+308], timestamps = [0, 1, 2]
+
+    @pytest.mark.parametrize("values,timestamps", [
+        ([1e308] * 3, [0, 1, 2]),
+        ([0, 1, 0], [-1e308, 0, 1e308]),
+    ])
+    def test_finite_inputs_that_overflow_have_explicit_value_error_and_cause(values, timestamps):
+        with pytest.raises(ValueError, match="overflow") as error:
+>           extract_segment_features(np.asarray(values), np.asarray(timestamps))
+
+tests\test_feature_consistency.py:65:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\streaming\segment_features.py:12: in extract_segment_features
+    return extract_features(values, timestamps, sampling)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\features\segment_spec.py:159: in extract_features
+    feats.update({name: float(fn(values)) for name, fn in TRANSFORMATIONS.items()})
+                              ^^^^^^^^^^
+src\features\segment_spec.py:103: in smooth10_n_peaks
+    return number_of_peaks_finding(smooth_values(array, 10))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+array = array([1.e+308, 1.e+308, 1.e+308]), window = 10
+
+    def smooth_values(array, window):
+        """Fixed arithmetic; NumPy 'same' alignment, including N < even window."""
+        array = np.asarray(array, dtype=np.float64)
+        n = len(array)
+        start = (min(n, window) - 1) // 2
+        return np.array([
+>           math.fsum(array[max(0, i - window + 1):min(n, i + 1)]) / window
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            for i in range(start, start + max(n, window))
+        ], dtype=np.float64)
+E       OverflowError: intermediate overflow in fsum
+
+src\features\segment_spec.py:97: OverflowError
+_ test_finite_inputs_that_overflow_have_explicit_value_error_and_cause[values1-timestamps1] _
+
+values = [0, 1, 0], timestamps = [-1e+308, 0, 1e+308]
+
+    @pytest.mark.parametrize("values,timestamps", [
+        ([1e308] * 3, [0, 1, 2]),
+        ([0, 1, 0], [-1e308, 0, 1e308]),
+    ])
+    def test_finite_inputs_that_overflow_have_explicit_value_error_and_cause(values, timestamps):
+        with pytest.raises(ValueError, match="overflow") as error:
+>           extract_segment_features(np.asarray(values), np.asarray(timestamps))
+
+tests\test_feature_consistency.py:65:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\streaming\segment_features.py:12: in extract_segment_features
+    return extract_features(values, timestamps, sampling)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\features\segment_spec.py:158: in extract_features
+    feats = {"duration": float(seconds_component(timestamps[-1] - timestamps[0]))}
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+delta = np.float64(inf)
+
+    def seconds_component(delta):
+        """Historical pandas .seconds compatibility for nonnegative durations."""
+>       return math.floor(float(delta)) % 86400
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: cannot convert float infinity to integer
+
+src\features\segment_spec.py:77: OverflowError
+=========================== short test summary info ===========================
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values12-timestamps12-True]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values13-timestamps13-sampling13]
+FAILED tests/test_feature_consistency.py::test_invalid_or_unsupported_segments_are_rejected[values14-timestamps14-1]
+FAILED tests/test_feature_consistency.py::test_finite_inputs_that_overflow_have_explicit_value_error_and_cause[values0-timestamps0]
+FAILED tests/test_feature_consistency.py::test_finite_inputs_that_overflow_have_explicit_value_error_and_cause[values1-timestamps1]
+5 failed, 26 passed in 1.71s

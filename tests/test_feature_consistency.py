@@ -47,16 +47,44 @@ def test_seconds_component_floors_fractional_seconds_and_keeps_cross_day_compati
     ([1, 2, 3], [0, 1], 1), ([[1, 2, 3]], [0, 1, 2], 1),
     ([1, 2, 3], [0, 1, 2], -1), ([1, 2, 3], [0, 1, 2], 0),
     ([1, 2, 3], [0, 1, 2], np.nan),
+    ([1, 2, 3], [0, 1, 2], True),
+    ([1, 2, 3], [0, 1, 2], np.bool_(True)),
+    ([1, 2, 3], [0, 1, 2], "1"),
 ])
 def test_invalid_or_unsupported_segments_are_rejected(values, timestamps, sampling):
     with pytest.raises(ValueError):
         extract_segment_features(np.asarray(values), np.asarray(timestamps), sampling)
 
 
+@pytest.mark.parametrize("values,timestamps", [
+    ([1e308] * 3, [0, 1, 2]),
+    ([0, 1, 0], [-1e308, 0, 1e308]),
+])
+def test_finite_inputs_that_overflow_have_explicit_value_error_and_cause(values, timestamps):
+    with pytest.raises(ValueError, match="overflow") as error:
+        extract_segment_features(np.asarray(values), np.asarray(timestamps))
+    assert isinstance(error.value.__cause__, (OverflowError, FloatingPointError))
+
+
 def test_constant_segment_has_explicit_finite_moment_sentinels():
     result = extract_segment_features(np.ones(8), np.arange(8))
     assert result["kurtosis"] == result["skew"] == 0
     assert np.isfinite(feature_vector(result)).all()
+
+
+@pytest.mark.parametrize("count", [3, 8])
+def test_exact_decimal_constant_has_exact_mean_and_zero_variance(count):
+    result = extract_segment_features(np.full(count, .1), np.arange(count))
+    assert result["mean"] == .1
+    assert result["var"] == 0.
+    assert result["std"] == 0.
+
+
+def test_near_constant_is_not_zeroed_by_a_threshold():
+    result = extract_segment_features(np.array([.1, .1 + 1e-10, .1]), np.arange(3))
+    assert 0 < result["var"] < 1e-20
+    assert result["std"] > 0
+    assert result["mean"] != .1
 
 
 def test_raw_and_smoothing_peak_plateaus_keep_scipy_semantics():

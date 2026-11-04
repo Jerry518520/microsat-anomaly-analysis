@@ -51,10 +51,10 @@
 |---|---|
 | 空段、少于3点 | 拒绝，抛出 ValueError。少于3点不适用18维正式判定。引擎现有正式判定也跳过少于3点的段。 |
 | 3点以上的短段，N<W | 保留 same 的输出长度 max(N,W)。不截回N。 |
-| 精确常量段 | var/std/diff方差为0。kurtosis/skew采用明确的有限哨兵0；它们不是常量分布的数学矩估计。 |
-| 其他数值导致未定义/非有限特征 | 拒绝。不让模型静默填补。 |
+| 精确常量段 | 所有值与首值精确相等时，mean取首值，var/std/diff方差为0。kurtosis/skew采用明确的有限哨兵0；它们不是常量分布的数学矩估计。不对近似常量使用阈值归零。 |
+| 其他数值导致未定义/非有限特征 | 拒绝。不让模型静默填补。有限输入的数值运算溢出统一抛出ValueError，并保留原始异常原因。 |
 | 缺失、NaN、Inf、数组长度或维数不一致 | 拒绝，抛出 ValueError。 |
-| sampling | 必须是正整数秒。零、负数和非有限值均拒绝。 |
+| sampling | 必须是实数类型的正整数秒。bool、字符串等非数值、零、负数和非有限值均以ValueError拒绝。 |
 | 乱序时间 | 拒绝。不排序，不把负间隔取模当成有效输入。 |
 | 相同时间戳、重复点 | 保留全部点，保留输入顺序。重复间隔为0。 |
 | 零时长 | duration=0，gaps_squared=0，var_div_duration=0。 |
@@ -94,7 +94,7 @@
 
 证据目录：`data/results/acceptance/A01/`。
 
-1. 运行 `.venv/Scripts/python.exe -m pytest tests/test_feature_consistency.py -q -p no:cacheprovider`。先前红灯为19失败、1通过；补充空表测试另有1失败、21通过。容差约束测试曾另有1失败、22通过；最后23项通过。
+1. 运行 `.venv/Scripts/python.exe -m pytest tests/test_feature_consistency.py -q -p no:cacheprovider`。先前红灯为19失败、1通过；补充空表测试另有1失败、21通过。容差约束测试曾另有1失败、22通过。小数常量回归曾另有1失败、25通过；采样类型与溢出回归曾有5失败、26通过；最后31项通过。
 2. 运行 `.venv/Scripts/python.exe scripts/verify_feature_consistency.py`。全量2123段18列一致；计数完全相同；向量逐值相同；同模型预测完全相同。
 3. 查看 `summary.json` 与 `all_differences.csv`。前者保存每列最大差、差异计数、模型影响和保护文件哈希。
 4. 用 gzip 解压 `point_peak_traces.json.gz`。22个相关段各自记录原始CSV行号、原始时间与值、输入顺序、两种平滑向量、阈值、峰索引、prominence和生成方式。历史缺失的峰索引被明确标记为无法还原。

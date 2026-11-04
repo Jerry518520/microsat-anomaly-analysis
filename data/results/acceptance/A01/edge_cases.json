@@ -1,0 +1,43 @@
+{
+  "exact_constant_0.1": {
+    "duration": 2.0,
+    "len": 3.0,
+    "mean": 0.1,
+    "var": 0.0,
+    "std": 0.0,
+    "kurtosis": 0.0,
+    "skew": 0.0,
+    "n_peaks": 0.0,
+    "smooth10_n_peaks": 1.0,
+    "smooth20_n_peaks": 1.0,
+    "diff_peaks": 0.0,
+    "diff2_peaks": 0.0,
+    "diff_var": 0.0,
+    "diff2_var": 0.0,
+    "gaps_squared": 2.0,
+    "len_weighted": 3.0,
+    "var_div_duration": 0.0,
+    "var_div_len": 0.0
+  },
+  "near_constant_variance": 2.2222219731669846e-21,
+  "bool_sampling": {
+    "exception": "ValueError",
+    "message": "sampling must be a positive integer in seconds, not bool or nonnumeric",
+    "cause_type": null
+  },
+  "string_sampling": {
+    "exception": "ValueError",
+    "message": "sampling must be a positive integer in seconds, not bool or nonnumeric",
+    "cause_type": null
+  },
+  "value_overflow": {
+    "exception": "ValueError",
+    "message": "segment numerical overflow or invalid arithmetic",
+    "cause_type": "FloatingPointError"
+  },
+  "time_overflow": {
+    "exception": "ValueError",
+    "message": "segment numerical overflow or invalid arithmetic",
+    "cause_type": "FloatingPointError"
+  }
+}

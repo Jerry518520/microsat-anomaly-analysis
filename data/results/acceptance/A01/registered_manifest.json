@@ -20,7 +20,7 @@
     "var_div_duration",
     "var_div_len"
   ],
-  "feature_spec_sha256": "04014b876d240087771b0efe2b4dcdb98ddc5388a2bdde86965b2efc85f0bad2",
+  "feature_spec_sha256": "56025f7734f59669fa4a9ecf21e796f8349ab5732ced2c6dad41f6e7290a5160",
   "spec": {
     "version": "18d-canonical-v1",
     "columns": [
@@ -43,14 +43,14 @@
       "var_div_duration",
       "var_div_len"
     ],
-    "input": "1D contiguous float64; same lengths; N>=3; finite; nondecreasing unix seconds; positive integer sampling seconds; preserve duplicates and order",
+    "input": "1D contiguous float64; same lengths; N>=3; finite; nondecreasing unix seconds; positive real integer sampling seconds, excluding bool and nonnumeric; preserve duplicates and order",
     "time": "floor(delta_seconds) modulo 86400; reject negative deltas; sum squared adjacent components",
-    "moments": "numpy mean/var/std ddof=0; scipy kurtosis Fisher,bias=True and skew bias=True; exact constant kurtosis/skew=0",
+    "moments": "numpy mean/var/std ddof=0; scipy kurtosis Fisher,bias=True and skew bias=True; exact constant mean=first value,var=std=kurtosis=skew=0; no near-constant threshold",
     "peaks": "scipy.find_peaks prominence=0.1*(max-min); exact equal plateau midpoint rounded down; exclude endpoints; no quantization",
     "smoothing": "math.fsum of each zero-padded window divided by 10 or 20; full convolution crop start=(min(N,W)-1)//2; length=max(N,W)",
     "differences": "numpy.diff n=1/2; population variance and same peak rule",
     "derived": "sampling*len; var/duration (0 when duration=0); var/len",
-    "output": "18 float64-compatible finite values or explicit ValueError; no imputation downstream",
+    "output": "18 float64-compatible finite values or explicit ValueError; numerical overflow retains exception cause; no imputation downstream",
     "acceptance": "all 18 values exactly equal; tolerances are auxiliary diagnostics only",
     "tolerances": {
       "duration": {
@@ -128,7 +128,7 @@
     }
   },
   "source_sha256": {
-    "src/features/segment_spec.py": "ac9df562b0b56b51ec0e6ac2a7fe3d5682e22f8597ed13af60a3a9e01e559f6e",
+    "src/features/segment_spec.py": "1031b10077e922bf6f476424bd53e3ac809a43fff47d5019816ddbb8cef411e5",
     "src/features/extract_segments_18d.py": "359547a3343a508916bb322e8e552eacb59aa9a661b22b06641041c55e15729a",
     "src/streaming/segment_features.py": "d11597ac2b577cf331e7326897d8d3aa435d84bdf4ede446c8e0cf5af8f79183"
   },
