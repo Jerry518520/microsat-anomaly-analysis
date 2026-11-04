@@ -1,0 +1,20 @@
+.......................                                                  [100%]
+============================== warnings summary ===============================
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+23 passed, 6 deselected, 4 warnings in 12.17s

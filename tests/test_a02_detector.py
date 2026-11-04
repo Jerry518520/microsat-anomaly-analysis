@@ -88,7 +88,7 @@ def test_verified_runtime_and_stage2_alias_never_fit(frozen, monkeypatch):
 
 @pytest.fixture(scope="module")
 def frozen(tmp_path_factory):
-    target = tmp_path_factory.mktemp("a02-package")
+    target = tmp_path_factory.mktemp("a02-package") / "bundle"
     api().freeze_bundle(target)
     return target
 
@@ -186,6 +186,8 @@ def test_explanation_keeps_low_display_formal_anomaly(frozen, monkeypatch):
     assert len(result) == 1
     assert result[0].final_pred and result[0].anomaly_score == 0.
     assert result[0].gate_op == "rule"
+    assert result[0].bundle_id == p.last_bundle_identity.manifest_sha256
+    assert result[0].model_sha256 == p.last_bundle_identity.model_sha256
 
 
 @pytest.mark.parametrize("file", ["detector_recipe.json", "model_manifest.json", "detector.joblib"])
@@ -226,9 +228,11 @@ def test_explicit_build_rejects_broken_canonical_feature_provenance(tmp_path, mo
         m.freeze_bundle(tmp_path / "output")
 
 
-def test_default_result_save_uses_versioned_run_and_preserves_history(tmp_path, monkeypatch):
+def test_default_result_save_uses_versioned_run_and_preserves_history(frozen, tmp_path, monkeypatch):
     from src.integration import anomaly_rag_pipeline as module
+    monkeypatch.setattr(api(), "DEFAULT_BUNDLE", frozen)
     pipeline = module.AnomalyRAGPipeline()
+    pipeline.detect(points())
     monkeypatch.setattr(module, "project_root", tmp_path)
     history = tmp_path / "data/results/anomaly_rag_results.json"
     history.parent.mkdir(parents=True)

@@ -35,11 +35,17 @@
 2. 执行 `.venv\Scripts\python.exe scripts/freeze_detector.py --verify-only`。
 3. 执行 `.venv\Scripts\python.exe scripts/verify_a02_detector.py`。
 
-只有第 1 步拟合模型。API、批量检测、流式加载和 `--verify-only` 都只加载。历史名称 `stage2.load_or_train()` 现在只做严格加载。
+默认构建只接受不存在的目标目录。目标已存在时立即拒绝，拒绝发生在读取配方和拟合之前。若需要重建，执行 `.venv\Scripts\python.exe scripts/freeze_detector.py --replace`。也可用 `--output <新目录>` 创建独立新包。
+
+`--replace` 先在目标同级的唯一暂存目录完成构建和真实加载校验。随后把整个旧包目录重命名为 `<原目录>.archive-<唯一标识>`，再发布新目录。旧包不删除。构建或暂存校验失败时，原包不变。发布失败时，恢复旧目录。失败的暂存目录保留供检查。CLI 显示旧包归档位置。若进程在两次目录重命名之间被强制终止，需要人工核对归档和暂存目录后恢复；完整旧包仍保留，不自动删除或训练。
+
+构建器拒绝磁盘根、仓库根、用户目录、数据容器目录和带链接/junction/reparse point 的路径。显式替换仅接受包含三个普通包文件的目录。每个目标使用独占构建锁。发现已有锁时需要先核对当前构建或失败记录，构建器不会删除其他运行的锁。
+
+只有构建步骤拟合模型。API、批量检测、流式加载和 `--verify-only` 都只加载。历史名称 `stage2.load_or_train()` 现在只做严格加载。
 
 默认包目录是 `data/models/a02-engineering-gate-v1/`。目录包含 `detector_recipe.json`、`model_manifest.json` 和 `detector.joblib`。缺包、不兼容或损坏都要求显式修复或重新构建，不自动训练。
 
-manifest 记录训练点表、规范特征表及其 manifest、划分文件、历史参数文件、特征规范、源码、依赖版本、配方和模型 SHA-256。加载器检查全部必需字段。加载器先校验模型字节，再反序列化同一份已校验字节。源码范围包含模型/规则实现、A01 适配器及批量 `detect`、流式 `_judge_segment` 方法；不包含无关 UI 和 RAG 生成方法。
+manifest 记录训练点表、规范特征表及其 manifest、划分文件、历史参数文件、特征规范、源码、依赖版本、配方和模型 SHA-256。加载器检查全部必需字段。它从已校验的规范特征表和划分文件重建拟合集，并核对 `fit_rows`、`fit_ids_sha256`、`fit_rows_per_channel` 和 `effective_if_max_samples`。反序列化后，它核对每个通道判定器的通道、k、算子、特征列、规则阈值，以及 IF 的拟合行数、特征维数、有效采样数、超参数和树数。缺字段也失败。这些检查不训练模型，也不重新给整个拟合集打分。加载器先校验模型字节，再反序列化同一份已校验字节。源码范围包含模型/规则实现、A01 适配器及批量 `detect`、流式 `_judge_segment` 方法；不包含无关 UI 和 RAG 生成方法。
 
 部署与仓库整合必须保持严格字节校验。整合时可对本次 Git 命令使用 `-c core.autocrlf=false`，随后逐项核对指纹。若目标目录的源码换行、依赖或数据字节不同，先在目标目录显式重新生成 A01 规范特征表，再构建 A02 包，并重跑只加载验证和逐段一致性核验。不能直接修改 manifest 来消除差异。
 
@@ -53,7 +59,9 @@ manifest 记录训练点表、规范特征表及其 manifest、划分文件、�
 
 `detect(None)` 明确重新检测官方原始点表中的 529 个测试段，记录 `last_input_mode='official_test_redetection'`。传入点表则记录 `supplied_points`。`last_input_sha256` 是本次输入摘要，与训练文件指纹分开。
 
-`last_seg_results` 保存全部正式结果。字段包括规则违规数、规则判定、IF 判定及分数、门控算子、门控标签、最终标签、后处理、展示分及检测/特征版本。返回的异常对象和解释结果也保留正式判据。CADC0884 不再被假定为永久正常。
+`last_seg_results` 保存全部正式结果。字段包括规则违规数、规则判定、IF 判定及分数、门控算子、门控标签、最终标签、后处理、展示分及检测/特征版本。返回的异常对象和解释结果也保留正式判据。
+
+每次成功加载还生成不可变的包身份快照：`model_sha256`、`recipe_sha256` 和 `manifest_sha256`。`bundle_id` 等于本次实际读取的 manifest 字节摘要。这个自摘要只在加载后生成，不写回 manifest。判定、异常对象、解释结果、流式 `features._detector` 和保存的运行都携带这个身份。保存时使用已加载的快照，不重新读取可能已经切换的包文件。零异常运行也保存本次检测的包身份和输入摘要；尚未完成检测时不能保存一个无身份的空运行。CADC0884 不再被假定为永久正常。
 
 流式引擎使用相同包和共享特征入口。闭段的正式判据进入状态推送，并保存在段表的 `features._detector` 中。告警文本显示实际门控、k 和版本。模型加载失败时状态保持未就绪，HTTP 接口返回 503，WebSocket 报告错误后以 1013 关闭。未就绪或无通道判定器的闭段不会静默丢弃。
 
@@ -63,6 +71,6 @@ manifest 记录训练点表、规范特征表及其 manifest、划分文件、�
 
 ## 验收证据
 
-证据目录为 `data/results/acceptance/A02/`。`segment_verdicts.csv` 包含 529 个官方测试段和 9 个合成新段。`consistency.json` 记录逐值比对结果。批量、单段调用和闭段检测在相同配方下全部一致，18 个特征逐值一致。合成 CADC0884 可以判为异常。
+初次证据目录为 `data/results/acceptance/A02/`。审查修正证据位于其 `review-fix/` 子目录。验证脚本支持 `--output <新证据目录>`，可保留既有证据。`segment_verdicts.csv` 包含 529 个官方测试段和 9 个合成新段。`consistency.json` 记录逐值比对结果。批量、单段调用和闭段检测在相同配方下全部一致，18 个特征逐值一致。合成 CADC0884 可以判为异常。
 
 本次验收不调用 LLM，不以测试集结果调参。会话隔离、自动切段改进、事件库、鉴权和生成状态属于其他任务。

@@ -50,6 +50,11 @@ class AnomalyResult:
     display_score: float = 0.
     detector_version: str = ""
     feature_version: str = ""
+    model_sha256: Optional[str] = None
+    recipe_sha256: Optional[str] = None
+    manifest_sha256: Optional[str] = None
+    bundle_id: Optional[str] = None
+    input_sha256: Optional[str] = None
 
 
 @dataclass  
@@ -84,6 +89,11 @@ class CombinedResult:
     display_score: float = 0.
     detector_version: str = ""
     feature_version: str = ""
+    model_sha256: Optional[str] = None
+    recipe_sha256: Optional[str] = None
+    manifest_sha256: Optional[str] = None
+    bundle_id: Optional[str] = None
+    input_sha256: Optional[str] = None
 
 
 class AnomalyRAGPipeline:
@@ -103,6 +113,7 @@ class AnomalyRAGPipeline:
         self.best_contamination = self.recipe["contamination"].copy()
         self.psi = self.recipe["isolation_forest"]["max_samples"]
         self.last_seg_results = pd.DataFrame()
+        self.last_bundle_identity = None
 
     def _init_rag(self):
         """延迟初始化RAG Pipeline（避免启动时加载大模型）"""
@@ -141,6 +152,7 @@ class AnomalyRAGPipeline:
         input_json = json.dumps(segments_df[required].to_numpy(dtype=object).tolist(),
                                 default=str, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
         self.last_input_sha256 = hashlib.sha256(input_json.encode()).hexdigest()
+        self.last_bundle_identity = next(iter(judges.values())).bundle_identity
         anomalies = []
         for idx, row in results.iterrows():
             if not row.final_pred:
@@ -153,7 +165,9 @@ class AnomalyRAGPipeline:
                 if_pred=row.if_pred, if_score=row.score, gate_op=row.gate_op,
                 gate_pred=bool(row.gate_pred), final_pred=bool(row.final_pred), postprocess=row.postprocess,
                 display_score=float(row.display_score), detector_version=row.detector_version,
-                feature_version=row.feature_version))
+                feature_version=row.feature_version, model_sha256=row.model_sha256,
+                recipe_sha256=row.recipe_sha256, manifest_sha256=row.manifest_sha256,
+                bundle_id=row.bundle_id, input_sha256=self.last_input_sha256))
         if progress_callback:
             progress_callback(100, 100, "正式门控判定完成")
         return anomalies
@@ -337,7 +351,8 @@ class AnomalyRAGPipeline:
             idx, anomaly = idx_anomaly
             facts = {name: getattr(anomaly, name) for name in (
                 "rule_hits", "rule_pred", "if_pred", "if_score", "gate_op", "gate_pred", "final_pred",
-                "postprocess", "display_score", "detector_version", "feature_version")}
+                "postprocess", "display_score", "detector_version", "feature_version",
+                "model_sha256", "recipe_sha256", "manifest_sha256", "bundle_id", "input_sha256")}
             print(f"\n[{idx+1}/{n_to_explain}] Segment {anomaly.segment}, {anomaly.channel}")
             try:
                 rag_result = self.explain(anomaly)
@@ -393,11 +408,23 @@ class AnomalyRAGPipeline:
         from datetime import datetime, timezone
         from uuid import uuid4
         from src.detection.frozen import VERSION
+        names = ("model_sha256", "recipe_sha256", "manifest_sha256", "bundle_id")
+        if results:
+            identity = {name: getattr(results[0], name) for name in names}
+            if not all(identity.values()) or any({name: getattr(row, name) for name in names} != identity for row in results):
+                raise ValueError("results must retain one actual loaded package identity")
+            input_sha256 = results[0].input_sha256
+        else:
+            if self.last_bundle_identity is None:
+                raise ValueError("complete detection before saving an empty run")
+            identity = self.last_bundle_identity.as_fields()
+            input_sha256 = self.last_input_sha256
         run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "-" + uuid4().hex[:8]
         path = Path(output_path) if output_path is not None else (
             project_root / "data/results/runs" / VERSION / f"{run_id}.json")
         path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"detector_version": VERSION, "run_id": run_id, "results": [asdict(r) for r in results]}
+        payload = {"detector_version": VERSION, **identity, "input_sha256": input_sha256,
+                   "run_id": run_id, "results": [asdict(r) for r in results]}
         with path.open("x", encoding="utf-8") as handle:
             json.dump(payload, handle, indent=2, ensure_ascii=False, default=str)
         print(f"[Saved] {path}")

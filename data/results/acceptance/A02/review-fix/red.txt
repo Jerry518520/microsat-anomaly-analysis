@@ -1,0 +1,242 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                            [100%]
+================================== FAILURES ===================================
+_ test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[False-fit_ids_sha256-wrong-split] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[False-fit_rows_per_channel-bad2] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[False-effective_if_max_samples-bad3] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[True-fit_rows-0] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[True-fit_ids_sha256-wrong-split] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[True-fit_rows_per_channel-bad2] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_fit_identity_fields_are_required_before_deserialization[True-effective_if_max_samples-bad3] _
+tests\test_a02_review_fixes.py:48: in test_fit_identity_fields_are_required_before_deserialization
+    api().load_bundle(target)
+src\detection\frozen.py:256: in load_bundle
+    payload = joblib.load(io.BytesIO(model_bytes))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:46: in <lambda>
+    monkeypatch.setattr(joblib, "load", lambda *a: pytest.fail("fit identity must be checked before load"))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: fit identity must be checked before load
+_ test_loaded_judges_match_recipe_and_actual_fit_population[channel-CADC9999] _
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_______ test_loaded_judges_match_recipe_and_actual_fit_population[k-99] _______
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+___ test_loaded_judges_match_recipe_and_actual_fit_population[gate_op-rule] ___
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_loaded_judges_match_recipe_and_actual_fit_population[detector_version-wrong] _
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_loaded_judges_match_recipe_and_actual_fit_population[n_features_in_-1] _
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+___ test_loaded_judges_match_recipe_and_actual_fit_population[_n_samples-1] ___
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+__ test_loaded_judges_match_recipe_and_actual_fit_population[max_samples_-1] __
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+__ test_loaded_judges_match_recipe_and_actual_fit_population[n_estimators-1] __
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+__ test_loaded_judges_match_recipe_and_actual_fit_population[max_samples-1] ___
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+__ test_loaded_judges_match_recipe_and_actual_fit_population[random_state-1] __
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+____ test_loaded_judges_match_recipe_and_actual_fit_population[n_jobs-99] _____
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_loaded_judges_match_recipe_and_actual_fit_population[contamination-0.01] _
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_loaded_judges_match_recipe_and_actual_fit_population[estimators_-bad12] _
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+____ test_loaded_judges_match_recipe_and_actual_fit_population[model-None] ____
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_loaded_judges_match_recipe_and_actual_fit_population[thresholds-bad14] _
+tests\test_a02_review_fixes.py:64: in test_loaded_judges_match_recipe_and_actual_fit_population
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_default_build_refuses_existing_target_before_fit_and_preserves_sentinels _
+tests\test_a02_review_fixes.py:77: in test_default_build_refuses_existing_target_before_fit_and_preserves_sentinels
+    api().freeze_bundle(target)
+src\detection\frozen.py:220: in freeze_bundle
+    judges = fit_judges(fit, recipe)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_a02_review_fixes.py:75: in <lambda>
+    monkeypatch.setattr(api(), "fit_judges", lambda *a: pytest.fail("refusal must precede fit"))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: refusal must precede fit
+________ test_replace_archives_old_complete_package_and_publishes_new _________
+tests\test_a02_review_fixes.py:84: in test_replace_archives_old_complete_package_and_publishes_new
+    api().freeze_bundle(target, replace=True)
+E   TypeError: freeze_bundle() got an unexpected keyword argument 'replace'
+______________ test_replace_build_failure_preserves_old_package _______________
+tests\test_a02_review_fixes.py:98: in test_replace_build_failure_preserves_old_package
+    api().freeze_bundle(target, replace=True)
+E   TypeError: freeze_bundle() got an unexpected keyword argument 'replace'
+_________________ test_build_rejects_unsafe_roots_before_fit __________________
+tests\test_a02_review_fixes.py:107: in test_build_rejects_unsafe_roots_before_fit
+    api().freeze_bundle(target, replace=True)
+E   TypeError: freeze_bundle() got an unexpected keyword argument 'replace'
+_ test_actual_loaded_identity_distinguishes_same_version_packages_and_survives_file_switch _
+tests\test_a02_review_fixes.py:128: in test_actual_loaded_identity_distinguishes_same_version_packages_and_survives_file_switch
+    assert va.model_sha256 != vb.model_sha256
+           ^^^^^^^^^^^^^^^
+E   AttributeError: 'EngineeringVerdict' object has no attribute 'model_sha256'
+_ test_pipeline_and_empty_run_save_loaded_identity_without_rereading_switched_files _
+tests\test_a02_review_fixes.py:149: in test_pipeline_and_empty_run_save_loaded_identity_without_rereading_switched_files
+    identity = anomalies[0].bundle_id
+               ^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'AnomalyResult' object has no attribute 'bundle_id'
+============================== warnings summary ===============================
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_pipeline_and_empty_run_save_loaded_identity_without_rereading_switched_files
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\src\rag\vectorstore.py:20: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+    from langchain_community.document_loaders import PyPDFLoader
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_ids_sha256-wrong-split]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows_per_channel-bad2]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-effective_if_max_samples-bad3]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[True-fit_rows-0]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[True-fit_ids_sha256-wrong-split]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[True-fit_rows_per_channel-bad2]
+FAILED tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[True-effective_if_max_samples-bad3]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[channel-CADC9999]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[k-99]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[gate_op-rule]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[detector_version-wrong]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[n_features_in_-1]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[_n_samples-1]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[max_samples_-1]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[n_estimators-1]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[max_samples-1]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[random_state-1]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[n_jobs-99]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[contamination-0.01]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[estimators_-bad12]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[model-None]
+FAILED tests/test_a02_review_fixes.py::test_loaded_judges_match_recipe_and_actual_fit_population[thresholds-bad14]
+FAILED tests/test_a02_review_fixes.py::test_default_build_refuses_existing_target_before_fit_and_preserves_sentinels
+FAILED tests/test_a02_review_fixes.py::test_replace_archives_old_complete_package_and_publishes_new
+FAILED tests/test_a02_review_fixes.py::test_replace_build_failure_preserves_old_package
+FAILED tests/test_a02_review_fixes.py::test_build_rejects_unsafe_roots_before_fit
+FAILED tests/test_a02_review_fixes.py::test_actual_loaded_identity_distinguishes_same_version_packages_and_survives_file_switch
+FAILED tests/test_a02_review_fixes.py::test_pipeline_and_empty_run_save_loaded_identity_without_rereading_switched_files
+29 failed, 5 warnings in 18.02s

@@ -1,0 +1,66 @@
+{
+  "status": "implementation_verified_pending_spec_rereview",
+  "base_commit": "9090225562247a5d7e90dbb277111f57464326cb",
+  "review_findings": [
+    {
+      "id": "A02-spec-1",
+      "closed_by": "Fit identity is reconstructed from verified canonical data and split before deserialization. All four fields are required and exact. Loaded channel/k/op/feature columns/rules/IF parameters, actual fit rows, feature dimensions, sample count and tree count are checked. No fit or full-fit rescoring occurs during load.",
+      "regressions": 24
+    },
+    {
+      "id": "A02-spec-2",
+      "closed_by": "Existing targets fail before fit by default. Explicit --replace builds and verifies a sibling stage, archives the complete previous directory, then publishes. Build failure preserves the old bytes; simulated publish failure restores the old directory. Unsafe roots/containers and link/reparse paths are rejected.",
+      "regressions": 5
+    },
+    {
+      "id": "A02-spec-3",
+      "closed_by": "A frozen load-time BundleIdentity binds model/recipe/manifest hashes and bundle_id to each verdict, batch row, anomaly, CombinedResult, stream._detector, and run. Save uses the held identity, including real zero-anomaly runs. Two valid same-version serializations are distinguishable; file switching does not relabel held results.",
+      "regressions": 3
+    }
+  ],
+  "full_offline_tests": {
+    "passed": 294,
+    "skipped": 1,
+    "deselected": 3,
+    "warnings": 18,
+    "elapsed_seconds": 43.19
+  },
+  "targeted_tests": {
+    "passed": 88,
+    "warnings": 17,
+    "elapsed_seconds": 33.5
+  },
+  "initial_red": {
+    "failed": 29,
+    "passed": 0
+  },
+  "consistency": {
+    "detector_version": "a02-engineering-gate-v1",
+    "official_test_rows": 529,
+    "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+    "recipe_sha256": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+    "manifest_sha256": "5e353ea458d7d019059763a0f35ae04af94b700020c0e688ff45006336b95ed7",
+    "bundle_id": "5e353ea458d7d019059763a0f35ae04af94b700020c0e688ff45006336b95ed7",
+    "unseen_rows": 9,
+    "total_rows": 538,
+    "batch_single_exact": true,
+    "batch_closed_stream_exact": true,
+    "actual_stream_engine_exercised": true,
+    "all_18_features_exact": true,
+    "test_used_for_tuning": false,
+    "postprocess": "identity",
+    "official_test_predicted_anomalies": 132,
+    "unseen_0884_can_be_anomalous": true
+  },
+  "package_path": "data\\models\\a02-engineering-gate-v1",
+  "archive_path": "data\\models\\a02-engineering-gate-v1.archive-a49c66e05ac34c068e2571510a18e996",
+  "original_package_model_and_manifest_exactly_preserved": true,
+  "older_stage2_and_historical_rag_output_exactly_preserved": true,
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "manifest_sha256": "5e353ea458d7d019059763a0f35ae04af94b700020c0e688ff45006336b95ed7",
+  "known_limits": [
+    "No real LLM/vectorstore/embedding-model integration calls.",
+    "Strict source/dependency byte fingerprints remain in force.",
+    "Process crash recovery between archive and publish is manual; complete old archive and stage are retained."
+  ]
+}

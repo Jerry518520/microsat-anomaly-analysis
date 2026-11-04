@@ -1,0 +1,247 @@
+{
+  "detector_version": "a02-engineering-gate-v1",
+  "feature": {
+    "feature_version": "18d-canonical-v1",
+    "feature_cols": [
+      "duration",
+      "len",
+      "mean",
+      "var",
+      "std",
+      "kurtosis",
+      "skew",
+      "n_peaks",
+      "smooth10_n_peaks",
+      "smooth20_n_peaks",
+      "diff_peaks",
+      "diff2_peaks",
+      "diff_var",
+      "diff2_var",
+      "gaps_squared",
+      "len_weighted",
+      "var_div_duration",
+      "var_div_len"
+    ],
+    "feature_spec_sha256": "56025f7734f59669fa4a9ecf21e796f8349ab5732ced2c6dad41f6e7290a5160",
+    "spec": {
+      "version": "18d-canonical-v1",
+      "columns": [
+        "duration",
+        "len",
+        "mean",
+        "var",
+        "std",
+        "kurtosis",
+        "skew",
+        "n_peaks",
+        "smooth10_n_peaks",
+        "smooth20_n_peaks",
+        "diff_peaks",
+        "diff2_peaks",
+        "diff_var",
+        "diff2_var",
+        "gaps_squared",
+        "len_weighted",
+        "var_div_duration",
+        "var_div_len"
+      ],
+      "input": "1D contiguous float64; same lengths; N>=3; finite; nondecreasing unix seconds; positive real integer sampling seconds, excluding bool and nonnumeric; preserve duplicates and order",
+      "time": "floor(delta_seconds) modulo 86400; reject negative deltas; sum squared adjacent components",
+      "moments": "numpy mean/var/std ddof=0; scipy kurtosis Fisher,bias=True and skew bias=True; exact constant mean=first value,var=std=kurtosis=skew=0; no near-constant threshold",
+      "peaks": "scipy.find_peaks prominence=0.1*(max-min); exact equal plateau midpoint rounded down; exclude endpoints; no quantization",
+      "smoothing": "math.fsum of each zero-padded window divided by 10 or 20; full convolution crop start=(min(N,W)-1)//2; length=max(N,W)",
+      "differences": "numpy.diff n=1/2; population variance and same peak rule",
+      "derived": "sampling*len; var/duration (0 when duration=0); var/len",
+      "output": "18 float64-compatible finite values or explicit ValueError; numerical overflow retains exception cause; no imputation downstream",
+      "acceptance": "all 18 values exactly equal; tolerances are auxiliary diagnostics only",
+      "tolerances": {
+        "duration": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "len": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "mean": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "var": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "std": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "kurtosis": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "skew": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "n_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "smooth10_n_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "smooth20_n_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "diff_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "diff2_peaks": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "diff_var": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "diff2_var": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "gaps_squared": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "len_weighted": {
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        "var_div_duration": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        },
+        "var_div_len": {
+          "atol": 0.0,
+          "rtol": 1e-10
+        }
+      }
+    },
+    "source_sha256": {
+      "src/features/segment_spec.py": "1031b10077e922bf6f476424bd53e3ac809a43fff47d5019816ddbb8cef411e5",
+      "src/features/extract_segments_18d.py": "359547a3343a508916bb322e8e552eacb59aa9a661b22b06641041c55e15729a",
+      "src/streaming/segment_features.py": "d11597ac2b577cf331e7326897d8d3aa435d84bdf4ede446c8e0cf5af8f79183"
+    },
+    "dependencies": {
+      "python": "3.13.13",
+      "numpy": "2.4.6",
+      "pandas": "3.0.3",
+      "scipy": "1.17.1"
+    }
+  },
+  "inputs": {
+    "data/processed/segments_18d_18d-canonical-v1.csv": "09d613cfd8cd33987ac3a5a9b87f6accb10b6baf3d830d82cb3bc6948e49bc8f",
+    "data/processed/segments_18d_18d-canonical-v1.manifest.json": "747fda5f8d956a8cbb700a6ed2dedf08e1a6675b04c6b68cd8e1de60578fe25a",
+    "data/raw/segments.csv": "dab2e01e873c93590692b50a7cc312d9cce4d5ba7e69ce8015603c47a8ffb97b",
+    "data/results/v3/split_indices.json": "d1209fa29ae607db71c966b33d2501758a8ead52592d3efcbfc1c4f261838b4c",
+    "data/results/v3/fusion.json": "6d84d3549823166bed1925965b29fbb955bf2dbf7475e65c4cb3ddb3c6229f4d"
+  },
+  "sources": {
+    "src/detection/frozen.py": "8463620a1d20b367ebb79db374150eaafe8df703f8ba82651e047d6cbd7efe86",
+    "src/features/segment_spec.py": "1031b10077e922bf6f476424bd53e3ac809a43fff47d5019816ddbb8cef411e5",
+    "src/features/extract_segments_18d.py": "359547a3343a508916bb322e8e552eacb59aa9a661b22b06641041c55e15729a",
+    "src/streaming/segment_features.py": "d11597ac2b577cf331e7326897d8d3aa435d84bdf4ede446c8e0cf5af8f79183",
+    "src/utils/stat_rules.py": "a647258cf76f268d3703da395fca13a6c486f4f2280edb95ab232db133c7396a",
+    "src/streaming/stage2.py": "3095b7be0515bee08fddea31cc6800740290070dd1717482215197223d8ddf85",
+    "src/integration/anomaly_rag_pipeline.py#AnomalyRAGPipeline.detect": "f0301eca33354a86325ca46dc9a4ed21bcc8b4f3b7d3e7fabcbe5ad2ac68e920",
+    "src/streaming/engine.py#StreamEngine._judge_segment": "f86524b78b2a583934ec92b6de72e8b23c43e13c9c9a8cc5ac3c696192a5c418"
+  },
+  "dependencies": {
+    "python": "3.13.13",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.8.0",
+    "joblib": "1.5.3"
+  },
+  "recipe_sha256": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+  "recipe": {
+    "detector_version": "a02-engineering-gate-v1",
+    "status": "engineering_fixed",
+    "purpose": "engineering_candidate; not historical experiment reproduction or validation-selected winner",
+    "feature_version": "18d-canonical-v1",
+    "fit_rows": 1275,
+    "fit_population": "split_indices.json fit_ids only; sorted by segment; no val/test fitting",
+    "parameter_source": "historical fusion.json selection; transferred fixed k/c/gate mapping; no new-feature search; historical validation winner was soft_perchannel",
+    "best_k": 2,
+    "contamination": {
+      "CADC0872": 0.35,
+      "CADC0892": 0.05,
+      "CADC0874": 0.5,
+      "CADC0884": 0.05,
+      "CADC0873": 0.35,
+      "CADC0886": null,
+      "CADC0888": 0.45,
+      "CADC0894": 0.15,
+      "CADC0890": null
+    },
+    "gate_choice": {
+      "CADC0872": "rule",
+      "CADC0873": "AND",
+      "CADC0874": "if",
+      "CADC0884": "rule",
+      "CADC0886": "rule",
+      "CADC0888": "rule",
+      "CADC0890": "rule",
+      "CADC0892": "if",
+      "CADC0894": "if"
+    },
+    "isolation_forest": {
+      "n_estimators": 100,
+      "max_samples": 128,
+      "random_state": 42,
+      "n_jobs": 1
+    },
+    "minimum_if_fit_rows": 10,
+    "rules": {
+      "minimum_nonnull_fit_rows": 5,
+      "std_ddof": 1,
+      "std_floor_condition": "std <= 1e-6 replaced by 1.0",
+      "sigma_multiplier": 3.0,
+      "iqr_multiplier": 1.5,
+      "quantiles": "pandas linear 0.25/0.75",
+      "comparison": "strict outside; sigma OR IQR counts each feature once"
+    },
+    "postprocess": "identity",
+    "fallback": "none; null contamination means no IF; missing required gate component fails",
+    "input_imputation": "none; nonfinite features rejected",
+    "display": "IF: max(0,-decision_function-tau95)/(3*fit_score_std), clipped to 1; no IF: rule_hits/6 clipped to 1; rounded 4dp; never changes label"
+  },
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "fit_rows": 1275,
+  "fit_ids_sha256": "06cb68ab3480f8c7ec8cc97eb92bfce482365d3f3db568abccaabf87097194e8",
+  "fit_rows_per_channel": {
+    "CADC0872": 329,
+    "CADC0873": 359,
+    "CADC0874": 112,
+    "CADC0884": 97,
+    "CADC0886": 6,
+    "CADC0888": 152,
+    "CADC0890": 9,
+    "CADC0892": 125,
+    "CADC0894": 86
+  },
+  "effective_if_max_samples": {
+    "CADC0872": 128,
+    "CADC0873": 128,
+    "CADC0874": 112,
+    "CADC0884": 97,
+    "CADC0886": null,
+    "CADC0888": 128,
+    "CADC0890": null,
+    "CADC0892": 125,
+    "CADC0894": 86
+  }
+}
