@@ -1,0 +1,58 @@
+{
+  "status": "implementation_verified_pending_review",
+  "base_commit": "c6f5218e4aa685e250affae486a3caae3ea20156",
+  "detector_version": "a02-engineering-gate-v1",
+  "feature_version": "18d-canonical-v1",
+  "package_path": "data/models/a02-engineering-gate-v1",
+  "model_sha256": "9965314e649c8198d93605f088d32a35a5319144c1ac03cef871e4080f0fe596",
+  "model_manifest_sha256": "87f240a63c22d1f2fdb1a4a002ba5461a3be0bcd8eb1f5c9afe975d42d367eb5",
+  "full_offline_tests": {
+    "passed": 262,
+    "skipped": 1,
+    "deselected": 3,
+    "warnings": 6,
+    "elapsed_seconds": 23.22,
+    "command": ".venv/Scripts/python.exe -m pytest -q -k \"not test_real_query and not test_with_real_vectorstore and not test_real_env_model_loads_and_has_expected_dim\" --tb=short --basetemp=data/results/acceptance/A02/pytest-delivery"
+  },
+  "consistency": {
+    "detector_version": "a02-engineering-gate-v1",
+    "official_test_rows": 529,
+    "unseen_rows": 9,
+    "total_rows": 538,
+    "batch_single_exact": true,
+    "batch_closed_stream_exact": true,
+    "all_18_features_exact": true,
+    "test_used_for_tuning": false,
+    "postprocess": "identity",
+    "manifest_sha256": "87f240a63c22d1f2fdb1a4a002ba5461a3be0bcd8eb1f5c9afe975d42d367eb5",
+    "official_test_predicted_anomalies": 132,
+    "unseen_0884_can_be_anomalous": true
+  },
+  "historical_artifacts_unchanged": {
+    "git_tracked_raw_and_legacy_processed": "no changes",
+    "anomaly_rag_results_sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+    "legacy_stage2_sha256": "89c84f3ed8277431f346694cb316b668803931ce14c8387a6db226543088ac31"
+  },
+  "known_limits": [
+    "No LLM, real vectorstore or real embedding-model integration run.",
+    "A04 session/segment management, A05 event store, A06 authentication, A12 generation state are outside A02.",
+    "Manifest strictly validates file bytes; line-ending or dependency changes require explicit rebuild.",
+    "IF max_samples=128 is capped by fit population per scikit-learn; four expected build warnings are recorded."
+  ],
+  "tdd_evidence": [
+    "red.txt",
+    "stream-red.txt",
+    "input-red.txt",
+    "explain-red.txt",
+    "provenance-red.txt",
+    "output-red.txt"
+  ],
+  "verification_evidence": [
+    "full-offline.txt",
+    "build.txt",
+    "verify-only.txt",
+    "consistency.json",
+    "segment_verdicts.csv",
+    "model_manifest.json"
+  ]
+}

@@ -1,23 +1,11 @@
+"""A02 streaming detection with a verified frozen engineering package.
+
+Closed segments share the A01 feature extractor and A02 judges with batch.
+Growing-prefix scores are previews; only final_pred can raise a formal alert.
 """
-StreamEngine — 实时遥测异常检测引擎(Stage 2 段判定版)
+from dataclasses import asdict
+from src.detection.frozen import DetectorUnavailable, VERSION
 
-数据流: ingest(遥测帧) → 在线切段(与官方段同构) → 段闭合 → 18 维段级特征
-→ Stage 2 判定(ipynb 严格一致) → 异常段生成告警 → 批量广播给 WebSocket 订阅者。
-
-双层语义(诚实性设计):
-- 正式判定层: 只在段闭合时发生, 判定单元/特征/规则/IF 参数与 ipynb
-  Stage 2 完全一致, 离线 SegF1 指标原样适用。告警只由这一层产生。
-- 增长段预览层: 段未闭合时对"当前段前缀"算 18 维特征并出展示分,
-  每点刷新供大屏曲线使用。前缀分布随段长向训练分布收敛, 但短前缀有
-  系统性偏差——预览分一律带 provisional=True, 不产生告警、不作判定。
-- 预览着色阈值(训练分 τ95 + σ 分级)仅决定曲线颜色, 不是判定边界。
-
-数据源:
-- replay: 按真实时间戳回放 data/raw/segments.csv(18 天遥测), 倍速可调,
-  界面须标注 SIMULATED LIVE —— OPS-SAT 已于 2024-05-22 再入, 不存在真实时流。
-  段 id 来自数据本身, 切段与官方完全一致。
-- ingest: 外部源 POST 遥测帧; 无段 id 时用采样间隔规则近似切段(见 segmenter)。
-"""
 import asyncio
 import time
 from collections import deque
@@ -44,6 +32,7 @@ class StreamEngine:
     def __init__(self) -> None:
         self.judges = {}
         self.models_ready = False
+        self.model_error = None
         self._models_lock: Optional[asyncio.Lock] = None
 
         # 告警/段判定持久化（SQLite）。建表失败不应让检测链路起不来。
@@ -73,7 +62,7 @@ class StreamEngine:
         self._broadcaster_task: Optional[asyncio.Task] = None
         self._segments_cache: Optional[pd.DataFrame] = None
 
-    # ===== 模型(懒加载,训练放线程池避免阻塞事件循环) =====
+    # ===== 模型（只加载并校验冻结包）=====
 
     async def ensure_models(self) -> None:
         if self.models_ready:
@@ -84,7 +73,15 @@ class StreamEngine:
             if self.models_ready:
                 return
             loop = asyncio.get_running_loop()
-            self.judges = await loop.run_in_executor(None, load_or_train)
+            try:
+                loaded = await loop.run_in_executor(None, load_or_train)
+            except DetectorUnavailable as exc:
+                self.judges = {}
+                self.models_ready = False
+                self.model_error = str(exc)
+                raise
+            self.judges = loaded
+            self.model_error = None
             self.models_ready = True
             self._ensure_broadcaster()
 
@@ -114,21 +111,25 @@ class StreamEngine:
     def _judge_segment(self, seg: ClosedSegment) -> None:
         ch = seg.channel
         judge = self.judges.get(ch)
-        if not self.models_ready or judge is None or len(seg.values) < 3:
-            return
+        if not self.models_ready or judge is None:
+            raise DetectorUnavailable(f"closed segment detector unavailable: {ch}")
         feats = extract_segment_features(seg.values, seg.timestamps, seg.sampling)
         verdict = judge.judge(feats)
         self.stats["judged_segments"] += 1
+        facts = asdict(verdict)
+        facts["segment"] = seg.seg_id
 
         # 展示分: 强通道用 IF 连续分, 弱通道用规则违例数
         disp = verdict.score if verdict.score is not None else float(verdict.rule_hits)
         self.latest[ch] = {
             "ts": float(seg.timestamps[-1]), "value": float(seg.values[-1]),
             "score": round(disp, 4), "severity": verdict.severity, "provisional": False,
+            "judgement": facts,
         }
         self._pending_scores[ch] = {
             "ts": float(seg.timestamps[-1]), "score": round(disp, 4),
             "severity": verdict.severity, "provisional": False,
+            "judgement": facts,
         }
         # 无论是否异常都落库，便于事后回溯「哪些段被判过、各自结论是什么」
         save_verdict(
@@ -139,16 +140,17 @@ class StreamEngine:
             is_anomaly=bool(verdict.anomaly),
             severity=verdict.severity,
             score=float(disp),
-            features=feats if isinstance(feats, dict) else {},
+            features={**feats, "_detector": facts},
         )
-        if verdict.anomaly:
+        if verdict.final_pred:
             self._raise_alert(seg, verdict, feats)
 
     def _raise_alert(self, seg: ClosedSegment, v: Verdict, feats: dict) -> None:
         self._alert_seq += 1
         seg_label = seg.seg_id if seg.official else seg.seg_id  # 官方段 id 或 LIVE-NNNN
-        if_part = ("IF:异常" if v.if_pred else "IF:正常") if v.if_pred is not None else "IF:—(弱通道纯规则)"
+        if_part = ("IF:异常" if v.if_pred else "IF:正常") if v.if_pred is not None else "IF:不可用（当前门控不需要）"
         alert = {
+            **asdict(v),
             "segment": seg_label,
             "channel": seg.channel,
             "channel_label": CHANNEL_MAP[seg.channel],
@@ -160,8 +162,8 @@ class StreamEngine:
             "hits": v.rule_hits,
             "anomaly_type": "unclassified (live)",
             "summary": (
-                f"【实时·Stage 2】{CHANNEL_MAP[seg.channel]} 段{seg_label} 判定异常 · "
-                f"{if_part} · 规则违例 {v.rule_hits} 条(≥2 判异常) · "
+                f"【实时·{v.detector_version}】{CHANNEL_MAP[seg.channel]} 段{seg_label} 判定异常 · "
+                f"门控 {v.gate_op} · {if_part} · 规则违例 {v.rule_hits} 条(k={self.judges[seg.channel].k}) · "
                 f"len={int(feats['len'])} mean={feats['mean']:.4g} std={feats['std']:.4g} · "
                 f"RAG 诊断待生成"
             ),
@@ -330,7 +332,10 @@ class StreamEngine:
         for ch in CHANNEL_MAP:
             last = self.latest.get(ch)
             channels[ch] = {
-                "model": "ready" if ch in self.judges else "unavailable",
+                "model": "ready" if self.models_ready and ch in self.judges else "unavailable",
+                "gate_op": self.judges[ch].gate_op if self.models_ready and ch in self.judges else None,
+                "rule_k": self.judges[ch].k if self.models_ready and ch in self.judges else None,
+                "judgement": last.get("judgement") if last else None,
                 "open_segment_len": self.segmenter.open_len(ch),
                 "last_ts": last["ts"] if last else None,
                 "last_value": last["value"] if last else None,
@@ -343,6 +348,8 @@ class StreamEngine:
             "speed": self.speed,
             "sim_ts": self.sim_ts,
             "models_ready": self.models_ready,
+            "model_error": self.model_error,
+            "detector_version": VERSION,
             "method": METHOD_DESC,
             "channels": channels,
             "alerts": list(self.alerts),

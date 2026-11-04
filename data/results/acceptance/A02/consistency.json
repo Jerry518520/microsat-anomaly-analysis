@@ -1,0 +1,14 @@
+{
+  "detector_version": "a02-engineering-gate-v1",
+  "official_test_rows": 529,
+  "unseen_rows": 9,
+  "total_rows": 538,
+  "batch_single_exact": true,
+  "batch_closed_stream_exact": true,
+  "all_18_features_exact": true,
+  "test_used_for_tuning": false,
+  "postprocess": "identity",
+  "manifest_sha256": "87f240a63c22d1f2fdb1a4a002ba5461a3be0bcd8eb1f5c9afe975d42d367eb5",
+  "official_test_predicted_anomalies": 132,
+  "unseen_0884_can_be_anomalous": true
+}

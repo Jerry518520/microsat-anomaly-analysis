@@ -1,20 +1,7 @@
-"""
-Stage 2 判定器 — 与 ipynb(微小卫星遥测异常检测与RAG解释系统_完整Pipeline)
-Stage 2「IF + 统计规则融合」严格一致的流式判定逻辑:
+"""A02 runtime loads a verified engineering package.
 
-- 训练数据: data/processed/segments_18d.csv(缺失时按 ipynb 回退路径
-  用 extract_segments_18d.generate_dataset 从 segments.csv 生成并缓存);
-- 特征: 18 维段级统计特征(feature_cols = 全部列 - META_COLS, 顺序同源);
-- 强通道(CADC0872/873/874): IsolationForest(n_estimators=100,
-  contamination=0.2, random_state=42, 无 max_samples) predict()==-1
-  OR 分通道 3σ/IQR 规则;
-- 弱通道(其余 6 个): 纯规则(不建 IF 模型);
-- 规则: 训练集上分通道计算各特征的 mean/std/q1/q3/iqr,
-  单段违反(3σ 或 1.5·IQR 出界)累计 ≥2 条即判异常;
-- 判定为二值 verdict。severity / anomaly_score 仅是展示层着色,
-  不参与判定(见 Verdict 注释)。
-
-首次训练后 joblib 落盘 data/models/stage2_detector.joblib, 后续直接加载。
+ChannelJudge and historical helpers below are retained verbatim for old-pickle
+forensics only. They do not define the current engineering method.
 """
 import os
 import time
@@ -43,7 +30,7 @@ RANDOM_STATE = 42
 MIN_TRAIN = 10
 CACHE_VERSION = "stage2-ipynb-aligned-2"
 
-METHOD_DESC = "Stage 2: 强通道 IF(c=0.2) OR 3σ/IQR 规则; 弱通道纯规则; 段闭合判定(与 ipynb 一致)"
+METHOD_DESC = "A02 a02-engineering-gate-v1: fit1275 + 18d-canonical-v1; fixed per-channel gate; identity postprocess"
 
 
 @dataclass
@@ -213,21 +200,7 @@ def train_detector() -> dict[str, ChannelJudge]:
     return judges
 
 
-def load_or_train() -> dict[str, ChannelJudge]:
-    """优先从 data/models/ 加载缓存, 否则训练并落盘"""
-    if os.path.exists(MODEL_PATH):
-        try:
-            payload = joblib.load(MODEL_PATH)
-            if payload.get("version") == CACHE_VERSION and payload.get("feature_cols") == FEATURE_COLS:
-                print(f"[Stage2] 从缓存加载 {len(payload['judges'])} 个通道判定器")
-                return payload["judges"]
-            print("[Stage2] 缓存版本/特征列不匹配, 重新训练")
-        except Exception as e:
-            print(f"[Stage2] 缓存加载失败({e}), 重新训练")
-
-    t0 = time.time()
-    judges = train_detector()
-    os.makedirs(MODEL_DIR, exist_ok=True)
-    joblib.dump({"version": CACHE_VERSION, "feature_cols": FEATURE_COLS, "judges": judges}, MODEL_PATH)
-    print(f"[Stage2] 训练完成({time.time() - t0:.1f}s), 已保存: {MODEL_PATH}")
-    return judges
+def load_or_train():
+    """Compatibility name: strictly load A02, never train or use legacy cache."""
+    from src.detection.frozen import load_bundle
+    return load_bundle()

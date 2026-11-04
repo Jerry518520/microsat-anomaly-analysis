@@ -1,0 +1,52 @@
+{
+  "detector_version": "a02-engineering-gate-v1",
+  "status": "engineering_fixed",
+  "purpose": "engineering_candidate; not historical experiment reproduction or validation-selected winner",
+  "feature_version": "18d-canonical-v1",
+  "fit_rows": 1275,
+  "fit_population": "split_indices.json fit_ids only; sorted by segment; no val/test fitting",
+  "parameter_source": "historical fusion.json selection; transferred fixed k/c/gate mapping; no new-feature search; historical validation winner was soft_perchannel",
+  "best_k": 2,
+  "contamination": {
+    "CADC0872": 0.35,
+    "CADC0892": 0.05,
+    "CADC0874": 0.5,
+    "CADC0884": 0.05,
+    "CADC0873": 0.35,
+    "CADC0886": null,
+    "CADC0888": 0.45,
+    "CADC0894": 0.15,
+    "CADC0890": null
+  },
+  "gate_choice": {
+    "CADC0872": "rule",
+    "CADC0873": "AND",
+    "CADC0874": "if",
+    "CADC0884": "rule",
+    "CADC0886": "rule",
+    "CADC0888": "rule",
+    "CADC0890": "rule",
+    "CADC0892": "if",
+    "CADC0894": "if"
+  },
+  "isolation_forest": {
+    "n_estimators": 100,
+    "max_samples": 128,
+    "random_state": 42,
+    "n_jobs": 1
+  },
+  "minimum_if_fit_rows": 10,
+  "rules": {
+    "minimum_nonnull_fit_rows": 5,
+    "std_ddof": 1,
+    "std_floor_condition": "std <= 1e-6 replaced by 1.0",
+    "sigma_multiplier": 3.0,
+    "iqr_multiplier": 1.5,
+    "quantiles": "pandas linear 0.25/0.75",
+    "comparison": "strict outside; sigma OR IQR counts each feature once"
+  },
+  "postprocess": "identity",
+  "fallback": "none; null contamination means no IF; missing required gate component fails",
+  "input_imputation": "none; nonfinite features rejected",
+  "display": "IF: max(0,-decision_function-tau95)/(3*fit_score_std), clipped to 1; no IF: rule_hits/6 clipped to 1; rounded 4dp; never changes label"
+}

@@ -3,7 +3,8 @@ import asyncio
 import os
 import sys
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+from src.detection.frozen import DetectorUnavailable
 from pydantic import BaseModel
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -14,6 +15,17 @@ from src.streaming.engine import engine
 from src.streaming.persistence import query_alerts as query_alerts_db, stats as alert_db_stats
 
 router = APIRouter()
+
+
+def _unavailable(exc):
+    return HTTPException(status_code=503, detail={"error": "detector_unavailable", "message": str(exc)})
+
+
+async def _ensure_models():
+    try:
+        await engine.ensure_models()
+    except DetectorUnavailable as exc:
+        raise _unavailable(exc) from exc
 
 
 class ReplayRequest(BaseModel):
@@ -35,15 +47,18 @@ class IngestRequest(BaseModel):
 @router.get("/state")
 async def get_state():
     """实时流状态快照(模式/仿真时钟/各通道最新判定/活跃告警/统计)。
-    首次调用会触发 Stage 2 判定器训练(数秒~首次生成特征约 1 分钟)。"""
-    await engine.ensure_models()
+    首次调用只加载和校验冻结包；缺失或不兼容返回503。"""
+    await _ensure_models()
     return engine.snapshot()
 
 
 @router.post("/replay/start")
 async def start_replay(req: ReplayRequest):
     """开始回放 18 天遥测(SIMULATED LIVE)。speed=倍速,1~2000"""
-    return await engine.start_replay(req.speed)
+    try:
+        return await engine.start_replay(req.speed)
+    except DetectorUnavailable as exc:
+        raise _unavailable(exc) from exc
 
 
 @router.post("/replay/stop")
@@ -61,7 +76,7 @@ async def ingest_frames(req: IngestRequest):
     if engine.mode == "replay":
         return {"accepted": 0, "rejected": len(req.frames),
                 "error": "replay in progress, stop it first"}
-    await engine.ensure_models()
+    await _ensure_models()
     engine.mode = "live"
     accepted = 0
     for f in req.frames:
@@ -74,7 +89,12 @@ async def ingest_frames(req: IngestRequest):
 async def stream_ws(ws: WebSocket):
     """实时推送: 连接即发 snapshot,随后每 0.5s 批量推送 points/scores/alerts"""
     await ws.accept()
-    await engine.ensure_models()
+    try:
+        await engine.ensure_models()
+    except DetectorUnavailable as exc:
+        await ws.send_json({"type": "error", "error": "detector_unavailable", "message": str(exc), "state": engine.snapshot()})
+        await ws.close(code=1013)
+        return
     await ws.send_json({"type": "snapshot", "state": engine.snapshot()})
     q = engine.subscribe()
     try:

@@ -1,37 +1,10 @@
-"""
-异常检测 + RAG解释 联合Pipeline
+"""Frozen A02 engineering detection plus optional RAG explanation.
 
-功能：
-1. 运行完整异常检测流程
-   - 有 fusion.json 配方时：按 gate_perchannel 逐通道选 rule/if/AND/OR
-     （9 个通道各自独立，参数由 scripts/fusion_v3.py 在 val 上选出）
-   - 无配方时：回退 Scheme G（强通道 IF+OR 规则 / 弱通道段级 baseline）
-   - psi=128 为工程固定参数；vote_threshold=0.25 为工程设定值（无 val 选优）
-2. 对检测到的异常自动生成RAG解释查询
-3. 调用RAG pipeline获取知识库支撑的分析报告
-4. 返回结构化的联合结果
-
-标签依赖说明：
-- 推理链路（阈值计算 / IF 训练 / 门控融合 / 段级聚合）不读取 `anomaly` 标签
-- 超参 best_k / best_contamination_per_channel / gate_choice 由
-  scripts/fusion_v3.py 在 val 集上选出，属离线阶段，与线上推理无关
-- last_seg_results 中的 y_true 字段仅供离线评估与前端可视化，
-  不参与任何预测计算
-
-口径声明（生产 vs 论文，勿混用）：
-- 本管线用 train 全集 1594 段拟合，实测 test F1 = **0.6446280991735537**
-  （TP78/FP51/FN35/TN365）。
-- 论文 gate_perchannel 的0.628099173553719 对应的是「fit 1275 段拟合 +
-  不排除 CADC0884」，是**另一套口径**，不是本管线的输出。
-- 两者差 +0.016529 = 排除 0884（+0.010556）+ 拟合口径（+0.005973）。
-- 引用纪律：0.6446 不能称作「论文结果复现」，0.6281 也不能称作「生产实测」。
-  详细实测表与复现脚本见 detect() 内注释及 data/results/v3/PAPER_TABLE.md。
-
-使用：
-    pipeline = AnomalyRAGPipeline()
-    results = pipeline.detect_and_explain()
-    # results = [{"segment": 123, "channel": "CADC0874", "anomaly_type": "intermittent_spikes",
-    #             "explanation": "...", "sources": [...]}]
+The engineering candidate uses canonical A01 features and only the fit1275
+population. Historical fusion parameters are transferred as fixed engineering
+choices. This is not a reproduction of historical test scores or a new-feature
+validation winner. Missing or incompatible packages fail without training.
+Formal labels equal the selected gate output; display scores never relabel.
 """
 
 import os
@@ -51,23 +24,32 @@ if str(project_root) not in sys.path:
 
 from src.utils.data_loader import load_segments, load_config, get_project_root
 from src.utils.constants import (
-    CHANNEL_PHYSICS, META_COLS, NO_ANOMALY_CHANNELS,
+    CHANNEL_PHYSICS,
     FEATURE_SUMMARY_KEYS, TYPE_THRESHOLDS, ANOMALY_TYPE_LABELS,
 )
-from src.utils.stat_rules import compute_stat_thresholds, apply_stat_rules
-from src.features.segment_features import run_segment_baseline
 from src.rag.pipeline import RAGPipeline, get_rag_pipeline
 
 
 @dataclass
 class AnomalyResult:
     """单条异常检测结果"""
-    segment: int
+    segment: int | str
     channel: str
     anomaly_score: float  # 段级异常率 (0-1)
     anomaly_type: str  # intermittent_spikes/high_freq_jitter/low_activity/unusual_shapes
     feature_summary: Dict[str, float]  # 关键特征统计
     is_anomaly: bool = True
+    rule_hits: int = 0
+    rule_pred: Optional[bool] = None
+    if_pred: Optional[bool] = None
+    if_score: Optional[float] = None
+    gate_op: str = ""
+    gate_pred: bool = True
+    final_pred: bool = True
+    postprocess: str = "identity"
+    display_score: float = 0.
+    detector_version: str = ""
+    feature_version: str = ""
 
 
 @dataclass  
@@ -82,7 +64,7 @@ class RAGExplanation:
 @dataclass
 class CombinedResult:
     """联合结果：检测 + 解释"""
-    segment: int
+    segment: int | str
     channel: str
     anomaly_score: float
     anomaly_type: str
@@ -91,95 +73,37 @@ class CombinedResult:
     rag_sources: List[Dict[str, Any]]
     retrieval_time: float
     generation_time: float
+    rule_hits: int = 0
+    rule_pred: Optional[bool] = None
+    if_pred: Optional[bool] = None
+    if_score: Optional[float] = None
+    gate_op: str = ""
+    gate_pred: bool = True
+    final_pred: bool = True
+    postprocess: str = "identity"
+    display_score: float = 0.
+    detector_version: str = ""
+    feature_version: str = ""
 
 
 class AnomalyRAGPipeline:
-    """
-    异常检测 + RAG解释 联合Pipeline
-    
-    集成了：
-    1. 最优检测方案 (Scheme G + threshold 0.25 + psi=128)
-    2. 自动异常类型识别
-    3. RAG知识库解释生成
-    """
-    
-    # 强通道（磁力计，F1>0.47）
+    """One frozen engineering detector; RAG is initialized separately."""
     STRONG_CHANNELS = {"CADC0872", "CADC0873", "CADC0874"}
 
-    # ---------------------------------------------------------------- 论文配方
-    # ⚠ 原先本管线把 9 个通道的 contamination、psi 等超参全部写死在 __init__，
-    #   且融合固定为「强通道 IF+OR 规则 / 弱通道段级 baseline」两分支。
-    #   这与实验代码 scripts/fusion_v3.py 选出的 gate_perchannel 配方不一致，
-    #   导致论文报告的 test F1=0.6281 在产品路径上复现不出来。
-    #   现改为：从 data/results/v3/fusion.json 读取 val 上选出的真实配方。
-    #   配方文件缺失时回退到原有硬编码行为（保持向后兼容，不静默降级）。
-    RECIPE_PATH = project_root / "data" / "results" / "v3" / "fusion.json"
-
     @classmethod
-    def load_recipe(cls) -> Optional[Dict[str, Any]]:
-        """读取 fusion.json 中的 gate_perchannel 配方。
-
-        返回 None 表示文件不存在或结构不符，调用方须回退到硬编码路径。
-        """
-        try:
-            if not cls.RECIPE_PATH.exists():
-                return None
-            data = json.loads(cls.RECIPE_PATH.read_text(encoding="utf-8"))
-            sel = data["results"]["selection"]
-            choice = sel["gate_perchannel_choice"]
-            contam = sel["best_contamination_per_channel"]
-            k = sel["best_k"]
-            if not isinstance(choice, dict) or not choice:
-                return None
-            return {
-                "gate_choice": {ch: v["op"] for ch, v in choice.items()},
-                "contamination": {ch: contam.get(ch) for ch in choice},
-                "best_k": k,
-                "git_commit": data.get("meta", {}).get("git_commit", "unknown"),
-            }
-        except (json.JSONDecodeError, KeyError, TypeError, OSError) as e:
-            print(f"[AnomalyRAGPipeline] 配方读取失败，回退硬编码：{e}")
-            return None
+    def load_recipe(cls):
+        from src.detection.frozen import load_recipe
+        return load_recipe()
 
     def __init__(self, config_path: Optional[str] = None):
-        """初始化联合Pipeline"""
-        self.config = load_config()
+        self.config = load_config(config_path)
         self.config_path = config_path
-        self.rag_pipeline = None  # 延迟初始化
-
-        # 检测参数
-        # ⚠ vote_threshold 是**无选优过程的工程设定值**，注释原文写「最优投票阈值」
-        #   不准确。fusion_v3.py 中不存在同名参数，被 val 选出的是各软融合策略的
-        #   tau（soft_global=0.15 / soft_perchannel 各通道 0.05~0.35 / soft_calibrated=0.2），
-        #   语义是「归一化分数阈值」；本值语义是「异常窗口占比阈值」，两者不同。
-        #   数值同为 0.25 属巧合，无因果关系。
-        #   段级数据每段仅 1 行（n_windows==1），该阈值实际作用于
-        #   _compute_segment_confidence 输出的连续分数。
-        self.vote_threshold = 0.25  # 工程设定值，非 val 选出
-        self.psi = 128  # 子采样数，工程固定参数
-
-        # 论文配方（val 选出）。载入失败时 recipe=None，走原有硬编码分支。
+        self.rag_pipeline = None
         self.recipe = self.load_recipe()
-        if self.recipe is not None:
-            print(f"[AnomalyRAGPipeline] 已载入论文配方 gate_perchannel "
-                  f"(k={self.recipe['best_k']}, commit={self.recipe['git_commit'][:8]})")
-        else:
-            print("[AnomalyRAGPipeline] 未找到 fusion.json 配方，使用内置硬编码参数")
+        self.best_contamination = self.recipe["contamination"].copy()
+        self.psi = self.recipe["isolation_forest"]["max_samples"]
+        self.last_seg_results = pd.DataFrame()
 
-        # 各通道最优contamination。仅在无配方时作为回退值使用。
-        self.best_contamination = {
-            "CADC0872": 0.5, "CADC0873": 0.5, "CADC0874": 0.5,
-            "CADC0886": 0.2, "CADC0888": 0.45, "CADC0890": 0.3,
-            "CADC0892": 0.5, "CADC0894": 0.5,
-        }
-        if self.recipe is not None:
-            self.best_contamination = {
-                ch: (v if v is not None else 0.5)
-                for ch, v in self.recipe["contamination"].items()
-            }
-
-        print("[AnomalyRAGPipeline] 初始化完成")
-    
     def _init_rag(self):
         """延迟初始化RAG Pipeline（避免启动时加载大模型）"""
         if self.rag_pipeline is None:
@@ -196,335 +120,44 @@ class AnomalyRAGPipeline:
     # ===== Step 1: 异常检测 =====
     
     def detect(self, segments_df: Optional[pd.DataFrame] = None, progress_callback=None) -> List[AnomalyResult]:
-        """
-        运行完整异常检测流程
-
-        Args:
-            segments_df: 可选的segments数据（None则自动加载）
-            progress_callback: 进度回调函数 callback(current, total, message)
-
-        Returns:
-            List[AnomalyResult]: 检测到的异常列表
-        """
-        print("\n" + "="*60)
-        print("Step 1: 异常检测流程")
-        print("="*60)
-
-        # 1.1 加载数据
+        """Detect only supplied points. None explicitly redetects official test points."""
+        from src.detection import frozen
+        judges = frozen.load_bundle()
         if segments_df is None:
-            segments_df = load_segments(self.config)
-        if progress_callback:
-            progress_callback(5, 100, "加载数据完成")
-
-        # 1.2 加载段级18维特征
-        print(f"\n[1/5] 加载段级18维特征...")
-        if progress_callback:
-            progress_callback(15, 100, "正在加载段级特征...")
-        root = get_project_root()
-        feat_path = os.path.join(root, self.config["data"]["raw_dir"], self.config["data"]["features_file"])
-        features_df = pd.read_csv(feat_path, encoding="utf-8")
-
-        feature_cols = [c for c in features_df.columns if c not in META_COLS]
-        train_mask = features_df["train"] == 1
-        # ⚠ 口径声明：生产用train 全集（1594 段）拟合，实验/论文用 fit（1275 段）。
-        #   两者不是同一个口径，**差异是真实且已量化的**，不要当成复现误差抹平。
-        #
-        #   已实测（同一 test 529 段、同一 gate_perchannel 配方、同一 evaluate()；
-        #   复现脚本 scripts/probe_caliber_attribution.py）：
-        #
-        #   口径                          TP  FP  FN  TNF1
-        #   (1) train1594 + 排除 0884       78  51  35  365    0.644628← 本管线现行
-        #   (2) train1594 + 不排除         78  59  35  357    0.624000
-        #   (3) fit1275  + 排除 0884       76  49  37  367    0.638655
-        #   (4) fit1275  + 不排除         76  53  37  363    0.628099← 论文口径
-        #
-        #   其中 (4) 与 fusion.json 的 gate_perchannel.test.f1 = 0.628099173553719
-        #   **逐位相同**，即论文数字对应「fit 拟合 + 不排除 0884」。
-        #
-        #   生产 (1) 与论文 (4) 的总差距 +0.016529，恰好拆成两项可加：
-        #     · 排除 NO_ANOMALY_CHANNELS(CADC0884)：+0.010556
-        #       （该通道 test 真值异常0 段，排除的是 4 个纯误报，零代价）
-        #     · 拟合口径 train1594 vs fit1275：    +0.005973
-        #
-        #   ⚠ 对外引用纪律（勿粉饰）：
-        #     - 生产数字 0.6446 **高于**论文 0.6281，差 0.0165，不是噪声，是口径差。
-        #     - 0.6446 绝不可被称为「论文方法的复现」或「论文结果」。
-        #     - 反过来0.6281 也不可当作生产系统的实测表现（生产跑出来就是 0.6446）。
-        #     - 两者 CI 高度重叠（见 data/results/v3/PAPER_TABLE.md），差异未达
-        #       统计显著，任何一侧都不应宣称「显著优于」另一侧。
-        #
-        #   为何生产用全集：上线时全部历史数据可用，fit 参数估计更稳。
-        #   为何论文用 fit：需与实验侧同口径公平比较超参（防过拟合 val）。
-        #   **两者各自成立，不要为了让数字好看而改动任一侧的超参。**
-        #   若要与论文数字严格对齐，改用 framework.load_split() 取 fit，
-        #   并注意 (3) 与 (4) 还差一个 0884 排除策略。
-        #
-        # ⚠⚠ 必须按segment 显式排序，否则结果依赖 CSV 的物理行序。
-        #   机理：IsolationForest 的 max_samples 子采样按**行索引**取样本，
-        #   而 offset_ = percentile(训练集自身分数, 100*contamination)
-        #   （sklearn/ensemble/_iforest.py:389）。random_state 只固定了随机数
-        #   发生器，固定不了「哪些行被选中」—— 行序一变，被选中的具体样本就变，
-        #   集成结构随之改变，offset_ 改变，最终预测改变。
-        #   实测（scripts/probe_caliber_and_determinism.py，train1594 口径）：
-        #   连跑 3 次，TP/FP/FN/TN/F1/precision/recall/mcc 的 repr() **逐位一致**；
-        #   另用「CSV 原序 / fit-then-val 重排 / 已按 segment 升序」三种写法各跑 2 次，
-        #   六次结果全部逐位相同（F1 恒为 0.6446280991735537），
-        #   即此处排序已完全消除行序影响。
-        #   （早期注释里「判异常数 138~144、F1 0.3294~0.3347、极差 0.0052」的
-        #     行序抖动数据是在门控配方接入**之前**的旧配置下测得，现已不适用，
-        #     勿再引用该组数字。）
-        features_df = features_df.sort_values("segment").reset_index(drop=True)
-        train_mask = features_df["train"] == 1
-        train_df = features_df[train_mask]
-        test_df = features_df[~train_mask].copy()
-
-        # 1.3 统计规则
-        print("[2/5] 应用统计规则...")
-        if progress_callback:
-            progress_callback(35, 100, "正在应用统计规则...")
-        thresholds = compute_stat_thresholds(train_df, feature_cols)
-        n_violated, n_total = apply_stat_rules(test_df, thresholds, feature_cols)
-        test_df["rule_violations"] = n_violated
-        test_df["rule_total"] = n_total
-        # ⚠ 口径须与实验代码 fusion_v3.py 一致。
-        #   原实现用「违规比例 >= 0.2」，实验代码用「违规数 >= k」（k 在 val 上选，
-        #   实测 k=2）。两者不同：18 个特征时 0.2 比例 ≈ 违规数 >= 4，
-        #   比 k=2 严格得多，会显著降低 rule 通道的召回。
-        #   有配方时用 best_k，无配方时回退原比例口径。
-        if self.recipe is not None:
-            k_best = int(self.recipe["best_k"])
-            rule_pred = pd.Series((n_violated >= k_best).astype(int), index=test_df.index)
-            print(f"      规则判定: 违规数 >= {k_best}（与论文配方一致）")
+            split = json.loads((project_root / frozen.SPLIT_JSON).read_text(encoding="utf-8"))
+            raw = pd.read_csv(project_root / "data/raw/segments.csv", float_precision="round_trip")
+            segments_df = raw[raw.segment.isin(split["test_ids"])].copy()
+            self.last_input_mode = "official_test_redetection"
         else:
-            rule_pred = pd.Series(
-                (n_violated / n_total.replace(0, 1) >= 0.2).astype(int),
-                index=test_df.index,
-            )
-            print("      规则判定: 违规比例 >= 0.2（无配方，回退口径）")
-
-        # 1.4 分通道IForest
-        print("[3/5] 分通道IsolationForest...")
+            self.last_input_mode = "supplied_points"
         if progress_callback:
-            progress_callback(55, 100, "正在运行分通道 IsolationForest...")
-        channel_preds = self._per_channel_iforest(train_df, test_df, feature_cols)
-
-        # 1.5 段级baseline
-        print("[4/5] 段级baseline...")
-        if progress_callback:
-            progress_callback(75, 100, "正在计算段级 baseline...")
-        seg_baseline_map = self._segment_baseline_iforest(segments_df)
-
-        # 1.6 Scheme G融合 + 投票阈值
-        print("[5/5] Scheme G融合 + 投票阈值聚合...")
-        if progress_callback:
-            progress_callback(90, 100, "正在融合 Scheme G + 投票阈值...")
-        pred_g = self._build_scheme_g(
-            test_df, channel_preds, rule_pred, seg_baseline_map
-        )
-        
-        # 段级聚合
-        seg_results = self._segment_aggregate(test_df, pred_g, self.vote_threshold)
-        
-        # 暴露完整段级判定（含全部测试段，不只异常段），供重测脚本一次性取 y_pred
-        self.last_seg_results = seg_results
-
-        # 筛选异常段
-        anomalies = seg_results[seg_results["is_anomaly"]]
-        print(f"\n检测结果: {len(anomalies)} 个异常段 (共 {len(seg_results)} 测试段)")
-        
-        # 转换为AnomalyResult列表
-        anomaly_results = []
-        for _, row in anomalies.iterrows():
-            # 获取特征统计
-            seg_windows = test_df[test_df["segment"] == row["segment"]]
-            feat_summary = self._extract_feature_summary(seg_windows, feature_cols)
-            
-            # 识别异常类型
-            anomaly_type = self._classify_anomaly_type(feat_summary, row["channel"])
-            
-            anomaly_results.append(AnomalyResult(
-                segment=int(row["segment"]),
-                channel=row["channel"],
-                anomaly_score=float(row["anomaly_score"]),
-                anomaly_type=anomaly_type,
-                feature_summary=feat_summary,
-                is_anomaly=True
-            ))
-        
-        return anomaly_results
-    
-    def _per_channel_iforest(self, train_df, test_df, feature_cols):
-        """分通道训练IForest"""
-        from sklearn.ensemble import IsolationForest
-        
-        channel_preds = {}
-        for ch in sorted(test_df["channel"].unique()):
-            ch_test = test_df[test_df["channel"] == ch]
-            ch_train = train_df[train_df["channel"] == ch]
-            
-            if len(ch_train) < 10 or len(ch_test) < 5:
+            progress_callback(10, 100, "冻结检测包校验完成")
+        features = frozen.point_features(segments_df)
+        results = frozen.predict_features(features, judges)
+        self.last_seg_results = results
+        # Input identity is independent of the frozen training-data identity.
+        required = ["channel", "segment", "timestamp", "value", "sampling"]
+        import hashlib
+        input_json = json.dumps(segments_df[required].to_numpy(dtype=object).tolist(),
+                                default=str, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+        self.last_input_sha256 = hashlib.sha256(input_json.encode()).hexdigest()
+        anomalies = []
+        for idx, row in results.iterrows():
+            if not row.final_pred:
                 continue
-            
-            ch_c = self.best_contamination.get(ch, 0.5)
-            X_tr = np.nan_to_num(ch_train[feature_cols].values)
-            X_te = np.nan_to_num(ch_test[feature_cols].values)
-            
-            # 使用psi参数
-            model = IsolationForest(
-                n_estimators=100, 
-                max_samples=self.psi,  # 子采样参数
-                contamination=ch_c, 
-                random_state=42, 
-                n_jobs=-1
-            )
-            model.fit(X_tr)
-            ch_pred = (model.predict(X_te) == -1).astype(int)
-            
-            for i, idx in enumerate(ch_test.index):
-                channel_preds[idx] = int(ch_pred[i])
-        
-        return channel_preds
-    
-    def _segment_baseline_iforest(self, segments_df):
-        """段级baseline IForest"""
-        from sklearn.ensemble import IsolationForest
-        
-        root = get_project_root()
-        feat_path = os.path.join(root, self.config["data"]["raw_dir"], self.config["data"]["features_file"])
-        dataset_df = pd.read_csv(feat_path, encoding="utf-8")
-        
-        meta_cols = ["channel", "segment", "anomaly", "train", "sampling"]
-        feat_cols = [c for c in dataset_df.columns if c not in meta_cols]
-        
-        train_mask = dataset_df["train"] == 1
-        X_train = dataset_df.loc[train_mask, feat_cols].values
-        X_test = dataset_df.loc[~train_mask, feat_cols].values
-        test_segments = dataset_df.loc[~train_mask, "segment"].values
+            summary = self._extract_feature_summary(features.iloc[[idx]], frozen.FEATURE_COLS)
+            anomalies.append(AnomalyResult(
+                segment=row.segment, channel=row.channel, anomaly_score=float(row.display_score),
+                anomaly_type=self._classify_anomaly_type(summary, row.channel), feature_summary=summary,
+                is_anomaly=bool(row.final_pred), rule_hits=int(row.rule_hits), rule_pred=row.rule_pred,
+                if_pred=row.if_pred, if_score=row.score, gate_op=row.gate_op,
+                gate_pred=bool(row.gate_pred), final_pred=bool(row.final_pred), postprocess=row.postprocess,
+                display_score=float(row.display_score), detector_version=row.detector_version,
+                feature_version=row.feature_version))
+        if progress_callback:
+            progress_callback(100, 100, "正式门控判定完成")
+        return anomalies
 
-        # ⚠ contamination=0.25 是**无选优过程的工程设定值**，不是 val 搜出来的。
-        #   fusion_v3.py 的 select_if_contamination 是分通道搜索，产出的
-        #   best_contamination_per_channel 里没有「全局段级 IF」这一项。
-        #   故此值不可声称「由 val 最优选出」，只能称工程设定。
-        #   且当 fusion.json 配方存在时，本函数的结果在 _build_scheme_g 中
-        #   不会被使用（9 个通道的 op 全为 rule/if/AND/OR，无 seg_baseline），
-        #   仅在配方缺失的回退路径生效。
-        model = IsolationForest(
-            n_estimators=100,
-            max_samples=self.psi,
-            contamination=0.25,
-            random_state=42,
-            n_jobs=-1
-        )
-        model.fit(X_train)
-        y_pred = (model.predict(X_test) == -1).astype(int)
-        
-        seg_pred_map = {}
-        for i in range(len(test_segments)):
-            seg_pred_map[test_segments[i]] = int(y_pred[i])
-        
-        return seg_pred_map
-    
-    def _build_scheme_g(self, test_df, channel_preds, rule_pred, seg_baseline_map):
-        """构建门控融合预测（每通道按 val 选出的算子）。
-
-        有配方时：对每个通道用 fusion.json 里 val 选定的算子
-        （rule / if / AND / OR），与实验代码 gate_perchannel 口径一致。
-        无配方时：回退到原 Scheme G（强通道 IF+OR 规则，弱通道段级 baseline）。
-        """
-        if self.recipe is None:
-            pred_g = pd.Series(0, index=test_df.index, dtype=int)
-            for idx in test_df.index:
-                ch = test_df.loc[idx, "channel"]
-                seg_id = test_df.loc[idx, "segment"]
-                if ch in self.STRONG_CHANNELS:
-                    if_pred = channel_preds.get(idx, 0)
-                    r_pred = int(rule_pred.loc[idx])
-                    pred_g.loc[idx] = max(if_pred, r_pred)
-                else:
-                    pred_g.loc[idx] = seg_baseline_map.get(seg_id, 0)
-            return pred_g
-
-        gate = self.recipe["gate_choice"]
-        pred_g = pd.Series(0, index=test_df.index, dtype=int)
-        for idx in test_df.index:
-            ch = test_df.loc[idx, "channel"]
-            seg_id = test_df.loc[idx, "segment"]
-            op = gate.get(ch)
-
-            if op == "rule":
-                pred_g.loc[idx] = int(rule_pred.loc[idx])
-            elif op == "if":
-                pred_g.loc[idx] = int(channel_preds.get(idx, 0))
-            elif op == "AND":
-                pred_g.loc[idx] = int(rule_pred.loc[idx]) & int(channel_preds.get(idx, 0))
-            elif op == "OR":
-                pred_g.loc[idx] = int(rule_pred.loc[idx]) | int(channel_preds.get(idx, 0))
-            else:
-                # 配方里没有该通道（理论上不应发生），回退段级 baseline
-                pred_g.loc[idx] = seg_baseline_map.get(seg_id, 0)
-                print(f"[warn] 通道 {ch} 不在配方中，回退段级 baseline")
-
-        return pred_g
-    
-    def _segment_aggregate(self, test_df, window_preds, threshold):
-        """窗口预测聚合为段级结果"""
-        test_df = test_df.copy()
-        test_df["pred"] = window_preds.values if hasattr(window_preds, 'values') else window_preds
-
-        seg = test_df.groupby("segment").agg(
-            channel=("channel", "first"),
-            y_true=("anomaly", "first"),
-            anomaly_score=("pred", "mean"),  # 异常窗口比例
-            n_windows=("pred", "count"),
-        ).reset_index()
-
-        # 如果每个段只有一行（段级特征），需要计算置信度分数
-        if (seg["n_windows"] == 1).all():
-            # 对于段级数据，使用特征值计算置信度
-            # 基于规则违规比例和通道预测的组合
-            seg["anomaly_score"] = seg.apply(
-                lambda row: self._compute_segment_confidence(row, test_df), axis=1
-            )
-
-        seg["is_anomaly"] = seg["anomaly_score"] >= threshold
-
-        # ⚠ 排除「全集合无正类样本」的通道。
-        #   依据：CADC0884 在 fit=97段/val=25段/test=36段 上正类均为 0
-        #   （三集合实测，见 tests/test_production_recipe.py 的断言）。
-        #   即该通道在整个可用数据上无正类，训练与评估都无法进行。
-        #
-        #   ⚠ 不要把依据写成「test 上无真值异常」—— 那是拿测试集标签做决策。
-        #     本常量只允许由「全集合无正类」推出，且须有测试断言守护。
-        #
-        #   注：门控配方里 0884 的 op="rule"、val_f1=0.0，门控本身就会忽略该通道，
-        #       此处显式排除是冗余保护，不改变结果。
-        if NO_ANOMALY_CHANNELS:
-            no_anom_mask = seg["channel"].isin(NO_ANOMALY_CHANNELS)
-            seg.loc[no_anom_mask, "is_anomaly"] = False
-            seg.loc[no_anom_mask, "anomaly_score"] = 0.0
-
-        return seg
-
-    def _compute_segment_confidence(self, row, test_df):
-        """为段级数据计算置信度分数（0-1）"""
-        seg_id = row["segment"]
-        seg_data = test_df[test_df["segment"] == seg_id].iloc[0]
-
-        # 基于规则违规比例
-        rule_ratio = seg_data.get("rule_violations", 0) / max(seg_data.get("rule_total", 1), 1)
-
-        # 基于 pred 值（0 或 1）
-        pred_val = float(seg_data.get("pred", 0))
-
-        # 组合置信度：pred=1 时给较高分数，pred=0 时给较低分数
-        # 同时考虑规则违规比例作为调整因子
-        if pred_val == 1:
-            confidence = 0.7 + 0.3 * rule_ratio  # 0.7-1.0
-        else:
-            confidence = 0.0 + 0.3 * rule_ratio  # 0.0-0.3
-
-        return min(max(confidence, 0.0), 1.0)
-    
     def _extract_feature_summary(self, seg_windows, feature_cols):
         """提取该段的关键特征统计。
 
@@ -634,7 +267,8 @@ class AnomalyRAGPipeline:
         desc_parts = [
             f"检测到{channel_desc}通道异常",
             f"异常类型: {anomaly.anomaly_type}",
-            f"异常得分: {anomaly.anomaly_score:.2f} (阈值{self.vote_threshold})",
+            f"展示分: {anomaly.display_score:.2f}（不改变正式标签）",
+            f"正式判定: {anomaly.final_pred}; 门控: {anomaly.gate_op}; 版本: {anomaly.detector_version}",
         ]
         
         # 添加关键特征（键名与 _extract_feature_summary 产出一致）
@@ -701,6 +335,9 @@ class AnomalyRAGPipeline:
         def _explain_one(idx_anomaly):
             nonlocal completed_count
             idx, anomaly = idx_anomaly
+            facts = {name: getattr(anomaly, name) for name in (
+                "rule_hits", "rule_pred", "if_pred", "if_score", "gate_op", "gate_pred", "final_pred",
+                "postprocess", "display_score", "detector_version", "feature_version")}
             print(f"\n[{idx+1}/{n_to_explain}] Segment {anomaly.segment}, {anomaly.channel}")
             try:
                 rag_result = self.explain(anomaly)
@@ -713,7 +350,8 @@ class AnomalyRAGPipeline:
                     rag_explanation=rag_result.answer,
                     rag_sources=rag_result.sources,
                     retrieval_time=rag_result.retrieval_time,
-                    generation_time=rag_result.generation_time
+                    generation_time=rag_result.generation_time,
+                    **facts
                 )
             except Exception as e:
                 print(f"  [ERROR] RAG解释失败: {e}")
@@ -726,7 +364,8 @@ class AnomalyRAGPipeline:
                     rag_explanation=f"RAG解释生成失败: {str(e)}",
                     rag_sources=[],
                     retrieval_time=0,
-                    generation_time=0
+                    generation_time=0,
+                    **facts
                 )
             completed_count += 1
             if progress_callback:
@@ -749,12 +388,21 @@ class AnomalyRAGPipeline:
         print(f"\n完成！共生成 {len(results)} 条结果")
         return results
     
-    def to_json(self, results: List[CombinedResult], output_path: str):
-        """保存结果到JSON"""
-        data = [asdict(r) for r in results]
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False, default=str)
-        print(f"[Saved] {output_path}")
+    def to_json(self, results: List[CombinedResult], output_path: Optional[str] = None):
+        """Save a new engineering run. Never overwrite an existing result."""
+        from datetime import datetime, timezone
+        from uuid import uuid4
+        from src.detection.frozen import VERSION
+        run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + "-" + uuid4().hex[:8]
+        path = Path(output_path) if output_path is not None else (
+            project_root / "data/results/runs" / VERSION / f"{run_id}.json")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {"detector_version": VERSION, "run_id": run_id, "results": [asdict(r) for r in results]}
+        with path.open("x", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=False, default=str)
+        print(f"[Saved] {path}")
+        return path
+
 
 
 def detect_and_explain(config_path: Optional[str] = None) -> List[CombinedResult]:
@@ -774,8 +422,7 @@ if __name__ == "__main__":
         print(f"\n检测到 {len(results)} 条异常，已生成RAG解释")
         
         # 保存结果
-        output_path = os.path.join(get_project_root(), "data/results/anomaly_rag_results.json")
-        pipeline.to_json(results, output_path)
+        output_path = pipeline.to_json(results)
         
         # 打印第一条结果示例
         print("\n" + "="*60)

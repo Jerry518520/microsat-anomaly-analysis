@@ -1,0 +1,32 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_pipeline_predicts_given_points_only_with_optional_labels ________
+tests\test_a02_detector.py:151: in test_pipeline_predicts_given_points_only_with_optional_labels
+    assert p.last_input_sha256 != digest
+E   AssertionError: assert 'b5b68546d2ebc0b41a85a2fb1976640df126d3b98013df6e376f9b971d0a050f' != 'b5b68546d2ebc0b41a85a2fb1976640df126d3b98013df6e376f9b971d0a050f'
+E    +  where 'b5b68546d2ebc0b41a85a2fb1976640df126d3b98013df6e376f9b971d0a050f' = <src.integration.anomaly_rag_pipeline.AnomalyRAGPipeline object at 0x000001613E497230>.last_input_sha256
+============================== warnings summary ===============================
+tests/test_a02_detector.py::test_pipeline_predicts_given_points_only_with_optional_labels
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_pipeline_predicts_given_points_only_with_optional_labels
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_pipeline_predicts_given_points_only_with_optional_labels
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_pipeline_predicts_given_points_only_with_optional_labels
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_pipeline_predicts_given_points_only_with_optional_labels
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\src\rag\vectorstore.py:20: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+    from langchain_community.document_loaders import PyPDFLoader
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_a02_detector.py::test_pipeline_predicts_given_points_only_with_optional_labels
+1 failed, 5 warnings in 11.05s

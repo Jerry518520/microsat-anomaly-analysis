@@ -1,0 +1,28 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_explicit_build_rejects_broken_canonical_feature_provenance _______
+tests\test_a02_detector.py:207: in test_explicit_build_rejects_broken_canonical_feature_provenance
+    with pytest.raises(m.DetectorUnavailable, match="canonical dataset"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+============================== warnings summary ===============================
+tests/test_a02_detector.py::test_explicit_build_rejects_broken_canonical_feature_provenance
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_explicit_build_rejects_broken_canonical_feature_provenance
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_explicit_build_rejects_broken_canonical_feature_provenance
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_explicit_build_rejects_broken_canonical_feature_provenance
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_a02_detector.py::test_explicit_build_rejects_broken_canonical_feature_provenance
+1 failed, 4 warnings in 2.78s

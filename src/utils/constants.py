@@ -54,12 +54,8 @@ CHANNEL_PHYSICS = {
     "CADC0894": "Photodiode 6 theta (I_PD6_THETA) 光电二极管6测角，官方示出异常表现=短数据缺口(short data gap)",
 }
 
-# 无异常通道（数据集中始终为正常）
-# 实测（load_split 后按集统计）：CADC0884 在 fit=97段/0异常、val=25段/0异常、
-# test=36段/0异常 —— **三个集合全为 0**，因此排除它的依据是「该通道在全部
-# 可用数据上无正类样本，无法训练也无法评估」，与 test 的具体结果无关。
-# 注意：不要用「test 上全错所以排除」作为理由，那属于用测试集信息做决策。
-NO_ANOMALY_CHANNELS = {"CADC0884"}
+# No channel is presumed permanently normal. Historical label absence is not a gate.
+NO_ANOMALY_CHANNELS = set()
 
 # ===== 异常形态分类（anomaly type classification）=====
 #
