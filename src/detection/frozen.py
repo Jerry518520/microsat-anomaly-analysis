@@ -8,7 +8,7 @@ import hashlib
 import importlib.metadata
 import io
 import json
-from numbers import Integral
+from numbers import Integral, Real
 import os
 from pathlib import Path
 import platform
@@ -251,7 +251,7 @@ def _fit_identity(fit, recipe):
 
 
 def _validate_judges(judges, fit, recipe, fit_identity):
-    """Check stored components without fitting or rescoring the training set."""
+    """Check stored components and one fit vector per channel; never refit."""
     if not isinstance(judges, dict) or set(judges) != set(recipe["gate_choice"]):
         raise DetectorUnavailable("detector payload channel-set mismatch")
     thresholds = compute_stat_thresholds(fit, FEATURE_COLS)
@@ -280,6 +280,9 @@ def _validate_judges(judges, fit, recipe, fit_identity):
         params = IsolationForest(contamination=recipe["contamination"][ch], **recipe["isolation_forest"]).get_params(deep=False)
         if model.get_params(deep=False) != params:
             raise DetectorUnavailable(f"detector payload IF parameters mismatch: {ch}")
+        offset = getattr(model, "offset_", None)
+        if not isinstance(offset, Real) or not np.isfinite(offset):
+            raise DetectorUnavailable(f"detector payload missing/invalid IF offset_: {ch}")
         attrs = {"n_features_in_": len(FEATURE_COLS), "_n_samples": fit_identity["fit_rows_per_channel"][ch],
                  "max_samples_": samples}
         if any(getattr(model, name, None) != value for name, value in attrs.items()):
@@ -287,6 +290,17 @@ def _validate_judges(judges, fit, recipe, fit_identity):
         trees = getattr(model, "estimators_", [])
         if len(trees) != params["n_estimators"] or any(tree.n_features_in_ != len(FEATURE_COLS) for tree in trees):
             raise DetectorUnavailable(f"detector payload IF trees mismatch: {ch}")
+    for ch, judge in judges.items():
+        try:
+            vector = fit[fit.channel == ch].iloc[0][FEATURE_COLS].to_dict()
+            verdict = judge.judge(vector)
+            scores = [verdict.display_score, verdict.anomaly_score]
+            if judge.model is not None:
+                scores.append(verdict.score)
+            if not np.isfinite(scores).all():
+                raise ValueError("nonfinite inference score")
+        except Exception as exc:
+            raise DetectorUnavailable(f"detector payload inference probe failed: {ch}: {exc}") from exc
 
 
 def _build_package(bundle):

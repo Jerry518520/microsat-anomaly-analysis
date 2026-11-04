@@ -1,0 +1,48 @@
+{
+  "status": "implementation_verified_pending_spec_rereview",
+  "base_commit": "dc41c2f588d93d4a5d9266415fa12b2e91144dea",
+  "counterexample": "CADC0874 IF.offset_ deleted with updated model hash previously loaded successfully and failed at first inference",
+  "fix": "Validate a finite real offset_, then run exactly one existing finite fit vector through the real judge per channel. Require finite IF and display scores. Any inference exception is wrapped as DetectorUnavailable during load. No refit or full-fit rescoring.",
+  "new_regressions": {
+    "red_failed": 7,
+    "green_passed": 7,
+    "cases": [
+      "missing offset_",
+      "NaN offset_",
+      "infinite offset_",
+      "missing estimators_features_",
+      "missing _decision_path_lengths",
+      "nonfinite probe score",
+      "exactly one finite 18D probe per channel with fit forbidden"
+    ]
+  },
+  "full_offline_tests": {
+    "passed": 301,
+    "skipped": 1,
+    "deselected": 3,
+    "warnings": 18,
+    "elapsed_seconds": 48.5
+  },
+  "consistency": {
+    "detector_version": "a02-engineering-gate-v1",
+    "official_test_rows": 529,
+    "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+    "recipe_sha256": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+    "manifest_sha256": "0a1cc5f1ab89fad7ef21dd0b2eee813568d7519217b5c0277eeed896f4ea819b",
+    "bundle_id": "0a1cc5f1ab89fad7ef21dd0b2eee813568d7519217b5c0277eeed896f4ea819b",
+    "unseen_rows": 9,
+    "total_rows": 538,
+    "batch_single_exact": true,
+    "batch_closed_stream_exact": true,
+    "actual_stream_engine_exercised": true,
+    "all_18_features_exact": true,
+    "test_used_for_tuning": false,
+    "postprocess": "identity",
+    "official_test_predicted_anomalies": 132,
+    "unseen_0884_can_be_anomalous": true
+  },
+  "previous_package_archive": "data\\models\\a02-engineering-gate-v1.archive-88710f033ee24cc7a11797ea1418dcf0",
+  "previous_package_exactly_preserved": true,
+  "legacy_stage2_and_historical_rag_output_exactly_preserved": true,
+  "recipe_and_formulas_changed": false
+}

@@ -66,6 +66,46 @@ def test_loaded_judges_match_recipe_and_actual_fit_population(package, tmp_path,
         api().load_bundle(target)
 
 
+@pytest.mark.parametrize("attribute,bad", [("offset_", "remove"), ("offset_", float("nan")),
+    ("offset_", float("inf")), ("estimators_features_", "remove"), ("_decision_path_lengths", "remove")])
+def test_load_rejects_missing_or_invalid_inference_state(package, tmp_path, attribute, bad):
+    target = copy_package(package, tmp_path / "bundle")
+    payload = joblib.load(target / "detector.joblib")
+    model = payload["judges"]["CADC0874"].model
+    if bad == "remove":
+        delattr(model, attribute)
+    else:
+        setattr(model, attribute, bad)
+    joblib.dump(payload, target / "detector.joblib")
+    value = manifest(target)
+    value["model_sha256"] = api().sha256(target / "detector.joblib")
+    write_manifest(target, value)
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+        api().load_bundle(target)
+
+
+def test_load_rejects_nonfinite_probe_score(package, monkeypatch):
+    m = api()
+    monkeypatch.setattr(m.IsolationForest, "decision_function", lambda self, values: m.np.full(len(values), m.np.nan))
+    with pytest.raises(m.DetectorUnavailable, match="probe"):
+        m.load_bundle(package)
+
+
+def test_load_runs_one_finite_probe_per_channel_without_training(package, monkeypatch):
+    m = api()
+    calls = []
+    original = m.EngineeringJudge.judge
+    def track(judge, features):
+        calls.append((judge.channel, len(features), all(m.np.isfinite(list(features.values())))))
+        return original(judge, features)
+    monkeypatch.setattr(m.EngineeringJudge, "judge", track)
+    monkeypatch.setattr(m.IsolationForest, "fit", lambda *args, **kwargs: pytest.fail("load trained"))
+    judges = m.load_bundle(package)
+    assert len(calls) == len(judges) == 9
+    assert {ch for ch, _, _ in calls} == set(judges)
+    assert all(count == 18 and finite for _, count, finite in calls)
+
+
 def test_default_build_refuses_existing_target_before_fit_and_preserves_sentinels(tmp_path, monkeypatch):
     target = tmp_path / "existing"
     target.mkdir()

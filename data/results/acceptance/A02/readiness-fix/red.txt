@@ -1,0 +1,65 @@
+FFFFFFF                                                                  [100%]
+================================== FAILURES ===================================
+____ test_load_rejects_missing_or_invalid_inference_state[offset_-remove] _____
+tests\test_a02_review_fixes.py:83: in test_load_rejects_missing_or_invalid_inference_state
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+______ test_load_rejects_missing_or_invalid_inference_state[offset_-nan] ______
+tests\test_a02_review_fixes.py:83: in test_load_rejects_missing_or_invalid_inference_state
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+______ test_load_rejects_missing_or_invalid_inference_state[offset_-inf] ______
+tests\test_a02_review_fixes.py:83: in test_load_rejects_missing_or_invalid_inference_state
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_load_rejects_missing_or_invalid_inference_state[estimators_features_-remove] _
+tests\test_a02_review_fixes.py:83: in test_load_rejects_missing_or_invalid_inference_state
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+_ test_load_rejects_missing_or_invalid_inference_state[_decision_path_lengths-remove] _
+tests\test_a02_review_fixes.py:83: in test_load_rejects_missing_or_invalid_inference_state
+    with pytest.raises(api().DetectorUnavailable, match="payload"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+___________________ test_load_rejects_nonfinite_probe_score ___________________
+tests\test_a02_review_fixes.py:90: in test_load_rejects_nonfinite_probe_score
+    with pytest.raises(m.DetectorUnavailable, match="probe"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE DetectorUnavailable
+________ test_load_runs_one_finite_probe_per_channel_without_training _________
+tests\test_a02_review_fixes.py:104: in test_load_runs_one_finite_probe_per_channel_without_training
+    assert len(calls) == len(judges) == 9
+E   AssertionError: assert 0 == 9
+E    +  where 0 = len([])
+E    +  and   9 = len({'CADC0872': EngineeringJudge(channel='CADC0872', model=IsolationForest(contamination=0.35, max_samples=128, n_jobs=1,...2049e5ced76b6254d71a5fbb23', manifest_sha256='5e353ea458d7d019059763a0f35ae04af94b700020c0e688ff45006336b95ed7')), ...})
+============================== warnings summary ===============================
+tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-remove]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-remove]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-remove]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-remove]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-remove]
+FAILED tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-nan]
+FAILED tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[offset_-inf]
+FAILED tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[estimators_features_-remove]
+FAILED tests/test_a02_review_fixes.py::test_load_rejects_missing_or_invalid_inference_state[_decision_path_lengths-remove]
+FAILED tests/test_a02_review_fixes.py::test_load_rejects_nonfinite_probe_score
+FAILED tests/test_a02_review_fixes.py::test_load_runs_one_finite_probe_per_channel_without_training
+7 failed, 32 deselected, 4 warnings in 6.89s

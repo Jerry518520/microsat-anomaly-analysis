@@ -1,0 +1,18 @@
+{
+  "detector_version": "a02-engineering-gate-v1",
+  "official_test_rows": 529,
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "recipe_sha256": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+  "manifest_sha256": "0a1cc5f1ab89fad7ef21dd0b2eee813568d7519217b5c0277eeed896f4ea819b",
+  "bundle_id": "0a1cc5f1ab89fad7ef21dd0b2eee813568d7519217b5c0277eeed896f4ea819b",
+  "unseen_rows": 9,
+  "total_rows": 538,
+  "batch_single_exact": true,
+  "batch_closed_stream_exact": true,
+  "actual_stream_engine_exercised": true,
+  "all_18_features_exact": true,
+  "test_used_for_tuning": false,
+  "postprocess": "identity",
+  "official_test_predicted_anomalies": 132,
+  "unseen_0884_can_be_anomalous": true
+}
