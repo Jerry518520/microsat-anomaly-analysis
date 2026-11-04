@@ -25,11 +25,10 @@ FEATURE_COLS = [
 ]
 COUNT_COLS = ["len", "n_peaks", "smooth10_n_peaks", "smooth20_n_peaks",
               "diff_peaks", "diff2_peaks"]
-# Registered before full-data verification. Counts/time are exact. Continuous
-# tolerances are in telemetry value (V), V^2, or dimensionless units.
+# Normative acceptance is EXACT for all 18 values. Auxiliary relative checks
+# have no absolute floor: magnetometer variances can be far below 1e-12 V^2.
 FEATURE_TOLERANCES = {
-    name: {"atol": (1e-12 if name in {"mean", "std"} else 1e-10
-                    if name in {"kurtosis", "skew"} else 1e-12), "rtol": 1e-10}
+    name: {"atol": 0., "rtol": 1e-10}
     for name in FEATURE_COLS
 }
 for _name in COUNT_COLS + ["duration", "gaps_squared", "len_weighted"]:
@@ -45,6 +44,7 @@ _SPEC = {
     "differences": "numpy.diff n=1/2; population variance and same peak rule",
     "derived": "sampling*len; var/duration (0 when duration=0); var/len",
     "output": "18 float64-compatible finite values or explicit ValueError; no imputation downstream",
+    "acceptance": "all 18 values exactly equal; tolerances are auxiliary diagnostics only",
     "tolerances": FEATURE_TOLERANCES,
 }
 FEATURE_SPEC_SHA256 = hashlib.sha256(

@@ -29,6 +29,12 @@ from src.features.segment_spec import (
 )
 from src.streaming.segment_features import extract_segment_features, feature_vector
 
+# Only reproduce the earlier audit's historical counts with its old tolerance.
+# This threshold MUST NOT be used to accept canonical offline/stream equality.
+LEGACY_AUDIT_TOLERANCES = {name: {"atol": 1e-6, "rtol": 1e-6} for name in FEATURE_COLS}
+for _name in COUNT_COLS:
+    LEGACY_AUDIT_TOLERANCES[_name] = {"atol": 0., "rtol": 0.}
+
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -58,12 +64,12 @@ def historical_features(values, seconds, sampling):
     return result
 
 
-def compare(left, right, name, records):
+def compare(left, right, name, records, *, exact=False, legacy_audit=False):
     if not left.index.equals(right.index):
         raise AssertionError(f"{name}: segment identities differ")
-    mask = np.column_stack([
-        ~np.isclose(left[col], right[col], equal_nan=False, **FEATURE_TOLERANCES[col])
-        for col in FEATURE_COLS
+    tolerances = LEGACY_AUDIT_TOLERANCES if legacy_audit else FEATURE_TOLERANCES
+    mask = (left[FEATURE_COLS].to_numpy() != right[FEATURE_COLS].to_numpy()) if exact else np.column_stack([
+        ~np.isclose(left[col], right[col], equal_nan=False, **tolerances[col]) for col in FEATURE_COLS
     ])
     for i, j in np.argwhere(mask):
         sid, col = left.index[i], FEATURE_COLS[j]
@@ -73,6 +79,7 @@ def compare(left, right, name, records):
                         "left": float(left.loc[sid, col]), "right": float(right.loc[sid, col])})
     return {
         "segments": len(left), "different_segments": int(mask.any(axis=1).sum()),
+        "comparison_rule": "all values exact" if exact else "legacy audit tolerance (not canonical acceptance)" if legacy_audit else "zero absolute floor, relative diagnostic 1e-10; counts exact",
         "different_cells": int(mask.sum()),
         "per_feature": {col: {"different_cells": int(mask[:, j].sum()),
                               "max_abs_difference": float(np.max(np.abs(left[col] - right[col])))}
@@ -107,6 +114,10 @@ def run(out, model_path):
     # Register tolerances before computing or comparing any new dataset.
     (out / "registered_manifest.json").write_text(
         json.dumps(feature_manifest(), indent=2, ensure_ascii=False), encoding="utf-8")
+    (out / "legacy_audit_tolerances.json").write_text(json.dumps({
+        "purpose": "historical audit reproduction only; NEVER canonical acceptance",
+        "tolerances": LEGACY_AUDIT_TOLERANCES,
+    }, indent=2), encoding="utf-8")
     offline = generate_dataset(raw).set_index("segment").sort_index()
     streams, historical = [], []
     groups = {}
@@ -131,7 +142,9 @@ def run(out, model_path):
         ("canonical_vs_official", offline, official),
         ("canonical_vs_processed", offline, processed),
     ):
-        comparisons[name] = compare(left, right, name, records)
+        comparisons[name] = compare(left, right, name, records,
+                                    exact=name == "canonical_offline_vs_stream",
+                                    legacy_audit=name in {"official_vs_processed", "historical_stream_vs_official", "historical_stream_vs_processed"})
     pd.DataFrame(records).to_csv(out / "all_differences.csv", index=False)
     canonical_path = ROOT / "data/processed" / CANONICAL_FILENAME
     offline.reset_index().to_csv(canonical_path, index=False, encoding="utf-8-sig", float_format="%.17g")
@@ -199,6 +212,8 @@ def run(out, model_path):
         "identity": feature_manifest(), "input_sha256": {str(p.relative_to(ROOT)): s for p, s in protected.items()},
         "canonical_dataset": str(canonical_path.relative_to(ROOT)), "canonical_dataset_sha256": sha(canonical_path),
         "tolerances_registered_before_run": FEATURE_TOLERANCES, "comparisons": comparisons,
+        "normative_acceptance": "all 18 vector values exactly equal; auxiliary atol=0/rtol=1e-10 cannot accept a mismatch",
+        "legacy_audit_tolerances": LEGACY_AUDIT_TOLERANCES,
         "all_18_model_vector_values_exact_equal": bool(vectors_equal),
         "saved_csv_roundtrip_model_vector_exact_equal": bool(disk_vectors_equal),
         "same_model_prediction_differences": int(np.count_nonzero(po != ps)),

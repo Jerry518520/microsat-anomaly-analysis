@@ -1,0 +1,14 @@
+......................F                                                  [100%]
+================================== FAILURES ===================================
+___ test_canonical_acceptance_requires_exact_values_without_absolute_floor ____
+
+    def test_canonical_acceptance_requires_exact_values_without_absolute_floor():
+        from src.features.segment_spec import FEATURE_TOLERANCES, feature_manifest
+>       assert all(tolerance["atol"] == 0 for tolerance in FEATURE_TOLERANCES.values())
+E       assert False
+E        +  where False = all(<generator object test_canonical_acceptance_requires_exact_values_without_absolute_floor.<locals>.<genexpr> at 0x0000014145DD4EE0>)
+
+tests\test_feature_consistency.py:120: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_feature_consistency.py::test_canonical_acceptance_requires_exact_values_without_absolute_floor
+1 failed, 22 passed in 1.69s

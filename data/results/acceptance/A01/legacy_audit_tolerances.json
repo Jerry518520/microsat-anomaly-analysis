@@ -1,0 +1,77 @@
+{
+  "purpose": "historical audit reproduction only; NEVER canonical acceptance",
+  "tolerances": {
+    "duration": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "len": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "mean": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "var": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "std": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "kurtosis": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "skew": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "n_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "smooth10_n_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "smooth20_n_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "diff_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "diff2_peaks": {
+      "atol": 0.0,
+      "rtol": 0.0
+    },
+    "diff_var": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "diff2_var": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "gaps_squared": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "len_weighted": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "var_div_duration": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    },
+    "var_div_len": {
+      "atol": 1e-06,
+      "rtol": 1e-06
+    }
+  }
+}

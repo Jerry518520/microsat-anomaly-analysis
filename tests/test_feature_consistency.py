@@ -113,3 +113,12 @@ def test_manifest_and_column_order_are_stable():
         "src/streaming/segment_features.py",
     }
     json.dumps(manifest, allow_nan=False)
+
+
+def test_canonical_acceptance_requires_exact_values_without_absolute_floor():
+    from src.features.segment_spec import FEATURE_TOLERANCES, feature_manifest
+    assert all(tolerance["atol"] == 0 for tolerance in FEATURE_TOLERANCES.values())
+    assert feature_manifest()["spec"]["acceptance"] == "all 18 values exactly equal; tolerances are auxiliary diagnostics only"
+    tiny = extract_segment_features(np.array([0., 1e-12, 0.]), np.arange(3))["var"]
+    assert 0 < tiny < 1e-12
+    assert not np.isclose(tiny, 0., **FEATURE_TOLERANCES["var"])

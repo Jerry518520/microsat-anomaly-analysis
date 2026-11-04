@@ -14,28 +14,28 @@
 
 以下 `x` 是按输入顺序排列的值；`N` 是点数；`V` 是该通道遥测值的单位；`S(d)=floor(d) mod 86400`。`P(x)` 表示 SciPy `find_peaks(x, prominence=0.1*(max(x)-min(x)))` 的峰数。
 
-| 顺序 | 名称 | 计算 | 单位 | 验收绝对容差；相对容差 |
+| 顺序 | 名称 | 计算 | 单位 | 辅助绝对容差；相对容差 |
 |---:|---|---|---|---|
 | 1 | duration | S(末时间−首时间) | 秒 | 0；0 |
 | 2 | len | N | 点 | 0；0 |
-| 3 | mean | 均值 | V | 1e-12；1e-10 |
-| 4 | var | 总体方差，ddof=0 | V² | 1e-12；1e-10 |
-| 5 | std | 总体标准差，ddof=0 | V | 1e-12；1e-10 |
-| 6 | kurtosis | SciPy Fisher 超额峰度，bias=True | 无量纲 | 1e-10；1e-10 |
-| 7 | skew | SciPy 偏度，bias=True | 无量纲 | 1e-10；1e-10 |
+| 3 | mean | 均值 | V | 0；1e-10 |
+| 4 | var | 总体方差，ddof=0 | V² | 0；1e-10 |
+| 5 | std | 总体标准差，ddof=0 | V | 0；1e-10 |
+| 6 | kurtosis | SciPy Fisher 超额峰度，bias=True | 无量纲 | 0；1e-10 |
+| 7 | skew | SciPy 偏度，bias=True | 无量纲 | 0；1e-10 |
 | 8 | n_peaks | P(x) | 个 | 0；0 |
 | 9 | smooth10_n_peaks | P(10点平均) | 个 | 0；0 |
 | 10 | smooth20_n_peaks | P(20点平均) | 个 | 0；0 |
 | 11 | diff_peaks | P(一阶差分) | 个 | 0；0 |
 | 12 | diff2_peaks | P(二阶差分) | 个 | 0；0 |
-| 13 | diff_var | 一阶差分的总体方差 | V² | 1e-12；1e-10 |
-| 14 | diff2_var | 二阶差分的总体方差 | V² | 1e-12；1e-10 |
+| 13 | diff_var | 一阶差分的总体方差 | V² | 0；1e-10 |
+| 14 | diff2_var | 二阶差分的总体方差 | V² | 0；1e-10 |
 | 15 | gaps_squared | 各相邻时间间隔的 S(d)² 之和 | 秒² | 0；0 |
 | 16 | len_weighted | sampling × N | 秒 | 0；0 |
-| 17 | var_div_duration | var/duration；duration=0时定义为0 | V²/秒 | 1e-12；1e-10 |
-| 18 | var_div_len | var/N | V²/点 | 1e-12；1e-10 |
+| 17 | var_div_duration | var/duration；duration=0时定义为0 | V²/秒 | 0；1e-10 |
+| 18 | var_div_len | var/N | V²/点 | 0；1e-10 |
 
-容差先写入规范和 `registered_manifest.json`，再运行全量比较。计数要求完全相同。连续值的容差带有各列的单位。全量实测比这些容差更严格：规范离线与流式的全部输入向量逐值相同。
+正式验收要求全部18列逐值完全相同。上表只登记辅助差分检查，不允许用辅助容差接受正式差异。所有绝对容差均为0，不把小于1e-12的磁力计方差吞掉。0值必须仍为0。规范和 `registered_manifest.json` 在全量比较前记录此要求。各列的单位已在上表说明。
 
 ## 平滑与峰平台
 
@@ -72,7 +72,7 @@
 
 仍未知：官方表与 processed 表生成时的完整输入身份、数值环境、平滑向量及峰索引。历史CSV只有峰数，无法从峰数反推出唯一峰索引。本轮确认了产生差异的机制，但没有证明每个历史差异具体由哪个生成条件触发。保留这个限制，不宣称全量官方复刻。
 
-全量历史复现与规范比较如下：
+全量历史复现与规范比较如下。前三行只用于复现此前审计，单独登记 `legacy_audit_tolerances.json`：连续值 atol=rtol=1e-6，峰计数完全相同。这个历史容差不能用于规范验收。规范对历史表的比较另使用绝对容差0、相对容差1e-10，不为了保留原峰数结论而扩大容差。
 
 | 比较 | 不同段 | 不同单元 |
 |---|---:|---:|
@@ -94,7 +94,7 @@
 
 证据目录：`data/results/acceptance/A01/`。
 
-1. 运行 `.venv/Scripts/python.exe -m pytest tests/test_feature_consistency.py -q -p no:cacheprovider`。先前红灯为19失败、1通过；补充空表测试另有1失败、21通过。最后22项通过。
+1. 运行 `.venv/Scripts/python.exe -m pytest tests/test_feature_consistency.py -q -p no:cacheprovider`。先前红灯为19失败、1通过；补充空表测试另有1失败、21通过。容差约束测试曾另有1失败、22通过；最后23项通过。
 2. 运行 `.venv/Scripts/python.exe scripts/verify_feature_consistency.py`。全量2123段18列一致；计数完全相同；向量逐值相同；同模型预测完全相同。
 3. 查看 `summary.json` 与 `all_differences.csv`。前者保存每列最大差、差异计数、模型影响和保护文件哈希。
 4. 用 gzip 解压 `point_peak_traces.json.gz`。22个相关段各自记录原始CSV行号、原始时间与值、输入顺序、两种平滑向量、阈值、峰索引、prominence和生成方式。历史缺失的峰索引被明确标记为无法还原。
