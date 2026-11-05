@@ -1,0 +1,21 @@
+F:\F��\΢С������Ŀ\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+  warn(
+F:\F��\΢С������Ŀ\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+  warn(
+F:\F��\΢С������Ŀ\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+  warn(
+F:\F��\΢С������Ŀ\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+  warn(
+Traceback (most recent call last):
+  File "F:\F��\΢С������Ŀ\microsat-anomaly-analysis\scripts\freeze_detector.py", line 28, in <module>
+    main()
+    ~~~~^^
+  File "F:\F��\΢С������Ŀ\microsat-anomaly-analysis\scripts\freeze_detector.py", line 19, in main
+    manifest = freeze_bundle(args.output, replace=args.replace)
+  File "F:\F��\΢С������Ŀ\microsat-anomaly-analysis\src\detection\frozen.py", line 382, in freeze_bundle
+    load_bundle(stage)
+    ~~~~~~~~~~~^^^^^^^
+  File "F:\F��\΢С������Ŀ\microsat-anomaly-analysis\src\detection\frozen.py", line 430, in load_bundle
+    raise DetectorUnavailable("detector recipe mismatch")
+src.detection.frozen.DetectorUnavailable: detector recipe mismatch
+A02 stage retained if present: F:\F��\΢С������Ŀ\microsat-anomaly-analysis\data\models\.a02-engineering-gate-v1.staging-5x_zk3ol; previous package/archive: F:\F��\΢С������Ŀ\microsat-anomaly-analysis\data\models\a02-engineering-gate-v1

@@ -1,0 +1,60 @@
+........................................................................ [ 23%]
+........................................................................ [ 47%]
+........................................................................ [ 70%]
+........................................................................ [ 94%]
+..................                                                       [100%]
+============================== warnings summary ===============================
+src\rag\vectorstore.py:20
+  F:\F盘\微小卫星项目\microsat-anomaly-analysis\src\rag\vectorstore.py:20: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+    from langchain_community.document_loaders import PyPDFLoader
+
+tests/test_a02_detector.py::test_verified_runtime_and_stage2_alias_never_fit
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+tests/test_a02_review_fixes.py::test_replace_archives_old_complete_package_and_publishes_new
+tests/test_a02_review_fixes.py::test_publish_failure_restores_original_directory
+  F:\F盘\微小卫星项目\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_verified_runtime_and_stage2_alias_never_fit
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+tests/test_a02_review_fixes.py::test_replace_archives_old_complete_package_and_publishes_new
+tests/test_a02_review_fixes.py::test_publish_failure_restores_original_directory
+  F:\F盘\微小卫星项目\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_verified_runtime_and_stage2_alias_never_fit
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+tests/test_a02_review_fixes.py::test_replace_archives_old_complete_package_and_publishes_new
+tests/test_a02_review_fixes.py::test_publish_failure_restores_original_directory
+  F:\F盘\微小卫星项目\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_detector.py::test_verified_runtime_and_stage2_alias_never_fit
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+tests/test_a02_review_fixes.py::test_fit_identity_fields_are_required_before_deserialization[False-fit_rows-0]
+tests/test_a02_review_fixes.py::test_replace_archives_old_complete_package_and_publishes_new
+tests/test_a02_review_fixes.py::test_publish_failure_restores_original_directory
+  F:\F盘\微小卫星项目\microsat-anomaly-analysis\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_rag/test_bm25_hybrid.py::TestTokenize::test_channel_id_kept_whole
+  F:\F盘\微小卫星项目\microsat-anomaly-analysis\.venv\Lib\site-packages\jieba\_compat.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+    import pkg_resources
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+306 passed, 3 deselected, 34 warnings in 75.57s (0:01:15)

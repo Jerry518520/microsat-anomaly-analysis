@@ -1,0 +1,44 @@
+{
+  "task_id": "A01",
+  "status": "passed_and_integrated",
+  "implementation_commits": [
+    "9e1108d",
+    "cf25c6f",
+    "b18fde9",
+    "c6f5218"
+  ],
+  "feature_version": "18d-canonical-v1",
+  "feature_spec_sha256": "56025f7734f59669fa4a9ecf21e796f8349ab5732ced2c6dad41f6e7290a5160",
+  "dataset_sha256": "09d613cfd8cd33987ac3a5a9b87f6accb10b6baf3d830d82cb3bc6948e49bc8f",
+  "spec_review": "Spec compliant; independent full check",
+  "quality_review": "Ready to merge Yes; Minor input documentation clarified in c6f5218",
+  "verification": [
+    "python -B scripts/verify_feature_consistency.py",
+    "python -B -m pytest tests -m \"not slow\" -k \"not TestRAGPipelineIntegration\" -p no:cacheprovider"
+  ],
+  "current_regression": {
+    "passed": 306,
+    "failed": 0,
+    "skipped": 0,
+    "deselected": 3,
+    "errors": 0,
+    "warnings": 34
+  },
+  "data_rows": 2123,
+  "exact_vector_match": true,
+  "exact_disk_match": true,
+  "model_prediction_differences": 0,
+  "limitations": [
+    "Historical feature-generation provenance is unavailable; differences remain documented",
+    "Old cache used only for equality verification, not approved for the new deployed feature version"
+  ],
+  "main_integration": {
+    "date": "2026-11-05",
+    "explicit_feature_regeneration": true,
+    "evidence": "data/results/acceptance/A01/main-integration-2026-11-05",
+    "exact_2123_vectors": true,
+    "exact_disk_vectors": true,
+    "same_model_prediction_differences": 0,
+    "historical_files_unchanged": true
+  }
+}

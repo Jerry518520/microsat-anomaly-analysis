@@ -1,0 +1,20 @@
+verified F:\F盘\微小卫星项目\microsat-anomaly-analysis\data\models\a02-engineering-gate-v1; channels=9; no inference training
+{
+  "detector_version": "a02-engineering-gate-v1",
+  "official_test_rows": 529,
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "recipe_sha256": "e9f44eee913cc677642f8f39afafdc87d66ee7294e06b440ac16c6ff3028f3ee",
+  "manifest_sha256": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+  "bundle_id": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+  "unseen_rows": 9,
+  "total_rows": 538,
+  "batch_single_exact": true,
+  "batch_closed_stream_exact": true,
+  "actual_stream_engine_exercised": true,
+  "all_18_features_exact": true,
+  "test_used_for_tuning": false,
+  "postprocess": "identity",
+  "official_test_predicted_anomalies": 132,
+  "unseen_0884_can_be_anomalous": true
+}
+IF_fit_calls=0

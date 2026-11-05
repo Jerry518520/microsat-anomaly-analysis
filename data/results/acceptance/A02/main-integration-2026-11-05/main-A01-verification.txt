@@ -1,0 +1,37 @@
+{
+  "segments": 2123,
+  "comparisons": {
+    "official_vs_processed": {
+      "different_segments": 10,
+      "different_cells": 10
+    },
+    "historical_stream_vs_official": {
+      "different_segments": 11,
+      "different_cells": 11
+    },
+    "historical_stream_vs_processed": {
+      "different_segments": 16,
+      "different_cells": 16
+    },
+    "canonical_offline_vs_stream": {
+      "different_segments": 0,
+      "different_cells": 0
+    },
+    "canonical_vs_historical_stream": {
+      "different_segments": 14,
+      "different_cells": 15
+    },
+    "canonical_vs_official": {
+      "different_segments": 12,
+      "different_cells": 12
+    },
+    "canonical_vs_processed": {
+      "different_segments": 13,
+      "different_cells": 14
+    }
+  },
+  "exact_vectors": true,
+  "exact_disk_vectors": true,
+  "same_model_prediction_differences": 0,
+  "protected_files_unchanged": true
+}

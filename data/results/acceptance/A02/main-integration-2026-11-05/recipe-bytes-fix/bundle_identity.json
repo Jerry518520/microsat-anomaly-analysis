@@ -1,0 +1,24 @@
+{
+  "bundle_path": "C:\\Users\\LENOVO\\.config\\codex\\worktrees\\microsat-anomaly-analysis\\acceptance-20261104\\data\\models\\a02-engineering-gate-v1",
+  "archive_path": "C:\\Users\\LENOVO\\.config\\codex\\worktrees\\microsat-anomaly-analysis\\acceptance-20261104\\data\\models\\a02-engineering-gate-v1.archive-1ac56f52be534f918c1fac42be832cbc",
+  "channels": 9,
+  "runtime_fit_forbidden": true,
+  "bundle_recipe_matches_input_raw_bytes": true,
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "recipe_sha256": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+  "manifest_sha256": "81ec18c23e9577e5b3f17864962e9cb892d73cd40cf1f9be72af2b2facd2f769",
+  "bundle_id": "81ec18c23e9577e5b3f17864962e9cb892d73cd40cf1f9be72af2b2facd2f769",
+  "archive_previous_package_exactly_preserved": true,
+  "unchanged_inputs": {
+    "configs\\detectors\\a02-engineering-gate-v1.json": true,
+    "data\\processed\\segments_18d_18d-canonical-v1.csv": true,
+    "data\\processed\\segments_18d_18d-canonical-v1.manifest.json": true,
+    "data\\models\\stage2_detector.joblib": true,
+    "data\\results\\anomaly_rag_results.json": true
+  },
+  "previous_package_hashes": {
+    "detector.joblib": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+    "detector_recipe.json": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+    "model_manifest.json": "0a1cc5f1ab89fad7ef21dd0b2eee813568d7519217b5c0277eeed896f4ea819b"
+  }
+}

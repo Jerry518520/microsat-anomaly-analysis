@@ -1,0 +1,9 @@
+{
+  "exists": true,
+  "sha256": "a2ddba00a845671acc8c71d39c4b54c78ed2d6ffdf7ff2cc08805ef0700f1916",
+  "logical_sha256": "5889385d2a4940f543b45ab3bcb401c0681643850751c1f892a1a6c76aaf3955",
+  "rows": {
+    "alerts": 1,
+    "segment_verdicts": 1
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "recipe_sha256": "e9f44eee913cc677642f8f39afafdc87d66ee7294e06b440ac16c6ff3028f3ee",
+  "manifest_sha256": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+  "manifest_sources": {
+    "src/detection/frozen.py": "ee196cccac66921b27e23e1d88cc354a079696f4e7541fd88d93a562c85c3cb3",
+    "src/features/segment_spec.py": "1031b10077e922bf6f476424bd53e3ac809a43fff47d5019816ddbb8cef411e5",
+    "src/features/extract_segments_18d.py": "9f706b0d3ebe702589f84b07bad0e6ab8e903099fd6865b8b39b97a570b059a6",
+    "src/streaming/segment_features.py": "b4e371bdaa327d9665c04e4d5610ee0755df423fac5aac13556d737d0f9f9811",
+    "src/utils/stat_rules.py": "a647258cf76f268d3703da395fca13a6c486f4f2280edb95ab232db133c7396a",
+    "src/streaming/stage2.py": "06dd4b725ce8c4d6030d28e08bdb9ad5f13935cafd951a3f44f701081aecf4d8",
+    "src/integration/anomaly_rag_pipeline.py#AnomalyRAGPipeline.detect": "f0301eca33354a86325ca46dc9a4ed21bcc8b4f3b7d3e7fabcbe5ad2ac68e920",
+    "src/streaming/engine.py#StreamEngine._judge_segment": "f86524b78b2a583934ec92b6de72e8b23c43e13c9c9a8cc5ac3c696192a5c418"
+  },
+  "fit_rows": 1275,
+  "fit_rows_per_channel": {
+    "CADC0872": 329,
+    "CADC0873": 359,
+    "CADC0874": 112,
+    "CADC0884": 97,
+    "CADC0886": 6,
+    "CADC0888": 152,
+    "CADC0890": 9,
+    "CADC0892": 125,
+    "CADC0894": 86
+  }
+}

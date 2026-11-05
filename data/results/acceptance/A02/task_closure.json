@@ -1,0 +1,92 @@
+{
+  "task_id": "A02",
+  "status": "passed_and_sealed",
+  "date": "2026-11-05",
+  "scope": "A02 engineering detector; A01 prerequisite integrated",
+  "implementation_commit": "c418ac3dd6fe073ca953c6a0c2f266b76e87d466",
+  "implementation_commits": [
+    "a8330d5",
+    "9090225",
+    "dc41c2f",
+    "e3eec9e",
+    "c418ac3"
+  ],
+  "seal_tag": "a02-sealed-2026-11-05",
+  "detector_version": "a02-engineering-gate-v1",
+  "feature_version": "18d-canonical-v1",
+  "selection_status": "engineering_fixed; not validation-selected",
+  "package_path": "data/models/a02-engineering-gate-v1",
+  "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+  "recipe_sha256": "e9f44eee913cc677642f8f39afafdc87d66ee7294e06b440ac16c6ff3028f3ee",
+  "manifest_sha256": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+  "bundle_id": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+  "canonical_dataset_sha256": "09d613cfd8cd33987ac3a5a9b87f6accb10b6baf3d830d82cb3bc6948e49bc8f",
+  "fit_rows": 1275,
+  "full_offline_tests": {
+    "passed": 306,
+    "failed": 0,
+    "skipped": 0,
+    "deselected": 3,
+    "errors": 0,
+    "warnings": 34,
+    "summary": "306 passed, 3 deselected, 34 warnings in 75.57s (0:01:15)",
+    "command": ".venv/Scripts/python.exe -B -m pytest tests -m \"not slow\" -k \"not TestRAGPipelineIntegration\" -p no:cacheprovider --basetemp=<external A02-seal/pytest-main-final> -q --tb=short",
+    "exit_code": 0
+  },
+  "consistency": {
+    "detector_version": "a02-engineering-gate-v1",
+    "official_test_rows": 529,
+    "model_sha256": "b292896d20e61fc3dafbb9177b67984ede34a87b76b547a0b8b2b88049d33824",
+    "recipe_sha256": "e9f44eee913cc677642f8f39afafdc87d66ee7294e06b440ac16c6ff3028f3ee",
+    "manifest_sha256": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+    "bundle_id": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+    "unseen_rows": 9,
+    "total_rows": 538,
+    "batch_single_exact": true,
+    "batch_closed_stream_exact": true,
+    "actual_stream_engine_exercised": true,
+    "all_18_features_exact": true,
+    "test_used_for_tuning": false,
+    "postprocess": "identity",
+    "official_test_predicted_anomalies": 132,
+    "unseen_0884_can_be_anomalous": true
+  },
+  "runtime_training_calls": 0,
+  "reviews": {
+    "spec": "passed",
+    "quality": "Ready to merge Yes; zero Critical/Important",
+    "recipe_bytes_spec": "passed",
+    "recipe_bytes_quality": "Yes; zero Critical/Important/Minor",
+    "reports": "main-integration-2026-11-05/reviews"
+  },
+  "requirements": {
+    "versioned_recipe": "passed",
+    "engineering_choice_separated_from_selection": "passed",
+    "no_permanent_normal_0884": "passed",
+    "supplied_points_actually_detected": "passed",
+    "formal_label_separated_from_display": "passed",
+    "strict_manifest_and_no_runtime_fit": "passed"
+  },
+  "historical_artifacts_unchanged": {
+    "data\\raw\\segments.csv": "dab2e01e873c93590692b50a7cc312d9cce4d5ba7e69ce8015603c47a8ffb97b",
+    "data\\raw\\dataset-提取的合成特征被计算到每个手动分割和标记的遥测段上.csv": "da20bc4bd3f30a3302ce06fe6a073bea6f036b297a92e83311d3f83b9c5e619b",
+    "data\\processed\\segments_18d.csv": "213942b3e16bc348cb1a9588b62b3a662e673f494444b5c929bd4244085f9a98",
+    "data\\models\\stage2_detector.joblib": "89c84f3ed8277431f346694cb316b668803931ce14c8387a6db226543088ac31",
+    "data/results/anomaly_rag_results.json": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3"
+  },
+  "production_database_unchanged": true,
+  "existing_workspace_changes_preserved": "30 files byte-identical before coordinator status updates; stream response annotations retained by AST comparison; stash retained",
+  "deployment": "A01 data explicitly regenerated and A02 explicitly rebuilt in main; environment identity differences are recorded, not suppressed",
+  "excluded_tests": [
+    "real BGE model load",
+    "real RAG query",
+    "real vectorstore query"
+  ],
+  "limits": [
+    "A03 formal experiments and selection remain open. Test set was not used to tune this package.",
+    "A04 input/session/end policy, A05 event store, A06 transport authentication, and A12 generation lifecycle remain separate tasks.",
+    "The existing short-segment HTTP 500 boundary is recorded for A04.",
+    "Real LLM/BGE/vectorstore acceptance and clean installation are not claimed by A02."
+  ],
+  "evidence": "data/results/acceptance/A02/main-integration-2026-11-05"
+}

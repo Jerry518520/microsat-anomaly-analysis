@@ -1,0 +1,9 @@
+{
+  "source_crlf": 0,
+  "package_crlf": 52,
+  "json_equal": true,
+  "normalized_equal": true,
+  "source_sha256": "e9f44eee913cc677642f8f39afafdc87d66ee7294e06b440ac16c6ff3028f3ee",
+  "package_sha256": "80e6583dffb060dc65e424b54957ce194a8b322049e5ced76b6254d71a5fbb23",
+  "manifest_recipe_sha256": "e9f44eee913cc677642f8f39afafdc87d66ee7294e06b440ac16c6ff3028f3ee"
+}

@@ -1,0 +1,1 @@
+verified C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\data\models\a02-engineering-gate-v1; channels=9; no inference training

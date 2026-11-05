@@ -1,0 +1,205 @@
+F.FF                                                                     [100%]
+================================== FAILURES ===================================
+_________ test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf] _________
+
+tmp_path = WindowsPath('C:/Users/LENOVO/Documents/ChatGPT/��ҵ��� 2/implementation-2026-11-04/A02-recipe-fix/red-tmp/test_real_freeze_and_load_pres0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000013A0EB6F6F0>
+newline = '\n', indent = 2
+
+    @pytest.mark.parametrize("newline", ["\n", "\r\n"], ids=["lf", "crlf"])
+    @pytest.mark.parametrize("indent", [2, 4], ids=["indent2", "indent4"])
+    def test_real_freeze_and_load_preserve_recipe_bytes(tmp_path, monkeypatch, newline, indent):
+        m = importlib.import_module("src.detection.frozen")
+        recipe = m.load_recipe()
+        raw = (json.dumps(recipe, ensure_ascii=False, indent=indent) + "\n").replace("\n", newline).encode("utf-8")
+        source = tmp_path / "input-recipe.json"
+        source.write_bytes(raw)
+        monkeypatch.setattr(m, "RECIPE_PATH", source)
+        assert m.load_recipe() == recipe
+    
+        target = tmp_path / "bundle"
+>       manifest = m.freeze_bundle(target)
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_a02_recipe_bytes.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\detection\frozen.py:382: in freeze_bundle
+    load_bundle(stage)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+bundle = WindowsPath('C:/Users/LENOVO/Documents/ChatGPT/��ҵ��� 2/implementation-2026-11-04/A02-recipe-fix/red-tmp/test_real_freeze_and_load_pres0/.bundle.staging-ffqeitfr')
+
+    def load_bundle(bundle=None):
+        """Verify every expected identity and model bytes before joblib.load."""
+        bundle = Path(bundle) if bundle is not None else DEFAULT_BUNDLE
+        try:
+            for name in ["model_manifest.json", "detector_recipe.json", "detector.joblib"]:
+                if not (bundle / name).is_file():
+                    raise DetectorUnavailable(f"detector package missing: {bundle / name}; run scripts/freeze_detector.py explicitly")
+            recipe = load_recipe()
+            expected = _identity(recipe)
+            manifest_bytes = (bundle / "model_manifest.json").read_bytes()
+            manifest = json.loads(manifest_bytes)
+            for name, value in expected.items():
+                if manifest.get(name) != value:
+                    raise DetectorUnavailable(f"detector manifest mismatch: {name}")
+            fit = _training_fit(recipe)
+            fit_identity = _fit_identity(fit, recipe)
+            for name, value in fit_identity.items():
+                if manifest.get(name) != value:
+                    raise DetectorUnavailable(f"detector manifest mismatch: {name}")
+            recipe_bytes = (bundle / "detector_recipe.json").read_bytes()
+            recipe_digest = hashlib.sha256(recipe_bytes).hexdigest()
+            if json.loads(recipe_bytes) != recipe or recipe_digest != manifest["recipe_sha256"]:
+>               raise DetectorUnavailable("detector recipe mismatch")
+E               src.detection.frozen.DetectorUnavailable: detector recipe mismatch
+E               A02 stage retained if present: C:\Users\LENOVO\Documents\ChatGPT\��ҵ��� 2\implementation-2026-11-04\A02-recipe-fix\red-tmp\test_real_freeze_and_load_pres0\.bundle.staging-ffqeitfr; previous package/archive: C:\Users\LENOVO\Documents\ChatGPT\��ҵ��� 2\implementation-2026-11-04\A02-recipe-fix\red-tmp\test_real_freeze_and_load_pres0\bundle
+
+src\detection\frozen.py:430: DetectorUnavailable
+_________ test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf] _________
+
+tmp_path = WindowsPath('C:/Users/LENOVO/Documents/ChatGPT/��ҵ��� 2/implementation-2026-11-04/A02-recipe-fix/red-tmp/test_real_freeze_and_load_pres2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000013A6FF839B0>
+newline = '\n', indent = 4
+
+    @pytest.mark.parametrize("newline", ["\n", "\r\n"], ids=["lf", "crlf"])
+    @pytest.mark.parametrize("indent", [2, 4], ids=["indent2", "indent4"])
+    def test_real_freeze_and_load_preserve_recipe_bytes(tmp_path, monkeypatch, newline, indent):
+        m = importlib.import_module("src.detection.frozen")
+        recipe = m.load_recipe()
+        raw = (json.dumps(recipe, ensure_ascii=False, indent=indent) + "\n").replace("\n", newline).encode("utf-8")
+        source = tmp_path / "input-recipe.json"
+        source.write_bytes(raw)
+        monkeypatch.setattr(m, "RECIPE_PATH", source)
+        assert m.load_recipe() == recipe
+    
+        target = tmp_path / "bundle"
+>       manifest = m.freeze_bundle(target)
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_a02_recipe_bytes.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\detection\frozen.py:382: in freeze_bundle
+    load_bundle(stage)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+bundle = WindowsPath('C:/Users/LENOVO/Documents/ChatGPT/��ҵ��� 2/implementation-2026-11-04/A02-recipe-fix/red-tmp/test_real_freeze_and_load_pres2/.bundle.staging-i2g4b7ae')
+
+    def load_bundle(bundle=None):
+        """Verify every expected identity and model bytes before joblib.load."""
+        bundle = Path(bundle) if bundle is not None else DEFAULT_BUNDLE
+        try:
+            for name in ["model_manifest.json", "detector_recipe.json", "detector.joblib"]:
+                if not (bundle / name).is_file():
+                    raise DetectorUnavailable(f"detector package missing: {bundle / name}; run scripts/freeze_detector.py explicitly")
+            recipe = load_recipe()
+            expected = _identity(recipe)
+            manifest_bytes = (bundle / "model_manifest.json").read_bytes()
+            manifest = json.loads(manifest_bytes)
+            for name, value in expected.items():
+                if manifest.get(name) != value:
+                    raise DetectorUnavailable(f"detector manifest mismatch: {name}")
+            fit = _training_fit(recipe)
+            fit_identity = _fit_identity(fit, recipe)
+            for name, value in fit_identity.items():
+                if manifest.get(name) != value:
+                    raise DetectorUnavailable(f"detector manifest mismatch: {name}")
+            recipe_bytes = (bundle / "detector_recipe.json").read_bytes()
+            recipe_digest = hashlib.sha256(recipe_bytes).hexdigest()
+            if json.loads(recipe_bytes) != recipe or recipe_digest != manifest["recipe_sha256"]:
+>               raise DetectorUnavailable("detector recipe mismatch")
+E               src.detection.frozen.DetectorUnavailable: detector recipe mismatch
+E               A02 stage retained if present: C:\Users\LENOVO\Documents\ChatGPT\��ҵ��� 2\implementation-2026-11-04\A02-recipe-fix\red-tmp\test_real_freeze_and_load_pres2\.bundle.staging-i2g4b7ae; previous package/archive: C:\Users\LENOVO\Documents\ChatGPT\��ҵ��� 2\implementation-2026-11-04\A02-recipe-fix\red-tmp\test_real_freeze_and_load_pres2\bundle
+
+src\detection\frozen.py:430: DetectorUnavailable
+________ test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf] ________
+
+tmp_path = WindowsPath('C:/Users/LENOVO/Documents/ChatGPT/��ҵ��� 2/implementation-2026-11-04/A02-recipe-fix/red-tmp/test_real_freeze_and_load_pres3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000013A6FEDA9C0>
+newline = '\r\n', indent = 4
+
+    @pytest.mark.parametrize("newline", ["\n", "\r\n"], ids=["lf", "crlf"])
+    @pytest.mark.parametrize("indent", [2, 4], ids=["indent2", "indent4"])
+    def test_real_freeze_and_load_preserve_recipe_bytes(tmp_path, monkeypatch, newline, indent):
+        m = importlib.import_module("src.detection.frozen")
+        recipe = m.load_recipe()
+        raw = (json.dumps(recipe, ensure_ascii=False, indent=indent) + "\n").replace("\n", newline).encode("utf-8")
+        source = tmp_path / "input-recipe.json"
+        source.write_bytes(raw)
+        monkeypatch.setattr(m, "RECIPE_PATH", source)
+        assert m.load_recipe() == recipe
+    
+        target = tmp_path / "bundle"
+>       manifest = m.freeze_bundle(target)
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_a02_recipe_bytes.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\detection\frozen.py:382: in freeze_bundle
+    load_bundle(stage)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+bundle = WindowsPath('C:/Users/LENOVO/Documents/ChatGPT/��ҵ��� 2/implementation-2026-11-04/A02-recipe-fix/red-tmp/test_real_freeze_and_load_pres3/.bundle.staging-ifaptmz0')
+
+    def load_bundle(bundle=None):
+        """Verify every expected identity and model bytes before joblib.load."""
+        bundle = Path(bundle) if bundle is not None else DEFAULT_BUNDLE
+        try:
+            for name in ["model_manifest.json", "detector_recipe.json", "detector.joblib"]:
+                if not (bundle / name).is_file():
+                    raise DetectorUnavailable(f"detector package missing: {bundle / name}; run scripts/freeze_detector.py explicitly")
+            recipe = load_recipe()
+            expected = _identity(recipe)
+            manifest_bytes = (bundle / "model_manifest.json").read_bytes()
+            manifest = json.loads(manifest_bytes)
+            for name, value in expected.items():
+                if manifest.get(name) != value:
+                    raise DetectorUnavailable(f"detector manifest mismatch: {name}")
+            fit = _training_fit(recipe)
+            fit_identity = _fit_identity(fit, recipe)
+            for name, value in fit_identity.items():
+                if manifest.get(name) != value:
+                    raise DetectorUnavailable(f"detector manifest mismatch: {name}")
+            recipe_bytes = (bundle / "detector_recipe.json").read_bytes()
+            recipe_digest = hashlib.sha256(recipe_bytes).hexdigest()
+            if json.loads(recipe_bytes) != recipe or recipe_digest != manifest["recipe_sha256"]:
+>               raise DetectorUnavailable("detector recipe mismatch")
+E               src.detection.frozen.DetectorUnavailable: detector recipe mismatch
+E               A02 stage retained if present: C:\Users\LENOVO\Documents\ChatGPT\��ҵ��� 2\implementation-2026-11-04\A02-recipe-fix\red-tmp\test_real_freeze_and_load_pres3\.bundle.staging-ifaptmz0; previous package/archive: C:\Users\LENOVO\Documents\ChatGPT\��ҵ��� 2\implementation-2026-11-04\A02-recipe-fix\red-tmp\test_real_freeze_and_load_pres3\bundle
+
+src\detection\frozen.py:430: DetectorUnavailable
+============================== warnings summary ===============================
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (125). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (112). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (97). max_samples will be set to n_samples for estimation.
+    warn(
+
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-crlf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+  C:\Users\LENOVO\.config\codex\worktrees\microsat-anomaly-analysis\acceptance-20261104\.venv\Lib\site-packages\sklearn\ensemble\_iforest.py:344: UserWarning: max_samples (128) is greater than the total number of samples (86). max_samples will be set to n_samples for estimation.
+    warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent2-lf]
+FAILED tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-lf]
+FAILED tests/test_a02_recipe_bytes.py::test_real_freeze_and_load_preserve_recipe_bytes[indent4-crlf]
+3 failed, 1 passed, 16 warnings in 6.59s

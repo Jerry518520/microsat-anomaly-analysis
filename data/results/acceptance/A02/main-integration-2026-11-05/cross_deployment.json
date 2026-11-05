@@ -1,0 +1,11 @@
+{
+  "rows": 538,
+  "all_non_environment_identity_fields_exact": true,
+  "excluded_identity_columns": [
+    "recipe_sha256",
+    "manifest_sha256",
+    "bundle_id"
+  ],
+  "model_sha256_unchanged": true,
+  "reason": "LF/CRLF source/config bytes differ; both packages were explicitly built and strictly verified"
+}

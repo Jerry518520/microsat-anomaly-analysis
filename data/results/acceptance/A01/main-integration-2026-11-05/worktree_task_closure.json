@@ -1,0 +1,33 @@
+{
+  "task_id": "A01",
+  "status": "passed_in_isolated_worktree",
+  "implementation_commits": [
+    "9e1108d",
+    "cf25c6f",
+    "b18fde9",
+    "c6f5218"
+  ],
+  "feature_version": "18d-canonical-v1",
+  "feature_spec_sha256": "56025f7734f59669fa4a9ecf21e796f8349ab5732ced2c6dad41f6e7290a5160",
+  "dataset_sha256": "09d613cfd8cd33987ac3a5a9b87f6accb10b6baf3d830d82cb3bc6948e49bc8f",
+  "spec_review": "Spec compliant; independent full check",
+  "quality_review": "Ready to merge Yes; Minor input documentation clarified in c6f5218",
+  "verification": [
+    "python -B scripts/verify_feature_consistency.py",
+    "python -B -m pytest tests -m \"not slow\" -k \"not TestRAGPipelineIntegration\" -p no:cacheprovider"
+  ],
+  "current_regression": {
+    "passed": 219,
+    "skipped": 1,
+    "deselected": 3
+  },
+  "data_rows": 2123,
+  "exact_vector_match": true,
+  "exact_disk_match": true,
+  "model_prediction_differences": 0,
+  "limitations": [
+    "Historical feature-generation provenance is unavailable; differences remain documented",
+    "Old cache used only for equality verification, not approved for the new deployed feature version",
+    "Integration to original repository waits for A02 model bundle"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "status": "recipe_bytes_fix_verified_in_worktree",
+  "base_commit": "e3eec9ea2fc19a509c43777e4991d37a0e435c13",
+  "root_cause": "Recipe JSON reserialization and Windows text newline translation changed bytes after the raw input recipe hash was registered.",
+  "fix": "Copy RECIPE_PATH raw bytes into the package; keep strict recipe content and raw-byte hash checks unchanged.",
+  "new_regressions": {
+    "red_failed": 3,
+    "red_passed": 1,
+    "green_passed": 4,
+    "cases": [
+      "LF indent=2",
+      "CRLF indent=2",
+      "LF indent=4",
+      "CRLF indent=4"
+    ],
+    "real_freeze_and_load": true,
+    "temporary_recipe_path_only": true,
+    "runtime_fit_forbidden": true
+  },
+  "targeted_tests": {
+    "passed": 99,
+    "warnings": 33,
+    "elapsed_seconds": 45.75,
+    "files": [
+      "tests/test_a02_detector.py",
+      "tests/test_a02_review_fixes.py",
+      "tests/test_a02_stream_runtime.py",
+      "tests/test_a02_recipe_bytes.py",
+      "tests/test_production_recipe.py"
+    ]
+  },
+  "explicit_replace_build_and_verify_only": true,
+  "strict_load_checks_changed": false,
+  "shared_environment_changed": false,
+  "independent_review": {
+    "findings": [],
+    "ready_to_merge": true,
+    "scope": [
+      "src/detection/frozen.py:318",
+      "tests/test_a02_recipe_bytes.py"
+    ]
+  },
+  "main_directory_full_offline_regression": "Parent agent will run after integration; not claimed by this worktree result.",
+  "external_temporary_and_log_directory": "C:\\Users\\LENOVO\\Documents\\ChatGPT\\毕业设计 2\\implementation-2026-11-04\\A02-recipe-fix",
+  "evidence_sha256": {
+    "red.txt": "9c41fdc864ac3847be2fe0dbb372b3933b738d99257f8152d36c6e7e4aad5c80",
+    "green.txt": "2331cc9db389fb6d2aad7513b8e2726baf0b380297fd2a840aa922be152d87a4",
+    "all-targeted.txt": "0577a69a0aa9e99ff894ab1ca93fc9db050e6859a1beefdf1f93f52acbbeed42",
+    "build.txt": "400c257ffbdf9ac741b29b809beedbe39b8dde7aaa4b805c8f276806b7411cc0",
+    "verify-only.txt": "85de32cba69136c4de3e7d7969a2ebe90b5d2a561fdd3eaea6c54c9e4a7c3231",
+    "bundle_identity.json": "427a64f06b9789c0d05548f304e9d0fa7bc45cb458c949a6044cdf6c2ae81793"
+  }
+}

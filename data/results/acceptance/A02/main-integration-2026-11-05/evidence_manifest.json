@@ -1,0 +1,114 @@
+{
+  "files": {
+    "consistency.json": {
+      "sha256": "24dff870c2531545a74feade9466be4b97186df170113b38c46b9369e6399bfd",
+      "bytes": 773
+    },
+    "cross_deployment.json": {
+      "sha256": "1c918f9d51519489c28e7f73c5377638cc5a682c44058cd4d4ba75d7515a35b5",
+      "bytes": 312
+    },
+    "database-after.json": {
+      "sha256": "03848bd99944feb580871b083f3aa8b7b296b6d0eb0a125d12709cc12b15aba3",
+      "bytes": 281
+    },
+    "database-before.json": {
+      "sha256": "cddf0dca4208b55c69dcfba2fcb9e183e30ed976052e605b4aa937a68a71580d",
+      "bytes": 258
+    },
+    "main-A01-verification.txt": {
+      "sha256": "f8e7e84d05f4e3a4e2c1c4d45fed7bb8e8ddc13a5437007026c75dfaff4ffb0a",
+      "bytes": 934
+    },
+    "main-build-fixed.txt": {
+      "sha256": "24e0529680bc6e46971f964168b8112bf14bec50537b4c49dc7b378b9e9f10f5",
+      "bytes": 1247
+    },
+    "main-build.txt": {
+      "sha256": "8f1188a8e8f8086891625fb580efefb7eff619c54c143e66ded7f0a20718546a",
+      "bytes": 2115
+    },
+    "main-consistency.txt": {
+      "sha256": "86ab6e69006a4fc0567d5afc342d523b2b3255f575d021e44bbfca4b45132c03",
+      "bytes": 923
+    },
+    "main-full-offline.txt": {
+      "sha256": "c79df2b600b57ed2484f6a95f92f81980cec748d8ec7d27f3a8bb1953aa63bb9",
+      "bytes": 5497
+    },
+    "main-identity.json": {
+      "sha256": "5977a08a1e98482492f89be590668b83d2d214533b3ea7f01e5625308634942d",
+      "bytes": 1445
+    },
+    "main-no-fit.json": {
+      "sha256": "950ab2905c9b0fa072554a1c8772dc4711b8119bc82f20951d874f9e17bb3920",
+      "bytes": 79
+    },
+    "model_manifest.json": {
+      "sha256": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+      "bytes": 8680
+    },
+    "preservation.json": {
+      "sha256": "0b7dbd6937be9e9e34f45215643cca5b355bcd01c16df206b0d84e0e0bcc7fb4",
+      "bytes": 227
+    },
+    "recipe-newline-root-cause.json": {
+      "sha256": "844f6bb25564ef113bc53b8adbe4a965943790930faf029b9a80dde437fa54c9",
+      "bytes": 375
+    },
+    "segment_verdicts.csv": {
+      "sha256": "553988fecdb5046f8e85faea5d164c1feba5fddc93593e30589b4651ea5d31bc",
+      "bytes": 221270
+    },
+    "worktree-full-offline.txt": {
+      "sha256": "7b7520ec4bfb51d76e4d8622c5009a3b0b29ae3c9a650e2df73523f58f956366",
+      "bytes": 4192
+    },
+    "recipe-bytes-fix/all-targeted.txt": {
+      "sha256": "0577a69a0aa9e99ff894ab1ca93fc9db050e6859a1beefdf1f93f52acbbeed42",
+      "bytes": 5009
+    },
+    "recipe-bytes-fix/build.txt": {
+      "sha256": "400c257ffbdf9ac741b29b809beedbe39b8dde7aaa4b805c8f276806b7411cc0",
+      "bytes": 1558
+    },
+    "recipe-bytes-fix/bundle_identity.json": {
+      "sha256": "427a64f06b9789c0d05548f304e9d0fa7bc45cb458c949a6044cdf6c2ae81793",
+      "bytes": 1519
+    },
+    "recipe-bytes-fix/counterexample_closed.json": {
+      "sha256": "97631a5e4374b1c727e46a7fb043beb16a1b984c40540bd7a4242573f07f23e3",
+      "bytes": 2190
+    },
+    "recipe-bytes-fix/green.txt": {
+      "sha256": "2331cc9db389fb6d2aad7513b8e2726baf0b380297fd2a840aa922be152d87a4",
+      "bytes": 2949
+    },
+    "recipe-bytes-fix/red.txt": {
+      "sha256": "9c41fdc864ac3847be2fe0dbb372b3933b738d99257f8152d36c6e7e4aad5c80",
+      "bytes": 14147
+    },
+    "recipe-bytes-fix/verify-only.txt": {
+      "sha256": "85de32cba69136c4de3e7d7969a2ebe90b5d2a561fdd3eaea6c54c9e4a7c3231",
+      "bytes": 167
+    },
+    "reviews/final-quality-review.md": {
+      "sha256": "c0f9d7df107f1d5011a0b804dd0f8d4592573688602554b518dfd5fd6bf5ca20",
+      "bytes": 4924
+    },
+    "reviews/final-spec-review.md": {
+      "sha256": "f81bee6ce4c26f0ad16c5a2129caee8fd34c59d5f55cca702550caa3ae100b83",
+      "bytes": 4971
+    },
+    "reviews/recipe-bytes-quality-review.md": {
+      "sha256": "e6b2bfb2ee792d584d5d95a066205ab0f45fe1967073cc7d4d7f67530e9ae775",
+      "bytes": 2395
+    },
+    "reviews/recipe-bytes-spec-review.md": {
+      "sha256": "6498483696cf91001e066085bc5a84a16a75f2844a05e7593f7a741b013cd1cf",
+      "bytes": 2856
+    }
+  },
+  "bundle_id": "cd792b204ede010c09e9d26e78f29fb327a61e38f8b5e9e39c517e0c4eb28b4e",
+  "implementation_commit": "c418ac3dd6fe073ca953c6a0c2f266b76e87d466"
+}
