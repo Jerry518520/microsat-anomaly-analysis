@@ -315,7 +315,7 @@ def _build_package(bundle):
     for ch, judge in judges.items():
         judge.judge(fit[fit.channel == ch].iloc[0][FEATURE_COLS].to_dict())
     bundle.mkdir(parents=True, exist_ok=True)
-    _write_json(bundle / "detector_recipe.json", recipe)
+    (bundle / "detector_recipe.json").write_bytes(RECIPE_PATH.read_bytes())
     joblib.dump({"detector_version": VERSION, "judges": judges}, bundle / "detector.joblib")
     manifest = {**identity, "model_sha256": sha256(bundle / "detector.joblib"),
                 **_fit_identity(fit, recipe)}
