@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "benchmark_segments": 529,
+  "nested_unique_held_segments": 1594,
+  "benchmark_methods": 8,
+  "nested_methods": 7,
+  "split_isolation": true,
+  "independent_metric_tolerance": 1e-12,
+  "all_saved_metrics_recomputed": true,
+  "engineering_matches_real_closed_stream": true,
+  "repeat_equal_artifacts": [
+    "comparison_table.csv",
+    "error_cases.csv",
+    "metrics.json",
+    "nested_metrics.json",
+    "nested_predictions.csv",
+    "nested_selections.json",
+    "predictions.csv",
+    "RESULTS.md",
+    "selection.json",
+    "split_manifest.json",
+    "validation_predictions.csv"
+  ]
+}

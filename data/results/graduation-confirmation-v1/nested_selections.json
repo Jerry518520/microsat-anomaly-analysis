@@ -1,0 +1,118 @@
+[
+  {
+    "fold": 0,
+    "contamination": 0.35,
+    "k": 2,
+    "gate_choice": {
+      "CADC0872": "AND",
+      "CADC0892": "if",
+      "CADC0874": "if",
+      "CADC0884": "rule",
+      "CADC0873": "if",
+      "CADC0888": "if",
+      "CADC0894": "if",
+      "CADC0890": "rule"
+    },
+    "soft_alpha": 0.75,
+    "soft_threshold": 0.5,
+    "validation_counts": {
+      "CADC0872": 59,
+      "CADC0873": 57,
+      "CADC0874": 24,
+      "CADC0888": 22,
+      "CADC0892": 21,
+      "CADC0884": 15,
+      "CADC0894": 14,
+      "CADC0890": 1
+    },
+    "fit_counts": {
+      "CADC0872": 232,
+      "CADC0873": 225,
+      "CADC0888": 108,
+      "CADC0892": 78,
+      "CADC0874": 74,
+      "CADC0884": 67,
+      "CADC0894": 51,
+      "CADC0890": 9,
+      "CADC0886": 5
+    }
+  },
+  {
+    "fold": 1,
+    "contamination": 0.35,
+    "k": 2,
+    "gate_choice": {
+      "CADC0872": "AND",
+      "CADC0892": "if",
+      "CADC0874": "rule",
+      "CADC0884": "rule",
+      "CADC0873": "AND",
+      "CADC0886": "rule",
+      "CADC0888": "rule",
+      "CADC0894": "AND",
+      "CADC0890": "rule"
+    },
+    "soft_alpha": 0.25,
+    "soft_threshold": 0.25,
+    "validation_counts": {
+      "CADC0873": 64,
+      "CADC0872": 48,
+      "CADC0888": 28,
+      "CADC0892": 19,
+      "CADC0874": 18,
+      "CADC0884": 18,
+      "CADC0894": 15,
+      "CADC0890": 2,
+      "CADC0886": 1
+    },
+    "fit_counts": {
+      "CADC0873": 238,
+      "CADC0872": 219,
+      "CADC0888": 102,
+      "CADC0892": 84,
+      "CADC0874": 72,
+      "CADC0894": 63,
+      "CADC0884": 62,
+      "CADC0890": 6,
+      "CADC0886": 4
+    }
+  },
+  {
+    "fold": 2,
+    "contamination": 0.35,
+    "k": 1,
+    "gate_choice": {
+      "CADC0872": "AND",
+      "CADC0892": "if",
+      "CADC0874": "rule",
+      "CADC0884": "rule",
+      "CADC0873": "AND",
+      "CADC0888": "AND",
+      "CADC0894": "rule",
+      "CADC0890": "rule"
+    },
+    "soft_alpha": 0.75,
+    "soft_threshold": 0.5,
+    "validation_counts": {
+      "CADC0873": 70,
+      "CADC0872": 50,
+      "CADC0874": 22,
+      "CADC0892": 20,
+      "CADC0888": 17,
+      "CADC0894": 16,
+      "CADC0884": 15,
+      "CADC0890": 3
+    },
+    "fit_counts": {
+      "CADC0873": 226,
+      "CADC0872": 220,
+      "CADC0888": 99,
+      "CADC0892": 94,
+      "CADC0874": 74,
+      "CADC0884": 67,
+      "CADC0894": 63,
+      "CADC0886": 4,
+      "CADC0890": 3
+    }
+  }
+]

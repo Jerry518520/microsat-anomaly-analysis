@@ -1,0 +1,72 @@
+..................FFFF                                                   [100%]
+================================== FAILURES ===================================
+________________ test_session_end_retry_and_distinct_sessions _________________
+tests\test_stream_sessions.py:148: in test_session_end_retry_and_distinct_sessions
+    asyncio.run(scenario())
+D:\Python313\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_stream_sessions.py:130: in scenario
+    first = await engine.start_live("sensor")
+                  ^^^^^^^^^^^^^^^^^
+E   AttributeError: 'StreamEngine' object has no attribute 'start_live'
+_ test_batch_validation_is_atomic_and_retry_does_not_deduplicate_observations _
+tests\test_stream_sessions.py:171: in test_batch_validation_is_atomic_and_retry_does_not_deduplicate_observations
+    asyncio.run(scenario())
+D:\Python313\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_stream_sessions.py:154: in scenario
+    sid = (await engine.start_live("sensor"))["session_id"]
+                 ^^^^^^^^^^^^^^^^^
+E   AttributeError: 'StreamEngine' object has no attribute 'start_live'
+_______ test_timeout_and_stop_never_formalize_incomplete_or_short_data ________
+tests\test_stream_sessions.py:192: in test_timeout_and_stop_never_formalize_incomplete_or_short_data
+    asyncio.run(scenario())
+D:\Python313\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_stream_sessions.py:178: in scenario
+    sid = (await engine.start_live("sensor"))["session_id"]
+                 ^^^^^^^^^^^^^^^^^
+E   AttributeError: 'StreamEngine' object has no attribute 'start_live'
+________________ test_concurrent_source_starts_have_one_winner ________________
+tests\test_stream_sessions.py:207: in test_concurrent_source_starts_have_one_winner
+    asyncio.run(scenario())
+D:\Python313\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_stream_sessions.py:199: in scenario
+    result = await asyncio.gather(engine.start_live("one"), engine.start_live("two"), return_exceptions=True)
+                                  ^^^^^^^^^^^^^^^^^
+E   AttributeError: 'StreamEngine' object has no attribute 'start_live'
+=========================== short test summary info ===========================
+FAILED tests/test_stream_sessions.py::test_session_end_retry_and_distinct_sessions
+FAILED tests/test_stream_sessions.py::test_batch_validation_is_atomic_and_retry_does_not_deduplicate_observations
+FAILED tests/test_stream_sessions.py::test_timeout_and_stop_never_formalize_incomplete_or_short_data
+FAILED tests/test_stream_sessions.py::test_concurrent_source_starts_have_one_winner
+4 failed, 18 passed in 2.18s

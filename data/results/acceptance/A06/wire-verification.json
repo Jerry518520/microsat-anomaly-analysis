@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "transport": "local TCP HTTP and WebSocket",
+  "auth_enabled": true,
+  "missing_http_key_status": 401,
+  "snapshot_batch_reconnect": true,
+  "batch_retry": true,
+  "end_retry": true,
+  "event_detail_matches": true,
+  "points": 3,
+  "judgements": 1,
+  "alerts": 1,
+  "event_id": "9cc64ce7-28a7-45a5-8e34-0fe1c06b855b",
+  "session_id": "7617f9f0-30cb-4c7d-a558-cb3382d8d219",
+  "bundle_id": "45a8c61d67976d13ed472b7ea0bb889e88fc81ae5150336eafd94b15074aabaf",
+  "database": "C:\\Users\\LENOVO\\Documents\\ChatGPT\\\u6bd5\u4e1a\u8bbe\u8ba1 2\\execution-2026-11-06\\wire-A06.db"
+}

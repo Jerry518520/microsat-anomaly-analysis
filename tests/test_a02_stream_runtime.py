@@ -28,7 +28,9 @@ def test_engine_preserves_model_failure_state(runtime, monkeypatch):
 
 
 @pytest.mark.parametrize("path,payload", [("/state", None), ("/replay/start", {"speed": 60}),
-                                         ("/ingest", {"frames": []})])
+                                         ("/ingest", {"session_id": "00000000-0000-4000-8000-000000000001",
+                                          "batch_id": "00000000-0000-4000-8000-000000000002",
+                                          "frames": [{"ts": 0., "channel": "CADC0884", "value": 1., "sampling": 5}]})])
 def test_routes_return_503_on_package_failure(runtime, monkeypatch, path, payload):
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
@@ -58,10 +60,8 @@ def test_closed_segment_requires_ready_detector(runtime):
 def test_runtime_closed_segment_emits_full_formal_facts(runtime, monkeypatch):
     from src.streaming.segmenter import ClosedSegment
     from src.detection.frozen import EngineeringJudge, FEATURE_COLS
-    captured = []
-    monkeypatch.setattr(runtime, "save_verdict", lambda **kwargs: captured.append(kwargs))
-    monkeypatch.setattr(runtime, "save_alert", lambda *a, **k: None)
-    engine = runtime.StreamEngine()
+    from src.streaming.event_store import EventStore
+    engine = runtime.StreamEngine(store=EventStore(":memory:"))
     th = {"mean": {"mean": 0., "std": 1., "q1": 0., "q3": 0., "iqr": 0.}}
     engine.judges = {"CADC0884": EngineeringJudge("CADC0884", None, th, k=1, gate_op="rule")}
     engine.models_ready = True
@@ -70,7 +70,7 @@ def test_runtime_closed_segment_emits_full_formal_facts(runtime, monkeypatch):
     facts = engine.latest["CADC0884"]["judgement"]
     assert facts["gate_pred"] == facts["final_pred"] is True
     assert facts["gate_op"] == "rule" and facts["postprocess"] == "identity"
-    assert captured[0]["features"]["_detector"] == facts
+    assert engine.store.get_event(seg.event_id)["judgement"] == facts
     assert engine.alerts[0]["final_pred"] is True
     assert "k=1" in engine.alerts[0]["summary"]
     short = ClosedSegment(channel="CADC0884", seg_id="short", official=False, values=[1., 2.], timestamps=[0., 5.], sampling=5)

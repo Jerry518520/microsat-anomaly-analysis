@@ -195,21 +195,16 @@ def test_actual_loaded_identity_distinguishes_same_version_packages_and_survives
 
 def test_real_closed_stream_context_retains_loaded_identity(package, monkeypatch):
     m = api()
-    persistence = importlib.import_module("src.streaming.persistence")
-    monkeypatch.setattr(persistence, "init_db", lambda: None)
     runtime = importlib.import_module("src.streaming.engine")
-    monkeypatch.setattr(runtime, "init_alert_db", lambda: None)
-    stored = []
-    monkeypatch.setattr(runtime, "save_verdict", lambda **kwargs: stored.append(kwargs))
-    monkeypatch.setattr(runtime, "save_alert", lambda *a, **k: None)
-    engine = runtime.StreamEngine()
+    from src.streaming.event_store import EventStore
+    engine = runtime.StreamEngine(store=EventStore(":memory:"))
     engine.judges = m.load_bundle(package)
     engine.models_ready = True
     from src.streaming.segmenter import ClosedSegment
     seg = ClosedSegment("CADC0884", "identity-test", False, [1e9, -1e9, 1e9, -1e9], [0., 5., 10., 15.], 5)
     engine._judge_segment(seg)
     identity = engine.judges["CADC0884"].bundle_identity.as_fields()
-    facts = stored[0]["features"]["_detector"]
+    facts = engine.store.get_event(seg.event_id)["judgement"]
     assert all(facts[name] == value for name, value in identity.items())
     assert all(engine.latest["CADC0884"]["judgement"][name] == value for name, value in identity.items())
 

@@ -1,0 +1,99 @@
+FFFFFFFFFFFFFFFFFF                                                       [100%]
+================================== FAILURES ===================================
+__________________ test_frame_rejects_invalid_input[ts-True] __________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+___________________ test_frame_rejects_invalid_input[ts-0] ____________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+__________________ test_frame_rejects_invalid_input[ts-inf] ___________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+________________ test_frame_rejects_invalid_input[value-False] ________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+__________________ test_frame_rejects_invalid_input[value-1] __________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+_________________ test_frame_rejects_invalid_input[value-nan] _________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+________________ test_frame_rejects_invalid_input[sampling-0] _________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+________________ test_frame_rejects_invalid_input[sampling--1] ________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+_______________ test_frame_rejects_invalid_input[sampling-True] _______________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+_______________ test_frame_rejects_invalid_input[sampling-1.5] ________________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+______________ test_frame_rejects_invalid_input[channel-UNKNOWN] ______________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+______________ test_frame_rejects_invalid_input[segment_id-True] ______________
+tests\test_stream_sessions.py:23: in test_frame_rejects_invalid_input
+    from src.streaming.contracts import TelemetryFrame
+E   ModuleNotFoundError: No module named 'src.streaming.contracts'
+_____________ test_external_source_id_is_not_an_official_boundary _____________
+tests\test_stream_sessions.py:32: in test_external_source_id_is_not_an_official_boundary
+    s = OnlineSegmenter(session_id=str(uuid4()), source_id="external")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: OnlineSegmenter.__init__() got an unexpected keyword argument 'session_id'
+_______ test_same_time_samples_are_preserved_and_reversed_time_rejected _______
+tests\test_stream_sessions.py:48: in test_same_time_samples_are_preserved_and_reversed_time_rejected
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_______ test_sampling_change_and_reopening_source_segment_are_rejected ________
+tests\test_stream_sessions.py:59: in test_sampling_change_and_reopening_source_segment_are_rejected
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+__ test_segment_size_policy_distinguishes_approximate_and_source_boundaries ___
+tests\test_stream_sessions.py:68: in test_segment_size_policy_distinguishes_approximate_and_source_boundaries
+    approximate = OnlineSegmenter(max_points=3)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: OnlineSegmenter.__init__() got an unexpected keyword argument 'max_points'
+__________________ test_idle_expiry_and_end_close_only_once ___________________
+tests\test_stream_sessions.py:89: in test_idle_expiry_and_end_close_only_once
+    s.feed(0., CHANNEL, 1., 7, 5, wall=10.)
+E   TypeError: OnlineSegmenter.feed() got an unexpected keyword argument 'wall'
+_____________ test_event_identity_changes_across_replay_sessions ______________
+tests\test_stream_sessions.py:103: in test_event_identity_changes_across_replay_sessions
+    s = OnlineSegmenter(session_id=str(uuid4()), official=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: OnlineSegmenter.__init__() got an unexpected keyword argument 'session_id'
+=========================== short test summary info ===========================
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[ts-True]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[ts-0]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[ts-inf]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[value-False]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[value-1]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[value-nan]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[sampling-0]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[sampling--1]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[sampling-True]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[sampling-1.5]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[channel-UNKNOWN]
+FAILED tests/test_stream_sessions.py::test_frame_rejects_invalid_input[segment_id-True]
+FAILED tests/test_stream_sessions.py::test_external_source_id_is_not_an_official_boundary
+FAILED tests/test_stream_sessions.py::test_same_time_samples_are_preserved_and_reversed_time_rejected
+FAILED tests/test_stream_sessions.py::test_sampling_change_and_reopening_source_segment_are_rejected
+FAILED tests/test_stream_sessions.py::test_segment_size_policy_distinguishes_approximate_and_source_boundaries
+FAILED tests/test_stream_sessions.py::test_idle_expiry_and_end_close_only_once
+FAILED tests/test_stream_sessions.py::test_event_identity_changes_across_replay_sessions
+18 failed in 0.40s

@@ -1,0 +1,22 @@
+{
+  "task": "A04",
+  "status": "implementation_verified_pending_integration",
+  "commits": [
+    "e2cece6",
+    "b292676"
+  ],
+  "full_offline": {
+    "passed": 335,
+    "skipped": 1,
+    "deselected": 3
+  },
+  "final_targeted": {
+    "passed": 38
+  },
+  "official_points": 303493,
+  "official_segments": 2123,
+  "exact_point_order_values_timestamps": true,
+  "actual_frozen_detector_session_flow": true,
+  "runtime_training_calls": 0,
+  "next": "A05 durable event identities, transaction and restart queries"
+}

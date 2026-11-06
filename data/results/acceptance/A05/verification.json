@@ -1,0 +1,19 @@
+{
+  "tests": {
+    "passed": 347,
+    "skipped": 1,
+    "deselected": 3,
+    "exclusion": "real RAG integration requires separate run"
+  },
+  "targeted_store_and_stream_passed": 48,
+  "atomic_failure_rollback": true,
+  "same_database_two_engines": true,
+  "immutable_duplicate_event": true,
+  "legacy_backup_and_mapping": true,
+  "restart_terminal_receipt": true,
+  "source_methods_fingerprinted": [
+    "_judge_segment",
+    "_prepare_closed",
+    "_compute_verdict"
+  ]
+}

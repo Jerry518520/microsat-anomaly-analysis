@@ -1,0 +1,42 @@
+......................FFFFFF                                             [100%]
+================================== FAILURES ===================================
+_________________ test_live_api_protocol_errors_and_end_flow __________________
+tests\test_stream_sessions.py:218: in test_live_api_protocol_errors_and_end_flow
+    assert client.post("/ingest", json={"frames": [frame()]}).status_code == 422
+E   AssertionError: assert 200 == 422
+E    +  where 200 = <Response [200 OK]>.status_code
+E    +    where <Response [200 OK]> = post('/ingest', json={'frames': [{'ts': 0.0, 'channel': 'CADC0884', 'value': 1.0, 'sampling': 5}]})
+E    +      where post = <starlette.testclient.TestClient object at 0x0000017A8C0C78C0>.post
+_________ test_live_api_rejects_invalid_frames_before_counters[bad0] __________
+tests\test_stream_sessions.py:252: in test_live_api_rejects_invalid_frames_before_counters
+    sid = client.post("/live/start", json={"source_id": "test"}).json()["session_id"]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'session_id'
+_________ test_live_api_rejects_invalid_frames_before_counters[bad1] __________
+tests\test_stream_sessions.py:252: in test_live_api_rejects_invalid_frames_before_counters
+    sid = client.post("/live/start", json={"source_id": "test"}).json()["session_id"]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'session_id'
+_________ test_live_api_rejects_invalid_frames_before_counters[bad2] __________
+tests\test_stream_sessions.py:252: in test_live_api_rejects_invalid_frames_before_counters
+    sid = client.post("/live/start", json={"source_id": "test"}).json()["session_id"]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'session_id'
+_________ test_live_api_rejects_invalid_frames_before_counters[bad3] __________
+tests\test_stream_sessions.py:252: in test_live_api_rejects_invalid_frames_before_counters
+    sid = client.post("/live/start", json={"source_id": "test"}).json()["session_id"]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'session_id'
+_________ test_live_api_rejects_invalid_frames_before_counters[bad4] __________
+tests\test_stream_sessions.py:252: in test_live_api_rejects_invalid_frames_before_counters
+    sid = client.post("/live/start", json={"source_id": "test"}).json()["session_id"]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'session_id'
+=========================== short test summary info ===========================
+FAILED tests/test_stream_sessions.py::test_live_api_protocol_errors_and_end_flow
+FAILED tests/test_stream_sessions.py::test_live_api_rejects_invalid_frames_before_counters[bad0]
+FAILED tests/test_stream_sessions.py::test_live_api_rejects_invalid_frames_before_counters[bad1]
+FAILED tests/test_stream_sessions.py::test_live_api_rejects_invalid_frames_before_counters[bad2]
+FAILED tests/test_stream_sessions.py::test_live_api_rejects_invalid_frames_before_counters[bad3]
+FAILED tests/test_stream_sessions.py::test_live_api_rejects_invalid_frames_before_counters[bad4]
+6 failed, 22 passed in 7.09s

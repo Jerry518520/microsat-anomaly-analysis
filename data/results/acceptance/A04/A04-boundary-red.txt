@@ -1,0 +1,31 @@
+.............................F                                           [100%]
+================================== FAILURES ===================================
+___________ test_feature_failure_is_recorded_without_a_normal_label ___________
+tests\test_stream_sessions.py:308: in test_feature_failure_is_recorded_without_a_normal_label
+    asyncio.run(scenario())
+D:\Python313\Lib\asyncio\runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+D:\Python313\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\test_stream_sessions.py:301: in scenario
+    receipt = await engine.end_live(sid)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\streaming\engine.py:256: in end_live
+    return self._finish_live(session, "ended", "end")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\streaming\engine.py:238: in _finish_live
+    closed = [self._handle_closed(segment) for segment in self.segmenter.flush(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\streaming\engine.py:134: in _handle_closed
+    self._judge_segment(seg)
+tests\test_stream_sessions.py:296: in failed
+    raise ValueError("feature overflow")
+E   ValueError: feature overflow
+=========================== short test summary info ===========================
+FAILED tests/test_stream_sessions.py::test_feature_failure_is_recorded_without_a_normal_label
+1 failed, 29 passed in 2.90s

@@ -39,7 +39,8 @@ SOURCE_FILES = ["src/detection/frozen.py", "src/features/segment_spec.py",
                 "src/features/extract_segments_18d.py", "src/streaming/segment_features.py",
                 "src/utils/stat_rules.py", "src/streaming/stage2.py"]
 SOURCE_METHODS = {"src/integration/anomaly_rag_pipeline.py": ["AnomalyRAGPipeline.detect"],
-                  "src/streaming/engine.py": ["StreamEngine._judge_segment"]}
+                  "src/streaming/engine.py": ["StreamEngine._judge_segment", "StreamEngine._prepare_closed",
+                                              "StreamEngine._compute_verdict"]}
 
 
 class DetectorUnavailable(RuntimeError):

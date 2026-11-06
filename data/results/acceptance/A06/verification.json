@@ -1,0 +1,11 @@
+{
+  "full_tests_passed": 357,
+  "skipped": 1,
+  "deselected": 3,
+  "transport_tests_passed": 7,
+  "http_ws_auth_matrix": true,
+  "rate_limit_both_protocols": true,
+  "queue_full_resync": true,
+  "disconnect_cleanup": true,
+  "real_tcp_evidence": "wire-verification.json"
+}

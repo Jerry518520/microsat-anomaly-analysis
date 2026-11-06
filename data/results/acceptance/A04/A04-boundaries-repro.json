@@ -1,0 +1,8 @@
+{
+  "raw_points": 303493,
+  "official_segments": 2123,
+  "exact_values_and_timestamps": true,
+  "source_ids_unique": true,
+  "replay_end_flush": true,
+  "runtime_training_calls": 0
+}

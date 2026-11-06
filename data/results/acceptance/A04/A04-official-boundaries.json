@@ -1,0 +1,8 @@
+{
+  "official_segments": 2123,
+  "raw_points": 303493,
+  "exact_values_and_timestamps": true,
+  "source_ids_unique": true,
+  "replay_end_flush": true,
+  "max_points_in_official_segment": 1040
+}

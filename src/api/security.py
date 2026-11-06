@@ -36,6 +36,7 @@ from collections import OrderedDict  # noqa: F401  (预留)
 from typing import Iterable
 
 from fastapi import HTTPException, Request
+from starlette.requests import HTTPConnection
 
 # ---------------------------------------------------------------- 配置
 
@@ -76,7 +77,7 @@ EXEMPT_PATHS = frozenset(
 )
 
 
-def _extract_key(request: Request) -> str:
+def _extract_key(request: HTTPConnection) -> str:
     """按优先级提取 API Key。
 
     `X-API-Key` 头 > `Authorization: Bearer` > `?api_key=` query。
@@ -97,7 +98,7 @@ def _extract_key(request: Request) -> str:
     return ""
 
 
-def require_api_key(request: Request) -> None:
+def require_api_key(request: HTTPConnection) -> None:
     """FastAPI 依赖：校验 API Key。
 
     认证被显式关闭时直接放行（本地开发场景）。
@@ -221,7 +222,7 @@ class FixedWindowLimiter:
 _limiter = FixedWindowLimiter()
 
 
-def rate_limit(request: Request) -> None:
+def rate_limit(request: HTTPConnection) -> None:
     """FastAPI 依赖：令牌桶限流。"""
     if _env_flag("API_RATE_LIMIT_DISABLED", default=False):
         return

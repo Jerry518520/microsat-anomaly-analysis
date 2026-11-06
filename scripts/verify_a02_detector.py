@@ -23,14 +23,10 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     judges = load_bundle()
     # Exercise the real closed-segment engine, with persistence isolated in memory.
-    import src.streaming.persistence as persistence
-    stored = []
-    persistence.init_db = lambda: None
-    persistence.save_verdict = lambda **kwargs: stored.append(kwargs)
-    persistence.save_alert = lambda *args, **kwargs: None
+    from src.streaming.event_store import EventStore
     from src.streaming.engine import StreamEngine
     from src.streaming.segmenter import ClosedSegment
-    engine = StreamEngine()
+    engine = StreamEngine(store=EventStore(":memory:"))
     engine.judges, engine.models_ready = judges, True
     raw = pd.read_csv(ROOT / "data/raw/segments.csv", float_precision="round_trip")
     split = json.loads((ROOT / SPLIT_JSON).read_text(encoding="utf-8"))
@@ -52,7 +48,7 @@ def main():
         assert np.array_equal(np.array([feats[c] for c in FEATURE_COLS]), feature_row[FEATURE_COLS].to_numpy(dtype=float))
         engine._judge_segment(ClosedSegment(ch, sid, True, frame.value.to_numpy(),
                               timestamp_seconds(frame.timestamp.to_numpy()), frame.sampling.iloc[0]))
-        stream.append(stored[-1]["features"]["_detector"])
+        stream.append(engine.latest[ch]["judgement"])
     for name in stream[0]:
         assert batch[name].tolist() == [row[name] for row in stream], name
     batch.to_csv(output / "segment_verdicts.csv", index=False, float_format="%.17g")

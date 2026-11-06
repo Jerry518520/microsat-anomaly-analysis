@@ -1,0 +1,39 @@
+{
+  "contamination": 0.35,
+  "k": 2,
+  "gate_choice": {
+    "CADC0872": "rule",
+    "CADC0892": "rule",
+    "CADC0874": "AND",
+    "CADC0884": "rule",
+    "CADC0873": "AND",
+    "CADC0886": "rule",
+    "CADC0888": "OR",
+    "CADC0894": "rule",
+    "CADC0890": "rule"
+  },
+  "soft_alpha": 0.25,
+  "soft_threshold": 0.25,
+  "validation_counts": {
+    "CADC0872": 85,
+    "CADC0873": 81,
+    "CADC0888": 36,
+    "CADC0892": 33,
+    "CADC0874": 30,
+    "CADC0884": 25,
+    "CADC0894": 25,
+    "CADC0890": 3,
+    "CADC0886": 1
+  },
+  "fit_counts": {
+    "CADC0873": 359,
+    "CADC0872": 329,
+    "CADC0888": 152,
+    "CADC0892": 125,
+    "CADC0874": 112,
+    "CADC0884": 97,
+    "CADC0894": 86,
+    "CADC0890": 9,
+    "CADC0886": 6
+  }
+}
