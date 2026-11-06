@@ -1,6 +1,8 @@
 """融合策略终选：在 usable@5 与 MRR 之间找帕累托最优。
 
-## 上一轮实测给出的矛盾
+历史记录中的 MRR 曾遗漏未命中查询，旧数值仅供追溯。当前评分按全部查询计算。
+
+## 上一轮记录的矛盾
 
 - G（混合召回 + rerank 打分）：**usable@5 = 1.000**（24/24 全部可用），
   但 **MRR 0.940 -> 0.807**。3 条查询的首位命中从 #1 掉到 #2/#4/#5。
@@ -19,7 +21,7 @@ I. **分数混合**：final = a*向量分归一化 + (1-a)*rerank分归一化。
 J. **rerank 只用于「提升候选」而非「重排」**：把 rerank 分数加到向量分上，
    但向量分为主项（等价于给关键词命中加权，不动语义序）。
 
-判定标准（硬）：**MRR >= 0.940（不低于现状）且 usable@5 尽量高**。
+判定标准（硬）：**MRR 不低于本次纯向量基线（不低于现状）且 usable@5 尽量高**。
 达不到就如实报告取舍，不硬凑。
 """
 import os
@@ -40,6 +42,7 @@ import transformers
 transformers.logging.set_verbosity_error()
 
 import eval_retrieval_quality as E
+from src.evaluation.retrieval_metrics import mean_reciprocal_rank
 from src.rag.vectorstore import get_vectorstore
 from src.rag.retrieval_policy import is_low_quality, select_candidates
 from src.rag.bm25 import BM25Index
@@ -190,24 +193,27 @@ print('\n' + '=' * 96)
 print(f"{'pipeline':<26}{'usable@5':>10}{'MRR':>8}{'kw_recall':>11}   判定")
 print('=' * 96)
 res = {}
+base_mrr = None
 for name, fn in CAND:
     rows = run(fn)
     res[name] = rows
     us = np.mean([r['usable'] for r in rows])
-    mrr = np.mean([1 / r['first'] for r in rows if r['first']])
+    mrr = mean_reciprocal_rank(r['first'] for r in rows)
     kw = np.mean([r['kws'] for r in rows])
-    ok = mrr >= 0.940 - 1e-9
-    verdict = 'PASS(MRR未降)' if ok else f'✗ MRR -{0.940-mrr:.3f}'
+    if base_mrr is None:
+        base_mrr = mrr
+    ok = mrr >= base_mrr - 1e-9
+    verdict = 'PASS(MRR未降)' if ok else f'✗ MRR -{base_mrr-mrr:.3f}'
     print(f'{name:<26}{us:>10.3f}{mrr:>8.3f}{kw:>11.3f}   {verdict}')
 
 print('\n' + '=' * 96)
-print('帕累托前沿（MRR >= 0.940 的方案里usable@5 最高的）')
+print('帕累托前沿（MRR 不低于本次纯向量基线 的方案里usable@5 最高的）')
 print('=' * 96)
 best = None
 for name, rows in res.items():
-    mrr = np.mean([1 / r['first'] for r in rows if r['first']])
+    mrr = mean_reciprocal_rank(r['first'] for r in rows)
     us = np.mean([r['usable'] for r in rows])
-    if mrr >= 0.940 - 1e-9 and (best is None or us > best[1]):
+    if mrr >= base_mrr - 1e-9 and (best is None or us > best[1]):
         best = (name, us, mrr)
 if best:
     print(f'  {best[0]}: usable@5={best[1]:.3f} MRR={best[2]:.3f}')
@@ -218,4 +224,4 @@ print('\n全局最优（不管 MRR）:')
 gname = max(res, key=lambda n: np.mean([r['usable'] for r in res[n]]))
 grows = res[gname]
 print(f'  {gname}: usable@5={np.mean([r["usable"] for r in grows]):.3f} '
-      f'MRR={np.mean([1/r["first"] for r in grows if r["first"]]):.3f}')
+      f'MRR={mean_reciprocal_rank(r["first"] for r in grows):.3f}')

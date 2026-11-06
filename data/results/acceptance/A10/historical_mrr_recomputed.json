@@ -1,0 +1,20 @@
+{
+  "orig": {
+    "source_sha256": "16c05a0be9ffa1c1a9e26e27a7c2809948d40455bf899f93b18d19dfef72ed46",
+    "n_queries": 24,
+    "old_reported_mrr": 0.9129,
+    "corrected_mrr": 0.8368055555555556
+  },
+  "after": {
+    "source_sha256": "384115369e3cb15330f931b5b1a3c25a5341ff2db190229ee2d3b620aafba2c0",
+    "n_queries": 24,
+    "old_reported_mrr": 0.9659,
+    "corrected_mrr": 0.8854166666666666
+  },
+  "run": {
+    "source_sha256": "ab462ed735370f63da0ccbc30b672b16bbd22d67ba65afbeeea3b73840d43b0b",
+    "n_queries": 24,
+    "old_reported_mrr": 0.9659,
+    "corrected_mrr": 0.8854166666666666
+  }
+}

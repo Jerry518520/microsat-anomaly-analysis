@@ -45,6 +45,7 @@ from typing import Any, Dict, List, Optional, Sequence
 ROOT = Path(__file__).resolve().parent.parent
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT))
+from src.evaluation.retrieval_metrics import mean_reciprocal_rank, rank_regressed
 
 from dotenv import load_dotenv
 
@@ -391,14 +392,14 @@ def evaluate(store, top_k: int, queries: List[Dict[str, Any]],
         n = len(rows)
         if n == 0:
             return {}
-        rr = [1.0 / r.rank_first_usable for r in rows if r.rank_first_usable]
+        ranks = [r.rank_first_usable for r in rows]
         return {
             "n": n,
             "source_hit@1": round(sum(r.source_hit_at_1 for r in rows) / n, 4),
             "source_hit@k": round(sum(r.source_hit_at_k for r in rows) / n, 4),
             "usable@k": round(sum(r.usable_at_k for r in rows) / n, 4),
             "kw_recall": round(_avg([r.kw_recall for r in rows]), 4),
-            "mrr": round(_avg(rr), 4),
+            "mrr": round(mean_reciprocal_rank(ranks), 6),
             "top1_score_mean": round(_avg([r.top1_score for r in rows]), 4),
             "top1_score_min": round(min(r.top1_score for r in rows), 4),
             "low_conf_ratio": round(sum(r.low_confidence for r in rows) / n, 4),
@@ -487,7 +488,7 @@ def compare(base: Dict[str, Any], new: Dict[str, Any]) -> None:
             continue
         if (n["usable_at_k"] < b["usable_at_k"]
                 or n["kw_recall"] < b["kw_recall"] - 1e-9
-                or (b["rank_first_usable"] or 99) > (n["rank_first_usable"] or 99)):
+                or rank_regressed(b["rank_first_usable"], n["rank_first_usable"])):
             regress.append((q, b, n))
     if not regress:
         print("无回退。")

@@ -241,12 +241,12 @@ class TestHubIdHeuristic:
 
 class TestBuildIndexUsesSingleSource:
     def test_build_index_calls_the_resolver(self):
-        """build_index.py 必须 import 并调用 resolve_embedding_model_path。"""
+        """The builder uses the shared encoder facade and its sole resolver."""
         src = BUILD_INDEX.read_text(encoding="utf-8")
-        assert "resolve_embedding_model_path" in src, (
-            "scripts/build_index.py 未使用 resolve_embedding_model_path()，"
-            "模型路径解析又在build_index 里出现了第二份实现"
-        )
+        encoder = (BUILD_INDEX.parent.parent / "src/rag/embedding.py").read_text(encoding="utf-8")
+        assert "get_embedder" in src
+        assert "resolve_embedding_model_path(self.embedding_config)" in encoder
+        assert "SentenceTransformer(" not in src
 
     def test_build_index_has_no_duplicate_env_or_fallback(self):
         """禁止再出现 `EMBEDDING_MODEL_PATH or config[...]` 这类就地解析。"""

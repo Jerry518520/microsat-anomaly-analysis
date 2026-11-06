@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import sqlite3
 import threading
+import time
 from contextlib import contextmanager
 from uuid import UUID, uuid4, uuid5
 
@@ -81,6 +82,12 @@ class EventStore:
                 legacy_table TEXT NOT NULL, legacy_id INTEGER NOT NULL, event_id TEXT UNIQUE NOT NULL,
                 PRIMARY KEY(legacy_table, legacy_id))""",
             "CREATE INDEX IF NOT EXISTS stream_alert_ts ON stream_alerts(ts)",
+            """CREATE TABLE IF NOT EXISTS stream_explanations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, attempt_id TEXT UNIQUE NOT NULL,
+                event_id TEXT NOT NULL REFERENCES stream_events(event_id), status TEXT NOT NULL,
+                created_at REAL NOT NULL, lease_until REAL NOT NULL, finished_at REAL,
+                input TEXT NOT NULL, result TEXT)""",
+            "CREATE INDEX IF NOT EXISTS stream_explanation_event ON stream_explanations(event_id,id)",
         ]
         with self._transaction():
             for sql in statements:
@@ -91,7 +98,7 @@ class EventStore:
                 for (identity,) in self.connection.execute(f"SELECT id FROM {table}").fetchall():
                     self.connection.execute("INSERT OR IGNORE INTO legacy_event_map VALUES (?,?,?)",
                         (table, identity, str(uuid5(namespace, f"{table}:{identity}"))))
-            self.connection.execute("INSERT OR REPLACE INTO stream_meta VALUES ('schema_version','1')")
+            self.connection.execute("INSERT OR REPLACE INTO stream_meta VALUES ('schema_version','2')")
 
     def _save_session(self, session):
         previous = self.connection.execute("SELECT payload FROM stream_sessions WHERE session_id=?",
@@ -222,3 +229,48 @@ class EventStore:
     def close(self):
         with self._lock:
             self.connection.close()
+
+    def _explanation_record(self, row):
+        record = {**row, "input": json.loads(row["input"]),
+                  "result": json.loads(row["result"]) if row["result"] else None}
+        record.pop("id")
+        if record["status"] == "generating" and record["lease_until"] < time.time():
+            record["status"] = "failed"
+            record["result"] = {"status": "generation_failed", "metadata": {"error": "generation_interrupted"}}
+        return record
+
+    def get_explanation(self, event_id):
+        rows = self._rows("SELECT * FROM stream_explanations WHERE event_id=? ORDER BY id DESC LIMIT 1", (event_id,))
+        return self._explanation_record(rows[0]) if rows else None
+
+    def explanation_history(self, event_id):
+        return [self._explanation_record(row) for row in self._rows(
+            "SELECT * FROM stream_explanations WHERE event_id=? ORDER BY id", (event_id,))]
+
+    def claim_explanation(self, event_id, inputs, *, retry=False, lease_seconds=300):
+        payload = _json(inputs)
+        with self._transaction():
+            previous = self.get_explanation(event_id)
+            if previous is not None and (previous["status"] == "generating" or not retry):
+                return previous, False
+            if previous is not None:
+                self.connection.execute("UPDATE stream_explanations SET status='failed', result=? WHERE attempt_id=? AND status='generating'",
+                    (_json(previous["result"]), previous["attempt_id"]))
+            now, attempt = time.time(), str(uuid4())
+            self.connection.execute("""INSERT INTO stream_explanations
+                (attempt_id,event_id,status,created_at,lease_until,input) VALUES (?,?,'generating',?,?,?)""",
+                (attempt, event_id, now, now + lease_seconds, payload))
+            record = self.get_explanation(event_id)
+        return record, True
+
+    def finish_explanation(self, attempt_id, result):
+        encoded = _json(result)
+        state = result["status"] if result["status"] in {"ready", "insufficient_knowledge"} else "failed"
+        with self._transaction():
+            changed = self.connection.execute("UPDATE stream_explanations SET status=?,result=?,finished_at=? WHERE attempt_id=? AND status='generating'",
+                (state, encoded, time.time(), attempt_id))
+            if changed.rowcount != 1:
+                raise EventConflict("explanation attempt is no longer active")
+            event_id = self.connection.execute("SELECT event_id FROM stream_explanations WHERE attempt_id=?", (attempt_id,)).fetchone()[0]
+            record = self.get_explanation(event_id)
+        return record

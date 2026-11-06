@@ -5,7 +5,11 @@ import re
 import sys
 import time
 from typing import Optional
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict
+from src.streaming.contracts import StreamProtocolError
+from src.streaming.event_store import StoreUnavailable
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if PROJECT_ROOT not in sys.path:
@@ -20,6 +24,43 @@ _KB_DIRS = [
 ]
 
 router = APIRouter()
+
+
+class EventExplanationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    retry: bool = False
+
+
+def _event_pipeline():
+    from src.rag.pipeline import get_rag_pipeline
+    return get_rag_pipeline()
+
+
+def _event_service():
+    from src.rag.event_explanations import EventExplanationService
+    from src.api.routes.stream import engine
+    return EventExplanationService(engine.store, _event_pipeline)
+
+
+def _event_call(operation):
+    try:
+        return operation()
+    except StreamProtocolError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"error": exc.code, "message": str(exc)}) from exc
+    except StoreUnavailable as exc:
+        raise HTTPException(status_code=503, detail={"error": "storage_unavailable"}) from exc
+
+
+@router.get("/events/{event_id}")
+def get_event_explanation(event_id: str):
+    return _event_call(lambda: _event_service().get(event_id))
+
+
+@router.post("/events/{event_id}")
+def generate_event_explanation(event_id: str, request: EventExplanationRequest):
+    result = _event_call(lambda: _event_service().generate(event_id, retry=request.retry))
+    status = {"generating": 202, "failed": 503}.get(result["status"], 200)
+    return JSONResponse(status_code=status, content=result)
 
 
 def _resolve_kb_path(filename: str) -> Optional[str]:
@@ -169,6 +210,9 @@ def get_detail(segment: str = Query(...), channel: str = Query(...)):
 
     return {
         "segment": segment,
+        "record_kind": "historical_cache",
+        "verification_status": "legacy_unverified",
+        "current_detector": False,
         "channel": channel,
         "channel_label": ch_label,
         "anomaly_type": item.get("anomaly_type", "未知"),
@@ -187,17 +231,19 @@ def get_detail(segment: str = Query(...), channel: str = Query(...)):
 def get_waveform(
     channel: str = Query(...),
     segment: Optional[str] = Query(None),
-    context_size: int = Query(200),
+    context_size: int = Query(200, ge=1, le=5000),
 ):
     """遥测波形数据 — 异常段上下文"""
     import pandas as pd
 
     data_path = os.path.join(PROJECT_ROOT, "data", "raw", "segments.csv")
     if not os.path.exists(data_path):
-        return {"error": "segments.csv not found"}
+        raise HTTPException(status_code=503, detail={"error": "telemetry_unavailable"})
 
     df = pd.read_csv(data_path)
-    ch_df = df[df["channel"] == channel].sort_values("timestamp").reset_index(drop=True)
+    ch_df = df[df["channel"] == channel].sort_values("timestamp", kind="stable").reset_index(drop=True)
+    if ch_df.empty:
+        raise HTTPException(status_code=404, detail={"error": "unknown_channel"})
 
     seg_indices = []
     if segment:
@@ -207,7 +253,9 @@ def get_waveform(
                 seg_mask = ch_df["segment"] == seg_id
                 seg_indices = ch_df.index[seg_mask].tolist()
         except (ValueError, TypeError):
-            pass
+            raise HTTPException(status_code=404, detail={"error": "unknown_historical_segment"})
+        if not seg_indices:
+            raise HTTPException(status_code=404, detail={"error": "unknown_historical_segment"})
 
     if not seg_indices:
         seg_indices = ch_df.index[ch_df["anomaly"] == 1].tolist()
@@ -231,10 +279,10 @@ def get_waveform(
         "timestamps": timestamps,
         "values": values,
         "anomaly_mask": anomaly_mask,
-        "mean": round(mean_val, 4),
-        "std": round(std_val, 4),
-        "upper_3sigma": round(mean_val + 3 * std_val, 4),
-        "lower_3sigma": round(mean_val - 3 * std_val, 4),
+        "mean": mean_val,
+        "std": std_val,
+        "upper_3sigma": mean_val + 3 * std_val,
+        "lower_3sigma": mean_val - 3 * std_val,
         "channel": channel,
         "channel_label": CHANNEL_MAP.get(channel, channel),
     }
@@ -244,32 +292,29 @@ def get_waveform(
 def rag_query(body: dict):
     """RAG 自由问答"""
     query = body.get("query", "")
-    channel = body.get("channel", "")
-    segment = body.get("segment", "")
-    context = body.get("context", {})
-
-    if not query:
-        return {"error": "Empty query"}
-
+    if not isinstance(query, str) or not query.strip() or len(query) > 4000:
+        raise HTTPException(status_code=422, detail={"error": "invalid_query"})
     try:
         from src.rag.pipeline import get_rag_pipeline
         pipeline = get_rag_pipeline()
-        if hasattr(pipeline, 'vectorstore') and pipeline.vectorstore.index is None:
-            pipeline.load_existing_knowledge_base()
-
-        enriched = f"【当前异常上下文】\n通道: {channel}\n异常段: {segment}\n"
-        if context:
-            for k, v in context.items():
-                enriched += f"{k}: {v}\n"
-        enriched += f"\n【用户问题】\n{query}"
-
+        channel = body.get("channel", "")
+        segment = body.get("segment", "")
+        context = body.get("context", {})
+        enriched = f"当前上下文\n通道 {channel}\n段号 {segment}\n{json.dumps(context, ensure_ascii=False)}\n用户问题\n{query}"
         result = pipeline.query(query=enriched, query_type="general", top_k=3)
-        return {
-            "answer": result.get("answer", "无法给出确切解答。"),
-            "sources": [
-                {"filename": s.get("metadata", s).get("filename", "未知"), "score": s.get("score", 0)}
-                for s in result.get("sources", [])
-            ],
-        }
-    except Exception as e:
-        return {"error": str(e), "answer": "RAG 引擎暂不可用。"}
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail={"error": "rag_unavailable", "message": str(exc)}) from exc
+    if result["status"] in {"retrieval_failed", "generation_failed"}:
+        raise HTTPException(status_code=503, detail={"error": result["status"],
+                            "message": result.get("metadata", {}).get("error", "RAG unavailable")})
+    sources = []
+    for item in result.get("sources", []):
+        metadata = item.get("metadata", {})
+        filename = metadata.get("filename", "unknown")
+        sources.append({"filename": filename, "score": item.get("score"),
+                        "page_index": metadata.get("page_index"), "page_label": metadata.get("page_label"),
+                        "chunk_id": metadata.get("chunk_id"), "source_sha256": metadata.get("source_sha256"),
+                        "excerpt": item.get("excerpt", item.get("content", "")),
+                        "index_bundle_id": item.get("index_bundle_id"), "local_path": _resolve_kb_path(filename)})
+    return {"status": result["status"], "answer": result["answer"], "sources": sources,
+            "metadata": result.get("metadata", {})}

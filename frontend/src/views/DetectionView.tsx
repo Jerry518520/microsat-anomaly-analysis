@@ -4,7 +4,7 @@ import type { ChannelF1, ExperimentStage, RagConfig, SystemParams } from '../api
 import Plot from '../components/Plot';
 
 const CHANNEL_LABELS: Record<string, string> = {
-  CADC0872: '磁力计 X轴', CADC0873: '磁力计 Y轴', CADC0874: '磁力计 Z轴',
+  CADC0872: '磁力计0号', CADC0873: '磁力计1号', CADC0874: '磁力计2号',
   CADC0884: '光电二极管 1', CADC0886: '光电二极管 2', CADC0888: '光电二极管 3',
   CADC0890: '光电二极管 4', CADC0892: '光电二极管 5', CADC0894: '光电二极管 6',
 };
@@ -57,7 +57,7 @@ export default function DetectionView() {
             {([
               ['ALGORITHM', params?.algorithm ?? '—'],
               ['DIMENSIONS', params ? `${params.dimensions}` : '—'],
-              ['CONTAMINATION', params ? `${params.contamination}` : '—'],
+              ['CONTAMINATION', params ? (params.contamination_summary ?? String(params.contamination)) : '—'],
             ]).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between py-2 border-b border-[rgba(94,234,212,0.07)] last:border-0">
                 <span className="font-mono text-[10px] tx-3">{k}</span>

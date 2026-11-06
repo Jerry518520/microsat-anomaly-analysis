@@ -36,7 +36,7 @@ API_URL = f"http://localhost:{API_PORT}"
 WEB_URL = f"http://localhost:{WEB_PORT}"
 
 # 保存子进程的 PID，用于清理
-child_pids = []
+child_processes = []
 
 
 # ── 工具函数 ──────────────────────────────────────────────
@@ -74,23 +74,6 @@ def wait_for_port(port, timeout=30):
     return False
 
 
-def kill_port(port):
-    """强制杀掉占用指定端口的进程"""
-    try:
-        result = subprocess.run(
-            ["netstat", "-ano"],
-            capture_output=True, text=True, timeout=5
-        )
-        for line in result.stdout.split("\n"):
-            if f":{port}" in line and "LISTENING" in line:
-                parts = line.split()
-                pid = parts[-1]
-                subprocess.run(["taskkill", "/F", "/PID", pid],
-                               capture_output=True, timeout=5)
-    except Exception:
-        pass
-
-
 def kill_pid_tree(pid):
     """杀掉进程树（包括子进程）"""
     # taskkill /T 杀掉进程树
@@ -99,19 +82,16 @@ def kill_pid_tree(pid):
 
 
 def cleanup(signum=None, frame=None):
-    print("\n")
-    log("INFO", "正在停止所有服务...")
-    for pid in child_pids:
-        try:
-            kill_pid_tree(pid)
-        except Exception:
-            pass
-    # 双保险：强制杀掉端口
-    kill_port(API_PORT)
-    kill_port(WEB_PORT)
-    log("OK", "所有服务已停止")
-    print()
-    sys.exit(0)
+    for process in list(child_processes):
+        if process.poll() is None:
+            try:
+                kill_pid_tree(process.pid)
+                process.wait(timeout=10)
+            except (OSError, subprocess.TimeoutExpired):
+                log("ERR", f"服务 {process.pid} 停止失败")
+    child_processes.clear()
+    if signum is not None:
+        raise SystemExit(128 + signum)
 
 
 def install_signal_handlers():
@@ -161,47 +141,50 @@ def check_node():
 
 
 def check_node_modules():
-    pkg = os.path.join(FRONTEND_DIR, "node_modules", ".package-lock.json")
-    if not os.path.exists(pkg):
-        log("WAIT", "首次运行，正在安装前端依赖 (npm install)...")
-        # 不用 shell=True：会多起一层 cmd，且失败时拿不到真实原因。
-        # 这里仍然用裸 npm —— 只有首次安装才会走到，此时可以接受要求
-        # PATH 里有 Node.js（README 第 6 步已列为前置条件）。
-        r = subprocess.run(["npm", "install"], cwd=FRONTEND_DIR, timeout=300)
-        if r.returncode != 0:
-            log("ERR", "npm install 失败：请确认 PATH 里有 Node.js/npm")
-            return False
-        log("OK", "前端依赖安装完成")
-    else:
-        log("OK", "前端依赖已就绪")
+    if not os.path.isfile(VITE_JS):
+        log("ERR", "前端依赖缺失。请先在 frontend 目录安装依赖。")
+        return False
+    log("OK", "前端依赖已就绪")
     return True
 
 
 def check_api_deps():
-    code = "import fastapi, uvicorn, pandas"
-    r = subprocess.run(
-        [VENV_PYTHON, "-c", code], capture_output=True, text=True,
-        encoding="utf-8", errors="replace", timeout=30,
-    )
-    if r.returncode != 0:
-        log("WAIT", "正在安装后端依赖...")
-        subprocess.run(
-            [VENV_PYTHON, "-m", "pip", "install", "fastapi", "uvicorn", "pandas"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
-        )
-    log("OK", "后端依赖已就绪")
+    code = """
+from dotenv import load_dotenv
+load_dotenv('.env')
+import fastapi, uvicorn, pandas, numpy, scipy, sklearn, faiss, torch
+import sentence_transformers, langchain_core, langchain_community, langchain_text_splitters
+import pypdf, yaml, joblib, requests, sqlite3
+from src.detection.frozen import load_bundle
+from src.rag.embedding import resolve_embedding_model_path
+from src.utils.paths import read_faiss_index_status
+from src.api.result_data import confirmed_results
+config = yaml.safe_load(open('configs/rag_config.yaml', encoding='utf-8'))
+resolve_embedding_model_path(config['embedding'])
+load_bundle()
+confirmed_results()
+status, _, reason = read_faiss_index_status()
+if status != 'ok':
+    raise RuntimeError(reason)
+"""
+    try:
+        result = subprocess.run([VENV_PYTHON, "-c", code], cwd=PROJECT_ROOT,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=45)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        log("ERR", f"后端检查失败。{exc}")
+        return False
+    if result.returncode != 0:
+        log("ERR", "后端依赖或冻结资源检查失败。请按部署说明准备依赖、数据、模型和索引。")
+        log("ERR", result.stderr[-1200:])
+        return False
+    log("OK", "后端依赖、数据、模型和索引已就绪")
     return True
 
 
 def check_port(port, name):
     if port_in_use(port):
-        log("WAIT", f"端口 {port} 被占用，正在清理...")
-        kill_port(port)
-        time.sleep(1)
-        if port_in_use(port):
-            log("ERR", f"端口 {port} 无法释放，请手动关闭占用进程")
-            return False
-        log("OK", f"端口 {port} 已释放")
+        log("ERR", f"{name} 端口 {port} 已被占用。启动已停止。")
+        return False
     return True
 
 
@@ -210,6 +193,8 @@ def check_port(port, name):
 def start_api():
     log("INFO", f"启动 FastAPI 后端 -> {API_URL}")
 
+    if child_env("API_AUTH_DISABLED", "true").get("API_AUTH_DISABLED", "").lower() in {"true", "1", "yes"}:
+        log("INFO", "本地开发模式已关闭 API 鉴权。服务监听 127.0.0.1。")
     log_file = os.path.join(PROJECT_ROOT, ".backend.log")
     lf = open(log_file, "w", encoding="utf-8")
 
@@ -222,7 +207,7 @@ def start_api():
         env=child_env("API_AUTH_DISABLED", "true"),
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0,
     )
-    child_pids.append(p.pid)
+    child_processes.append(p)
 
     if wait_for_port(API_PORT):
         log("OK", f"后端已就绪  {API_URL}/docs")
@@ -258,7 +243,7 @@ def start_web():
         env=child_env("BACKEND_URL", API_URL),
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0,
     )
-    child_pids.append(p.pid)
+    child_processes.append(p)
 
     if wait_for_port(WEB_PORT):
         log("OK", f"前端已就绪  {WEB_URL}")
@@ -302,7 +287,11 @@ def health_check():
     all_ok = True
     for path, name in checks:
         try:
-            req = urllib.request.urlopen(f"{API_URL}{path}", timeout=10)
+            from dotenv import dotenv_values
+            keys = os.getenv("API_AUTH_KEYS") or dotenv_values(os.path.join(PROJECT_ROOT, ".env")).get("API_AUTH_KEYS", "")
+            headers = {"X-API-Key": keys.split(",")[0].strip()} if keys else {}
+            request = urllib.request.Request(f"{API_URL}{path}", headers=headers)
+            req = urllib.request.urlopen(request, timeout=10)
             json.loads(req.read().decode("utf-8"))
             log("OK", f"  {name}")
         except Exception as e:
@@ -343,7 +332,8 @@ def main():
             sys.exit(1)
 
     if start_both or args.api:
-        check_api_deps()
+        if not check_api_deps():
+            sys.exit(1)
         if not check_port(API_PORT, "FastAPI"):
             sys.exit(1)
 
@@ -369,12 +359,15 @@ def main():
         print()
         log("ERR", "部分服务启动失败，请检查上方错误信息")
         cleanup()
+        sys.exit(1)
 
     # ── API 健康检查 ──
     print()
     print("  [ Health Check ]")
-    if not health_check():
+    if (start_both or args.api) and not health_check():
         log("ERR", "部分 API 检查失败")
+        cleanup()
+        sys.exit(1)
     print()
 
     # ── 打印摘要 ──
@@ -398,13 +391,11 @@ def main():
     try:
         while True:
             # 定期检查子进程是否还活着
-            for pid in list(child_pids):
-                try:
-                    os.kill(pid, 0)
-                except OSError:
-                    log("ERR", f"子进程 {pid} 已退出，正在重启...")
-                    child_pids.remove(pid)
-                    # 可以在这里加自动重启逻辑
+            for process in list(child_processes):
+                if process.poll() is not None:
+                    log("ERR", f"服务 {process.pid} 已退出")
+                    cleanup()
+                    sys.exit(1)
             time.sleep(3)
     except KeyboardInterrupt:
         cleanup()

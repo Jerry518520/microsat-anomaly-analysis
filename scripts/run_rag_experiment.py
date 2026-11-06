@@ -77,17 +77,7 @@ def test_retrieval_quality(embedder, vectorstore, anomaly_segments, n_samples=30
     print(f"{'='*60}")
     
     # 通道物理含义
-    CHANNEL_PHYSICS = {
-        "CADC0872": "Magnetometer X-axis 磁力计X轴",
-        "CADC0873": "Magnetometer Y-axis 磁力计Y轴",
-        "CADC0874": "Magnetometer Z-axis 磁力计Z轴",
-        "CADC0884": "Photodiode 1 angle 光电二极管1",
-        "CADC0886": "Photodiode 2 angle 光电二极管2",
-        "CADC0888": "Photodiode 3 angle 光电二极管3",
-        "CADC0890": "Photodiode 4 angle 光电二极管4",
-        "CADC0892": "Photodiode 5 angle 光电二极管5",
-        "CADC0894": "Photodiode 6 angle 光电二极管6",
-    }
+    from src.utils.constants import CHANNEL_PHYSICS
     
     # 均匀抽样 (覆盖所有通道)
     channels = sorted(anomaly_segments["channel"].unique())
@@ -180,17 +170,7 @@ def run_rag_generation(embedder, vectorstore, anomaly_segments, n_generate=20):
     print(f"Part 3: RAG 生成 (LLM解释 {n_generate} 个异常段)")
     print(f"{'='*60}")
     
-    CHANNEL_PHYSICS = {
-        "CADC0872": "Magnetometer X-axis 磁力计X轴",
-        "CADC0873": "Magnetometer Y-axis 磁力计Y轴",
-        "CADC0874": "Magnetometer Z-axis 磁力计Z轴",
-        "CADC0884": "Photodiode 1 光电二极管1",
-        "CADC0886": "Photodiode 2 光电二极管2",
-        "CADC0888": "Photodiode 3 光电二极管3",
-        "CADC0890": "Photodiode 4 光电二极管4",
-        "CADC0892": "Photodiode 5 光电二极管5",
-        "CADC0894": "Photodiode 6 光电二极管6",
-    }
+    from src.utils.constants import CHANNEL_PHYSICS
     
     # 初始化 LLM
     llm = LLMClient()

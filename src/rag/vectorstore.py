@@ -10,6 +10,7 @@ from typing import List, Dict, Any, Optional, Tuple, Union
 import numpy as np
 import yaml
 import logging
+import threading
 import pickle
 from datetime import datetime
 
@@ -31,9 +32,17 @@ from .retrieval_policy import default_priority_caps, is_low_quality, select_cand
 # 关键词侧（BM25）。可选依赖：jieba 缺失时 bm25.tokenize自动退化为
 # 「英文正则 + CJK bigram」，不会让检索失败。
 from .bm25 import BM25Index
+from . import index_bundle
 
 # 配置日志（由应用入口统一配置 basicConfig）
 logger = logging.getLogger(__name__)
+
+
+class ContextSources(list):
+    """Keep the two-value API while retaining the candidates for each call."""
+    def __init__(self, used, candidates):
+        super().__init__(used)
+        self.candidates = candidates
 
 
 class FAISSVectorStore:
@@ -78,6 +87,8 @@ class FAISSVectorStore:
         self.index_type = self.vectorstore_config.get("index_type", "Flat")
         self.metric = self.vectorstore_config.get("metric", "cosine")
         self.persist_directory = self.vectorstore_config.get("persist_directory", "data/vectorstore")
+        if not Path(self.persist_directory).is_absolute():
+            self.persist_directory = str(index_bundle.ROOT / self.persist_directory)
         self.use_gpu = self.vectorstore_config.get("use_gpu", False)
         self.gpu_id = self.vectorstore_config.get("gpu_id", 0)
         
@@ -113,6 +124,9 @@ class FAISSVectorStore:
         self.keyword_pool_k = self.retrieval_config.get("keyword_pool_k", 40)
         self.keyword_boost = self.retrieval_config.get("keyword_boost", 0.02)
         self._bm25: Optional[BM25Index] = None
+        self.bundle_id = None
+        self.bundle_manifest = None
+        self.load_error = None
 
         # 初始化组件
         self.index: Optional[faiss.Index] = None
@@ -343,6 +357,9 @@ class FAISSVectorStore:
         # 保存文档和元数据
         self.documents.extend(all_chunks)
         self.document_metadata.extend([chunk.metadata for chunk in all_chunks])
+        self._invalidate_bm25()
+        self.bundle_id = None
+        self.bundle_manifest = None
         
         logger.info(f"文档添加完成，当前总文档块数：{len(self.documents)}")
         
@@ -387,49 +404,10 @@ class FAISSVectorStore:
         query: str,
         vector_results: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
-        """把 BM25 关键词信号叠加到向量候选上（混合检索的第二路召回）。
+        """Merge keyword candidates and apply one bonus per chunk.
 
-        ## 为什么是「小权重加分」而不是 RRF 排名融合
-
-        实测（24 条标注查询，评测脚本 ``scripts/eval_retrieval_quality.py``，
-        选型探针 ``scripts/probe_fusion_weight.py`` 与 ``probe_fusion_blend.py``）
-        横向比较了 4 类融合公式：
-
-        ====================  ==========  ==========  ==============
-        融合方式                 usable@5MRR        kw_recall
-        ====================  ==========  ==========  ==============
-        纯向量（改动前）        0.875       0.940       0.681
-        RRF（排名融合）          **0.917**   0.902       0.710
-        分数线性加权            0.917       0.902       0.688
-        **BM25 小权重加分**     0.875       **0.940**   **0.724**
-        ====================  ==========  ==========  ==============
-
-        RRF 能把召回率提到 0.917，但**MRR 从 0.940 掉到 0.902**：
-        它完全抛弃向量分数的语义序、改用纯排名序。而 BGE-M3 在同源
-        细粒度相关性上的方向是可靠的（相邻两名差~0.01 但排序稳定），
-        丢掉它得不偿失——这属于「用首位精度换召回」。
-
-        ``keyword_boost=0.02``（加到向量分上）是实测中**唯一
-        MRR 不降、kw_recall 反而 +0.043** 的方案，故采用。
-
-        ## 残留局限（如实记录，未解决）
-
-        本方案**不提升 usable@5**。原因是：纯 BM25 命中但向量侧未召回的
-        chunk，其向量分为 0.0，加 0.02 后仍排在候选池尾部，进不了 top-5。
-        要真正救回这批 chunk，必须让 cross-encoder rerank 接管打分
-        （实测 usable@5 可达 1.000），但代价是 MRR 0.940 -> 0.807，
-        超出「不许降低准确率换召回」的约束，本次**不做**。
-
-        ## 与 RetrievalPolicy 既有约定的关系
-
-        本方法只产出候选与分数，**不参与排序决策**：
-        priority 仍只决定「入选资格」，最终顺序仍严格按 ``score`` 降序
-        （由 :func:`~src.rag.retrieval_policy.select_candidates` 执行）。
-        关键词加分只是让「字面匹配强」的 chunk 获得应得的分数补偿。
-
-        Args:
-            query: 原始查询文本。
-            vector_results: 向量侧候选列表（原地追加关键词侧补充项）。
+        The boost is a fixed engineering setting. Report this version with the
+        corrected retrieval metrics and its own index identity.
         """
         bm25 = self._ensure_bm25()
         if bm25 is None or not vector_results or self.keyword_boost <= 0:
@@ -439,6 +417,8 @@ class FAISSVectorStore:
         already = {
             r["_pos"] for r in vector_results if r.get("_pos") is not None
         }
+        for result in vector_results:
+            result.setdefault("vector_score", result["score"])
         # 关键词侧最高分，用于把BM25 分数压到 [0,1] 再乘权重，
         # 避免 BM25 的原始量纲（实测 0~48）压倒余弦相似度（0.45~0.67）。
         kw_hits = bm25.top_n(query, self.keyword_pool_k)
@@ -467,6 +447,7 @@ class FAISSVectorStore:
                 # 实测这类 chunk 仍排在池尾（见上方「残留局限」），
                 # 保留它们是为了让 keyword_match 信号可见、可供后续策略使用。
                 "score": self.keyword_boost * (kw_score / kw_max),
+                "vector_score": 0.,
                 "metadata": metadata,
                 "keyword_match": kw_score,
                 "_pos": pos,
@@ -480,9 +461,10 @@ class FAISSVectorStore:
             if pos is None:
                 continue
             hit = dict(kw_hits).get(pos)
-            if hit:
+            if hit and pos in already:
                 r["score"] = r["score"] + self.keyword_boost * (hit / kw_max)
                 r["keyword_match"] = hit
+            r["fusion_score"] = r["score"]
 
         if added:
             logger.info(
@@ -533,6 +515,8 @@ class FAISSVectorStore:
                            else self.score_threshold)
         
         try:
+            if self.bundle_manifest is not None:
+                index_bundle.validate_sources(self.bundle_manifest)
             # 编码查询
             query_embedding = self.embedder.encode(query)
             
@@ -576,6 +560,8 @@ class FAISSVectorStore:
                 results.append({
                     "content": content,
                     "score": score,
+                    "vector_score": score,
+                    "fusion_score": score,
                     "metadata": metadata,
                     "_pos": int(idx),
                 })
@@ -623,170 +609,72 @@ class FAISSVectorStore:
             
         except Exception as e:
             logger.error(f"检索失败：{e}")
-            return []
+            raise RuntimeError(f"retrieval failed: {e}") from e
     
-    def search_with_context(
-        self, 
-        query: str, 
-        top_k: Optional[int] = None,
-        max_tokens: Optional[int] = None
-    ) -> Tuple[str, List[Dict[str, Any]]]:
-        """
-        检索并生成上下文（用于 RAG）
-        
-        Args:
-            query: 查询文本
-            top_k: 返回的文档数量
-            max_tokens: 上下文最大 token 数
-        
-        Returns:
-            Tuple[str, List[Dict]]: (上下文文本, 检索结果列表)
-        """
-        # 检索文档
-        results = self.search(query, top_k)
-        
-        if not results:
-            return "", []
-        
-        # 生成上下文
-        max_tokens = max_tokens or self.retrieval_config.get("max_tokens", 2000)
-        context_parts = []
-        current_tokens = 0
-        
-        # Token 估算 helper：中文字符约2token，英文字符约0.25token
-        def _estimate(text: str) -> int:
-            chinese = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
-            return chinese * 2 + (len(text) - chinese) * 0.25
-        
-        # 低置信度时在上下文开头显式提示，避免 LLM 把弱相关片段当权威依据
-        low_conf = bool(results) and results[0].get("low_confidence", False)
-        if low_conf:
-            warning = (
-                f"【检索置信度低】最佳片段相似度仅 {results[0]['score']:.4f}，"
-                f"低于 {self.low_confidence_threshold}，以下内容可能与问题无关，"
-                f"请勿据此编造结论。\n\n"
-            )
-            context_parts.append(warning)
-            current_tokens += _estimate(warning)
-        
+    def search_with_context(self, query, top_k=None, max_tokens=None, score_threshold=None):
+        results = self.search(query, top_k=top_k, score_threshold=score_threshold)
+        budget = max_tokens if max_tokens is not None else self.retrieval_config.get("max_tokens", 2000)
+        if not results or budget <= 0:
+            return "", ContextSources([], results)
+        def estimate(text):
+            chinese = sum(1 for char in text if "\u4e00" <= char <= "\u9fff")
+            return chinese * 2 + (len(text) - chinese) * .25
+        parts, used = [], []
+        current = 0.
         for result in results:
-            content = result["content"]
             metadata = result["metadata"]
-            
-            estimated_tokens = _estimate(content)
-            
-            if current_tokens + estimated_tokens > max_tokens:
-                break
-            
-            # 格式化上下文
-            source = metadata.get("filename", "未知来源")
-            page = metadata.get("page", "未知页码")
-            citation = f"【来源：{source} 第 {page} 页】"
-            
-            context_parts.append(f"{content}\n{citation}")
-            current_tokens += estimated_tokens
-        
-        context = "\n\n---\n\n".join(context_parts)
-        
-        logger.info(f"上下文生成完成，长度：{len(context)} 字符")
-        return context, results
-    
-    def save(self, directory: Optional[str] = None):
-        """
-        保存向量库到磁盘
-        
-        Args:
-            directory: 保存目录，默认为配置中的 persist_directory
-        """
-        directory = directory or self.persist_directory
-        os.makedirs(directory, exist_ok=True)
-        
-        try:
-            # 保存 FAISS 索引
-            if self.index is not None:
-                index_path = os.path.join(directory, "faiss_index.bin")
-                
-                # 如果是 GPU 索引，先转到 CPU
-                if self.use_gpu and faiss.get_num_gpus() > 0:
-                    cpu_index = faiss.index_gpu_to_cpu(self.index)
-                    faiss.write_index(cpu_index, index_path)
-                else:
-                    faiss.write_index(self.index, index_path)
-                
-                logger.info(f"FAISS 索引已保存：{index_path}")
-            
-            # 保存文档和元数据
-            metadata_path = os.path.join(directory, "documents_metadata.pkl")
-            with open(metadata_path, "wb") as f:
-                pickle.dump({
-                    "documents": self.documents,
-                    "metadata": self.document_metadata,
-                    "config": {
-                        "chunk_size": self.chunk_size,
-                        "chunk_overlap": self.chunk_overlap,
-                        "index_type": self.index_type,
-                        "metric": self.metric
-                    }
-                }, f)
-            
-            logger.info(f"文档元数据已保存：{metadata_path}")
-            
-        except Exception as e:
-            logger.error(f"向量库保存失败：{e}")
-            raise RuntimeError(f"无法保存向量库：{e}")
-    
-    def load(self, directory: Optional[str] = None) -> bool:
-        """
-        从磁盘加载向量库
-        
-        Args:
-            directory: 加载目录，默认为配置中的 persist_directory
-        
-        Returns:
-            bool: 是否加载成功
-        """
-        directory = directory or self.persist_directory
-        
-        try:
-            # 加载 FAISS 索引
-            index_path = os.path.join(directory, "faiss_index.bin")
-            if os.path.exists(index_path):
-                self.index = faiss.read_index(index_path)
-                logger.info(f"FAISS 索引已加载：{index_path}")
+            source = metadata.get("filename", "unknown source")
+            page = metadata.get("page_index", metadata.get("page"))
+            label = metadata.get("page_label")
+            if source.lower().endswith(".pdf") and page is not None:
+                label = str(int(page) + 1)
+                citation = f"【来源：{source} 第 {label} 页】"
             else:
-                logger.warning(f"FAISS 索引文件不存在：{index_path}")
-                return False
-            
-            # 加载文档和元数据
-            metadata_path = os.path.join(directory, "documents_metadata.pkl")
-            if os.path.exists(metadata_path):
-                with open(metadata_path, "rb") as f:
-                    data = pickle.load(f)
-                    # 兼容两种序列化格式：
-                    # 格式1: List[Dict] (build_index.py直接序列化Document列表)
-                    # 格式2: Dict (vectorstore.save()方法)
-                    if isinstance(data, list):
-                        self.documents = [item.get("content", "") for item in data]
-                        self.document_metadata = [item.get("metadata", {}) for item in data]
-                    elif isinstance(data, dict):
-                        self.documents = data.get("documents", [])
-                        self.document_metadata = data.get("metadata", [])
-                    else:
-                        logger.error(f"不支持的元数据格式：{type(data)}")
-                        return False
-                
-                logger.info(f"文档元数据已加载：{metadata_path}")
-            else:
-                logger.warning(f"文档元数据文件不存在：{metadata_path}")
-                return False
-            
-            logger.info(f"向量库加载完成，总文档块数：{len(self.documents)}")
+                citation = f"【来源：{source} 文本片段】"
+            citation += f" [chunk {metadata.get('chunk_id', 'unversioned')}]"
+            part = result["content"] + "\n" + citation
+            tokens = estimate(part) + (estimate("\n\n---\n\n") if parts else 0)
+            if current + tokens > budget:
+                continue
+            parts.append(part)
+            used.append({**result, "metadata": {**metadata, "page_index": page, "page_label": label},
+                         "excerpt": result["content"], "index_bundle_id": self.bundle_id})
+            current += tokens
+        return "\n\n---\n\n".join(parts), ContextSources(used, results)
+
+    def save(self, directory=None):
+        directory = directory or self.persist_directory
+        index = self.index
+        if self.use_gpu and faiss.get_num_gpus() > 0:
+            index = faiss.index_gpu_to_cpu(index)
+        manifest, identity, metadata = index_bundle.publish(
+            directory, index, self.documents, self.document_metadata, self.config, self.embedder)
+        self.document_metadata = metadata
+        self.bundle_manifest, self.bundle_id = manifest, identity
+        self._invalidate_bm25()
+
+    def load(self, directory=None):
+        directory = directory or self.persist_directory
+        self.clear()
+        self.load_error = None
+        try:
+            generation, manifest, identity = index_bundle.read(directory, self.config, self.embedder)
+            index = faiss.deserialize_index(np.frombuffer((generation / "faiss_index.bin").read_bytes(), dtype="uint8"))
+            with (generation / "documents_metadata.pkl").open("rb") as stream:
+                data = pickle.load(stream)
+            documents, metadata = data["documents"], data["metadata"]
+            if not (index.ntotal == len(documents) == len(metadata) == manifest["count"]):
+                raise ValueError("index/document/metadata counts disagree")
+            if index.d != manifest["dimension"] or len({item["chunk_id"] for item in metadata}) != len(metadata):
+                raise ValueError("index dimension or chunk identity mismatch")
+            self.index, self.documents, self.document_metadata = index, documents, metadata
+            self.bundle_manifest, self.bundle_id = manifest, identity
             return True
-            
-        except Exception as e:
-            logger.error(f"向量库加载失败：{e}")
+        except Exception as exc:
+            self.load_error = str(exc)
+            logger.error("Index load failed: %s", exc)
             return False
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """
         获取向量库统计信息
@@ -807,6 +695,9 @@ class FAISSVectorStore:
     def clear(self):
         """清空向量库"""
         self.index = None
+        self.bundle_id = None
+        self.bundle_manifest = None
+        self._invalidate_bm25()
         self.documents.clear()
         self.document_metadata.clear()
         self.embedder.clear_cache()
@@ -824,6 +715,8 @@ class FAISSVectorStore:
 
 # 全局实例（单例模式）
 _global_vectorstore = None
+_global_vectorstore_key = None
+_global_vectorstore_lock = threading.RLock()
 
 def get_vectorstore(config_path: Optional[str] = None) -> FAISSVectorStore:
     """
@@ -835,10 +728,14 @@ def get_vectorstore(config_path: Optional[str] = None) -> FAISSVectorStore:
     Returns:
         FAISSVectorStore: 向量数据库实例
     """
-    global _global_vectorstore
-    if _global_vectorstore is None:
-        _global_vectorstore = FAISSVectorStore(config_path)
-    return _global_vectorstore
+    global _global_vectorstore, _global_vectorstore_key
+    from .index_bundle import configuration_key
+    signature = configuration_key(config_path, embedding_only=False)
+    with _global_vectorstore_lock:
+        if _global_vectorstore is None or signature != _global_vectorstore_key:
+            _global_vectorstore = FAISSVectorStore(config_path)
+            _global_vectorstore_key = signature
+        return _global_vectorstore
 
 
 def search_knowledge(query: str, top_k: int = 5) -> List[Dict[str, Any]]:

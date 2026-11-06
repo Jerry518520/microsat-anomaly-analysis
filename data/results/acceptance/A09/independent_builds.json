@@ -1,0 +1,11 @@
+{
+  "count": 4863,
+  "chunk_ids_exact": true,
+  "source_fingerprints_exact": true,
+  "embedding_fingerprint_exact": true,
+  "vector_values_exact": true,
+  "vector_max_absolute_difference": 0.0,
+  "different_manifest_fields": [
+    "files"
+  ]
+}

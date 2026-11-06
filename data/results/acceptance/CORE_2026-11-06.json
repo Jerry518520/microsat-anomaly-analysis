@@ -1,0 +1,25 @@
+{
+  "backend_tests": {
+    "passed": 392,
+    "deselected": 3,
+    "exclusion": "legacy real RAG integration class; separate real BGE and DeepSeek verification recorded"
+  },
+  "frontend": {
+    "lint_exit": 0,
+    "types_exit": 0,
+    "build_exit": 0,
+    "browser_acceptance": "pending auxiliary delivery"
+  },
+  "real_service_calls": 3,
+  "real_service_model": "deepseek-chat",
+  "live_inputs": "synthetic verification segments",
+  "current_index_chunks": 4863,
+  "actual_sources": 6,
+  "index_build_vector_max_difference": 0.0,
+  "detection_benchmark_rows": 529,
+  "nested_training_rows": 1594,
+  "fixed_retrieval_fact_questions": 12,
+  "retrieval_scope": "public development facts; separate from the 30-question explanation evaluation",
+  "auxiliary_handoff": "docs/CORE_INTERFACE_HANDOFF_2026-11-06.md",
+  "validation_scope": "current shared working tree, including pending auxiliary changes"
+}

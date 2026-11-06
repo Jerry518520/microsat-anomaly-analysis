@@ -12,6 +12,7 @@ if PROJECT_ROOT not in sys.path:
 
 from src.utils.constants import CHANNEL_MAP, NO_ANOMALY_CHANNELS, FAULT_THRESHOLD
 from src.utils.results_loader import load_json
+from src.api.result_data import confirmed_results
 # P0-A6：索引路径收敛到 src/utils/paths.py，避免各处手写漂移
 from src.utils.paths import read_faiss_index_status
 
@@ -41,18 +42,10 @@ def _severity(score: float, channel: str = "") -> str:
 def get_core_metrics():
     """核心指标: 异常率、告警数、F1、吞吐量"""
     rag_data = load_json("anomaly_rag_results.json")
-    ss_data = load_json("subsampling_sweep_1.9_results.json")
     df_seg = _load_segments()
 
-    # 最佳 SegF1：取 v3 论文口径的逐通道门控（gate_perchannel）test 段级 F1，
-    # 与 /api/detection/experiments 的 Stage 2 同源，避免两处各说一套。
-    fusion_data = load_json("fusion.json")
-    best_f1 = (
-        (fusion_data or {}).get("results", {}).get("methods", {})
-        .get("gate_perchannel", {}).get("test", {}).get("f1")
-    )
-    if not isinstance(best_f1, (int, float)):
-        best_f1 = ss_data.get("best_seg_f1", 0.425) if ss_data else 0.425
+    current, result_source = confirmed_results()
+    best_f1 = current["overall"]["engineering_gate"]["f1"]
 
     total_anomalies = 0
     fault_count = 0
@@ -79,6 +72,7 @@ def get_core_metrics():
         "total_anomalies": total_anomalies,
         "best_f1": round(best_f1, 4),
         "throughput": total_rows,
+        "result_source": result_source,
         "channel_count": 9,
     }
 

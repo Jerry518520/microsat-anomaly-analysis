@@ -89,13 +89,11 @@ def test_index_is_newer_than_knowledge_source():
     """索引必须比知识库源文件新，否则改完知识库没重建索引 = 改动无效。"""
     import faiss
 
-    idx_path = ROOT / "data" / "vectorstore" / "faiss_index.bin"
-    if not idx_path.exists():
-        pytest.skip("索引不存在，无法比对时间戳")
-    assert idx_path.stat().st_mtime >= KNOWLEDGE_MD.stat().st_mtime, (
-        "索引比知识库源文件旧 —— 改了知识库但没重建索引，"
-        "臆测内容仍会被检索喂给 LLM"
-    )
+    from src.rag.index_bundle import read
+    _, manifest, _ = read(ROOT / "data/vectorstore")
+    source = next(item for item in manifest["sources"] if item["file_path"] == "docs/knowledge_base/experiment_knowledge.md")
+    import hashlib
+    assert source["sha256"] == hashlib.sha256(KNOWLEDGE_MD.read_bytes()).hexdigest()
 
 
 if __name__ == "__main__":

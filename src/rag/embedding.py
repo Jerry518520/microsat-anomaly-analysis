@@ -18,6 +18,7 @@ from typing import List, Dict, Any, Union, Optional
 import numpy as np
 import yaml
 import logging
+import threading
 
 # 设置 HuggingFace 镜像源（国内加速）
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
@@ -382,13 +383,14 @@ class BGE_M3_Embedder:
             texts = [texts]
         
         batch_size = batch_size or self.batch_size
-        show_progress_bar = show_progress_bar or self.embedding_config.get("show_progress_bar", True)
+        show_progress_bar = show_progress_bar if show_progress_bar is not None else self.embedding_config.get("show_progress_bar", True)
         normalize = normalize if normalize is not None else self.normalize_embeddings
         
-        # 检查缓存
-        if len(texts) == 1 and texts[0] in self.cache:
+        # The same text can have different vectors under different encoding options.
+        cache_key = (self.model_name, self.max_length, normalize, texts[0]) if len(texts) == 1 else None
+        if cache_key is not None and cache_key in self.cache:
             logger.debug(f"从缓存获取嵌入：{texts[0][:50]}...")
-            return self.cache[texts[0]].reshape(1, -1)
+            return self.cache[cache_key].reshape(1, -1)
         
         # 批量编码
         try:
@@ -404,7 +406,7 @@ class BGE_M3_Embedder:
             
             # 更新缓存（仅缓存单个文本）
             if len(texts) == 1:
-                self.cache[texts[0]] = embeddings[0]
+                self.cache[cache_key] = embeddings[0]
             
             return embeddings
             
@@ -491,6 +493,8 @@ class BGE_M3_Embedder:
 
 # 全局实例（单例模式）
 _global_embedder = None
+_global_embedder_key = None
+_global_embedder_lock = threading.RLock()
 
 def get_embedder(config_path: Optional[str] = None) -> BGE_M3_Embedder:
     """
@@ -502,10 +506,14 @@ def get_embedder(config_path: Optional[str] = None) -> BGE_M3_Embedder:
     Returns:
         BGE_M3_Embedder: 嵌入编码器实例
     """
-    global _global_embedder
-    if _global_embedder is None:
-        _global_embedder = BGE_M3_Embedder(config_path)
-    return _global_embedder
+    global _global_embedder, _global_embedder_key
+    from .index_bundle import configuration_key
+    signature = configuration_key(config_path, embedding_only=True)
+    with _global_embedder_lock:
+        if _global_embedder is None or signature != _global_embedder_key:
+            _global_embedder = BGE_M3_Embedder(config_path)
+            _global_embedder_key = signature
+        return _global_embedder
 
 
 def encode_texts(texts: List[str], **kwargs) -> np.ndarray:

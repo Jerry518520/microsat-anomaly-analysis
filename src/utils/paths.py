@@ -29,6 +29,8 @@ FAISS 向量索引路径 —— 唯一定义源（P0-A6）
 """
 
 import os
+import json
+from pathlib import Path
 import shutil
 import tempfile
 
@@ -46,12 +48,24 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 
 def get_faiss_index_path() -> str:
     """返回 FAISS 索引文件的绝对路径。"""
-    return os.path.join(PROJECT_ROOT, FAISS_PERSIST_DIR, FAISS_INDEX_BASENAME)
+    return str(_active_directory() / FAISS_INDEX_BASENAME)
 
 
 def get_faiss_metadata_path() -> str:
     """返回 FAISS 文档元数据文件的绝对路径。"""
-    return os.path.join(PROJECT_ROOT, FAISS_PERSIST_DIR, FAISS_METADATA_BASENAME)
+    return str(_active_directory() / FAISS_METADATA_BASENAME)
+
+
+def _active_directory():
+    directory = Path(PROJECT_ROOT) / FAISS_PERSIST_DIR
+    pointer = directory / "CURRENT"
+    if not pointer.exists():
+        return directory
+    generation = json.loads(pointer.read_text(encoding="utf-8"))["generation"]
+    active = directory / "generations" / generation
+    if active.resolve().parent != (directory / "generations").resolve():
+        raise ValueError("invalid index generation")
+    return active
 
 
 def _has_non_ascii(path: str) -> bool:
@@ -121,18 +135,19 @@ def read_faiss_index_status():
     返回原因字符串而非抛异常，是为了让 UI 能把"路径 + 原因"一并展示给
     用户定位问题；本函数不吞异常细节，`unreadable` 分支带上原始报错。
     """
-    index_path = get_faiss_index_path()
-
-    if not os.path.exists(index_path):
-        return "missing", None, f"未找到索引文件：{index_path}"
-
+    directory = Path(PROJECT_ROOT) / FAISS_PERSIST_DIR
+    if not (directory / "CURRENT").is_file():
+        return "missing", None, "未找到已核验索引。请运行 scripts/build_index.py。"
     try:
         import faiss
-    except ImportError as e:
-        return "unreadable", None, f"faiss 未安装，无法读取索引：{e}"
-
-    try:
-        idx = faiss.read_index(faiss_readable_path(index_path))
-        return "ok", int(idx.ntotal), ""
-    except Exception as e:
-        return "unreadable", None, f"索引存在但读取失败：{index_path}（{e}）"
+        import numpy as np
+        import yaml
+        from src.rag.index_bundle import read
+        config = yaml.safe_load((Path(PROJECT_ROOT) / "configs/rag_config.yaml").read_text(encoding="utf-8"))
+        generation, manifest, _ = read(directory, config)
+        index = faiss.deserialize_index(np.frombuffer((generation / FAISS_INDEX_BASENAME).read_bytes(), dtype="uint8"))
+        if index.ntotal != manifest["count"] or index.d != manifest["dimension"]:
+            raise ValueError("index count or dimension mismatch")
+        return "ok", int(index.ntotal), ""
+    except Exception as exc:
+        return "unreadable", None, f"索引核验失败。{exc}"

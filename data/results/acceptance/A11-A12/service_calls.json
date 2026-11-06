@@ -1,0 +1,8 @@
+{
+  "total_real_calls": 3,
+  "model": "deepseek-chat",
+  "event_inputs": "synthetic verification segments",
+  "all_calls_succeeded": true,
+  "final_prompt_sha256": "cf0c201703a73e3cec7abcfc47835c353ddad4c86c9de9d71f7f8d1d390158f8",
+  "final_sources_rebuilt_from_context": true
+}

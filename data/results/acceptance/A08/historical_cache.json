@@ -1,0 +1,9 @@
+{
+  "record_kind": "historical_cache",
+  "verification_status": "legacy_unverified",
+  "current_detector": false,
+  "file": "data/results/anomaly_rag_results.json",
+  "sha256": "db2e66f8d7fcaec9105d3a8b337bcc116a6e239bc850fa1bc760a623c9cb7bb3",
+  "records": 200,
+  "reason": "Historical detector and unverified physical claims. Original bytes preserved."
+}

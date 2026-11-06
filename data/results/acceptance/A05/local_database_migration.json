@@ -1,0 +1,10 @@
+{
+  "legacy_rows_preserved": true,
+  "row_counts": {
+    "alerts": 1,
+    "segment_verdicts": 1
+  },
+  "schema_version": "2",
+  "backup": "F:\\F\u76d8\\\u5fae\u5c0f\u536b\u661f\u9879\u76ee\\microsat-anomaly-analysis\\data\\alerts.db.pre-events-v1-30ca8654-2997-4697-b66d-e8ebec7f23e2.sqlite",
+  "backup_sha256": "153fd5926bb3e9cc73d61d58c44d8b09f06e2ea8199b15ad32d4f4642f632a89"
+}

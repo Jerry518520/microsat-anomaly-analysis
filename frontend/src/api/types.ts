@@ -65,7 +65,8 @@ export interface ChannelF1 {
 export interface SystemParams {
   algorithm: string;
   dimensions: number;
-  contamination: number;
+  contamination: number | null;
+  contamination_summary?: string;
 }
 
 export interface DiagnosisSections {

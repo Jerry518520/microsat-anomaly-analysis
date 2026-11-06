@@ -23,22 +23,18 @@ sys.path.insert(0, str(project_root))
 # ============================================================
 
 def test_pipeline_error_path_metadata_structure():
-    """验证 pipeline.py 错误路径返回的 metadata 包含 retrieval_time 和 generation_time"""
-    pipeline_src = (project_root / "src" / "rag" / "pipeline.py").read_text(encoding="utf-8")
-
-    # 正常路径 metadata 应包含 retrieval_time 和 generation_time
-    assert '"retrieval_time": retrieval_time' in pipeline_src, \
-        "正常路径 metadata 缺少 retrieval_time"
-    assert '"generation_time": generation_time' in pipeline_src, \
-        "正常路径 metadata 缺少 generation_time"
-
-    # 错误路径 metadata 应包含 retrieval_time: 0 和 generation_time: 0
-    assert '"retrieval_time": 0' in pipeline_src, \
-        "错误路径 metadata 缺少 retrieval_time: 0"
-    assert '"generation_time": 0' in pipeline_src, \
-        "错误路径 metadata 缺少 generation_time: 0"
-
-    print("[PASS] pipeline.py 错误路径 metadata 结构与正常路径一致")
+    """Exercise the failure path and retain measured timing fields."""
+    from unittest.mock import Mock
+    from src.rag.pipeline import RAGPipeline
+    pipeline = RAGPipeline.__new__(RAGPipeline)
+    pipeline.top_k, pipeline.score_threshold, pipeline.max_tokens = 5, .3, 2000
+    pipeline.vectorstore = Mock(index=object(), bundle_id="test")
+    pipeline.vectorstore.search_with_context.side_effect = RuntimeError("retrieval unavailable")
+    result = pipeline.query("test")
+    assert result["status"] == "retrieval_failed"
+    for field in ("retrieval_time", "generation_time", "total_time"):
+        assert isinstance(result["metadata"][field], (int, float))
+        assert result["metadata"][field] >= 0
 
 
 # ============================================================
@@ -70,7 +66,8 @@ def test_anomaly_rag_pipeline_uses_get():
 
 def test_faiss_index_exists():
     """验证 FAISS 索引文件存在且大小合理"""
-    faiss_path = project_root / "data" / "vectorstore" / "faiss_index.bin"
+    from src.utils.paths import get_faiss_index_path
+    faiss_path = Path(get_faiss_index_path())
     assert faiss_path.exists(), f"FAISS 索引文件不存在: {faiss_path}"
 
     size_mb = faiss_path.stat().st_size / (1024 * 1024)

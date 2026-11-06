@@ -80,7 +80,7 @@ document:
       priority: 1           # 最高优先级
       language: "en"        # 英文
       
-    - name: "Ruszczak OPS-SAT AD 2025"
+    - name: "OPS-SAT-AD arXiv 2407.04730v1 (2024)"
       file_path: "docs/papers/！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf"
       priority: 2           # 核心一手资料(ESA工程师标注)
       language: "en"        # 英文
@@ -231,10 +231,6 @@ logging:
 system:
   # 工作目录
   workspace: "data/rag_workspace"
-  
-  # 缓存配置
-  enable_cache: true
-  cache_ttl: 3600  # 缓存过期时间（秒）
   
   # 并行处理
   max_workers: 4   # 最大工作线程数

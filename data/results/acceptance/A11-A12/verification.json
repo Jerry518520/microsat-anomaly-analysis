@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d",
+  "indexed_chunks": 4863,
+  "source_count": 6,
+  "sampled_pages_and_fragments": 12,
+  "real_generation_calls": 2,
+  "llm_model": "deepseek-chat",
+  "event_id": "55a5aec0-da8d-41de-aaa9-8900cb1fde7e",
+  "same_event_features_waveform": true,
+  "http_auth_enabled": true,
+  "cached_retry": true,
+  "restart_read": true
+}

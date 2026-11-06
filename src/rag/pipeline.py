@@ -4,11 +4,15 @@ RAG Pipeline 模块
 """
 
 import os
+import hashlib
+import json
+import re
 import sys
 from typing import List, Dict, Any, Optional, Tuple, Union
 from pathlib import Path
 import yaml
 import logging
+import threading
 from datetime import datetime
 
 # 导入子模块
@@ -138,28 +142,37 @@ class RAGPipeline:
                 - metadata: 查询元数据
         """
         start_time = datetime.now()
+        stage = "retrieval"
+        context, sources, candidates, prompts = "", [], [], None
+        retrieval_time = generation_time = 0.
         
         try:
             # 参数处理
-            top_k = top_k or self.top_k
-            score_threshold = score_threshold or self.score_threshold
+            top_k = self.top_k if top_k is None else top_k
+            score_threshold = self.score_threshold if score_threshold is None else score_threshold
             
             logger.info(f"开始 RAG 查询：{query[:50]}...")
             
             # 步骤 1：检索相关文档
             retrieval_start = datetime.now()
+            if self.vectorstore.index is None:
+                raise RuntimeError("knowledge index unavailable")
             context, sources = self.vectorstore.search_with_context(
                 query, 
                 top_k=top_k,
-                max_tokens=self.max_tokens
+                max_tokens=self.max_tokens,
+                score_threshold=score_threshold
             )
+            candidates = list(getattr(sources, "candidates", sources))
             retrieval_time = (datetime.now() - retrieval_start).total_seconds()
             
             # 检查是否有检索结果
             if not context:
                 logger.warning("未检索到相关文档")
                 return {
-                    "answer": "抱歉，知识库中未找到相关信息。请尝试更具体的查询。",
+                    "status": "insufficient_knowledge",
+                    "retrieved_candidates": candidates,
+                    "answer": "知识库中未找到足够信息。请补充当前事件的证据。",
                     "sources": [],
                     "context": "",
                     "metadata": {
@@ -198,11 +211,27 @@ class RAGPipeline:
             
             # 步骤 3：调用 LLM 生成响应
             generation_start = datetime.now()
+            stage = "generation"
+            confidence = "low" if any(source.get("low_confidence") for source in sources) else "normal"
+            if confidence == "low":
+                prompts["system"] += "\n检索置信度低。应说明证据限制，避免给出确定故障结论。"
             answer = self.llm_client.generate(
                 prompt=prompts["user"],
                 system_prompt=prompts["system"]
             )
             generation_time = (datetime.now() - generation_start).total_seconds()
+            if not isinstance(answer, str) or not answer.strip():
+                raise ValueError("generation returned an empty answer")
+            raw_answer = answer
+            heading = re.search(r"(?m)^\s*(?:\*\*)?【来源】(?:\*\*)?\s*$", answer)
+            if heading:
+                citations = []
+                for number, source in enumerate(sources, 1):
+                    metadata = source["metadata"]
+                    page = metadata.get("page_label")
+                    location = f"PDF第{page}页" if page is not None else "文本片段"
+                    citations.append(f"{number}. [{metadata.get('filename', 'unknown')} {location} chunk {metadata.get('chunk_id', 'unversioned')}]")
+                answer = answer[:heading.start()].rstrip() + "\n\n**【来源】**\n" + "\n".join(citations)
             
             # 计算总时间
             total_time = (datetime.now() - start_time).total_seconds()
@@ -217,7 +246,11 @@ class RAGPipeline:
             
             # 返回结果
             return {
+                "status": "ready",
                 "answer": answer,
+                "raw_answer": raw_answer,
+                "retrieved_candidates": candidates,
+                "prompts": prompts,
                 "sources": sources,
                 "context": context,
                 "metadata": {
@@ -226,7 +259,11 @@ class RAGPipeline:
                     "retrieval_time": retrieval_time,
                     "generation_time": generation_time,
                     "total_time": total_time,
-                    "sources_count": len(sources)
+                    "sources_count": len(sources),
+                    "index_bundle_id": getattr(self.vectorstore, "bundle_id", None),
+                    "llm_model": getattr(self.llm_client, "model", None),
+                    "retrieval_confidence": confidence,
+                    "prompt_sha256": hashlib.sha256(json.dumps(prompts, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
                 }
             }
             
@@ -236,15 +273,19 @@ class RAGPipeline:
             # 返回错误信息（包含 retrieval_time / generation_time 以防止下游 KeyError）
             error_time = (datetime.now() - start_time).total_seconds()
             return {
-                "answer": f"抱歉，查询过程中出现错误：{str(e)}",
-                "sources": [],
-                "context": "",
+                "status": f"{stage}_failed",
+                "retrieved_candidates": candidates,
+                "answer": f"查询过程中出现错误：{str(e)}",
+                "sources": sources,
+                "context": context,
+                "prompts": prompts,
                 "metadata": {
                     "query": query,
                     "query_type": query_type,
-                    "retrieval_time": 0,
-                    "generation_time": 0,
+                    "retrieval_time": retrieval_time,
+                    "generation_time": generation_time,
                     "error": str(e),
+                    "index_bundle_id": getattr(self.vectorstore, "bundle_id", None),
                     "total_time": error_time
                 }
             }
@@ -401,6 +442,8 @@ class RAGPipeline:
 
 # 全局实例（单例模式）
 _global_pipeline = None
+_global_pipeline_key = None
+_global_pipeline_lock = threading.RLock()
 
 def get_rag_pipeline(config_path: Optional[str] = None) -> RAGPipeline:
     """
@@ -412,10 +455,14 @@ def get_rag_pipeline(config_path: Optional[str] = None) -> RAGPipeline:
     Returns:
         RAGPipeline: RAG Pipeline 实例
     """
-    global _global_pipeline
-    if _global_pipeline is None:
-        _global_pipeline = RAGPipeline(config_path)
-    return _global_pipeline
+    global _global_pipeline, _global_pipeline_key
+    from .index_bundle import configuration_key
+    signature = configuration_key(config_path, embedding_only=False)
+    with _global_pipeline_lock:
+        if _global_pipeline is None or signature != _global_pipeline_key:
+            _global_pipeline = RAGPipeline(config_path)
+            _global_pipeline_key = signature
+        return _global_pipeline
 
 
 def query_knowledge(query: str, **kwargs) -> Dict[str, Any]:

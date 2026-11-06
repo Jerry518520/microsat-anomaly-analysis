@@ -1,0 +1,5 @@
+profile,n,source_hit_rate,candidate_answer_coverage,context_answer_coverage,candidate_mrr,context_mrr
+vector,12,1.0,1.0,1.0,1.0,1.0
+keyword,12,1.0,1.0,1.0,1.0,1.0
+runtime_filter,12,1.0,1.0,1.0,1.0,1.0
+source_policy,12,1.0,1.0,1.0,1.0,1.0

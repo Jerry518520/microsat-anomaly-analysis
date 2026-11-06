@@ -49,11 +49,27 @@
 | 状态码 | 含义 |
 |---|---|
 | 200 | 操作成功，接入回执包含 accepted、rejected、closed_events 和统计 |
-| 404 | 会话不存在 |
+| 404 | 会话或事件不存在 |
 | 409 | 来源冲突、会话已结束、批次内容冲突或来源段号重开 |
 | 422 | 字段、帧数、时间顺序或段内 sampling 不符合输入契约 |
-| 503 | 冻结检测包不可用 |
+| 503 | 冻结检测包或事件存储不可用 |
 
 会话状态有 active、ended、stopped、expired，回放另有 completed、failed。snapshot 返回当前 session_id 和会话状态。
 
-本契约为 G01 的已实现部分。持久化事件查询由 G02 扩充，HTTP/WS 错误与认证矩阵在 G03 统一验证后放行客户端适配。
+本契约覆盖输入会话、事件保存和后端解释。客户端接入按 CORE_INTERFACE_HANDOFF_2026-11-06.md 验收。
+
+## 2026-11-06 事件与解释补充
+
+GET /api/stream/events/{event_id} 返回持久化事件。事件包括原始保留波形、18 维特征、判据、关闭原因和模型身份。SQLite 原型默认保留事件与解释，人工归档前可持续读取。记录缺失返回 404。
+
+GET /api/explanation/events/{event_id} 返回最新解释状态。POST 同一路径按需生成。请求体包含严格布尔字段 retry，默认 false。生成中返回 202，技术失败返回 503，完成或资料不足返回 200。相同事件的默认重复请求复用已有尝试。retry 为 true 时创建新尝试，旧记录保留。
+
+生成状态包括 not_requested、generating、ready、insufficient_knowledge、failed。生成租约为 300 秒。过期尝试按 failed 返回，可再次请求重试。
+
+每次生成保存 attempt_id、事件输入快照、事件哈希、实际提示词、提示词哈希、索引身份、模型名称、原始回答、展示回答、检索候选和实际上下文来源。展示回答的标准来源段由实际来源重建。候选中的 vector_score、fusion_score 分别保留原始向量分与融合分。
+
+PDF 页索引 page_index 从 0 开始，显示页码 page_label 从 1 开始。Markdown 使用文本片段定位和稳定 chunk_id。
+
+索引 schema 1 使用 PyPDFLoader 的逐页文本和 UTF-8 Markdown。分块参数来自 document.chunking。CURRENT 原子指向已完成的 generation。manifest 绑定来源、分块配置、编码器文件指纹、编码参数、维度、数量和文件哈希。
+
+旧根目录索引和历史解释保留为历史资源。当前读取入口使用 CURRENT 和 event_id。模型或索引检查失败返回明确的不可用状态。

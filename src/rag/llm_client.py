@@ -9,6 +9,7 @@ from typing import List, Dict, Any, Optional, Generator, Callable
 from pathlib import Path
 import yaml
 import logging
+import threading
 import requests
 import json
 import time
@@ -699,6 +700,8 @@ class LLMClient:
 
 # 全局实例（单例模式）
 _global_llm_client = None
+_global_llm_client_key = None
+_global_llm_client_lock = threading.RLock()
 
 def get_llm_client(config_path: Optional[str] = None) -> LLMClient:
     """
@@ -710,10 +713,14 @@ def get_llm_client(config_path: Optional[str] = None) -> LLMClient:
     Returns:
         LLMClient: LLM 客户端实例
     """
-    global _global_llm_client
-    if _global_llm_client is None:
-        _global_llm_client = LLMClient(config_path)
-    return _global_llm_client
+    global _global_llm_client, _global_llm_client_key
+    from .index_bundle import configuration_key
+    signature = configuration_key(config_path)
+    with _global_llm_client_lock:
+        if _global_llm_client is None or signature != _global_llm_client_key:
+            _global_llm_client = LLMClient(config_path)
+            _global_llm_client_key = signature
+        return _global_llm_client
 
 
 def generate_response(prompt: str, **kwargs) -> str:

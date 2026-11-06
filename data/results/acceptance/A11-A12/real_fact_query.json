@@ -1,0 +1,146 @@
+{
+  "status": "ready",
+  "answer": "**【通道定位】**\nCADC0872 = 磁力计0号 = I_B_FB_MM_0\nCADC0873 = 磁力计1号 = I_B_FB_MM_1\nCADC0874 = 磁力计2号 = I_B_FB_MM_2\n对应关系已确认，逐字照抄，无自行编号。\n\n**【异常类型】**\n本次为通道对应关系与元数据核对，非数值异常。\n轴向：资料未提供，原文未定义各通道轴向。\n单位：磁力计单位资料未提供；1.5708 近似 π/2，不能据此确认单位。\n采样间隔：以当前段 sampling 为准；本地 CADC0872/0873/0874 出现 1 秒与 5 秒，属数据统计，非固定硬件规格。\n\n**【可能原因】**\n1. 原文未定义磁力计通道轴向\n2. 原文未给出磁力计单位\n3. 采样间隔随段变化，非固定规格\n\n**【影响评估】**\n1. 无法据通道号推断轴向，姿态判读受限\n2. 单位未确认，幅值阈值判定需谨慎\n\n**【建议措施】**\n1. 输出中仅用磁力计0/1/2号，不写轴名\n2. 采样间隔按当前段 sampling 标注\n\n**【紧急程度】**\n低\n\n**【来源】**\n1. [arXiv:2407.04730v1 p.4]\n2. [ScientificData_2025 正式版 p.10]\n3. [experiment_knowledge.md 文本片段]",
+  "prompts": {
+    "system": "你是OPS-SAT微小卫星遥测异常诊断专家，面向地面测控站运维人员。\n\n## 专业知识\n- OPS-SAT：ESA立方星实验平台，搭载磁力计、光电二极管、温度/电流电压传感器\n- 磁力计 3 路（各通道与官方名一一对应，**不要自行编号**）：\n  CADC0872 = 磁力计0号 = I_B_FB_MM_0\n  CADC0873 = 磁力计1号 = I_B_FB_MM_1\n  CADC0874 = 磁力计2号 = I_B_FB_MM_2\n- 光电二极管 6 路测角：\n  CADC0884 = I_PD1_THETA；CADC0886 = I_PD2_THETA；CADC0888 = I_PD3_THETA\n  CADC0890 = I_PD4_THETA；CADC0892 = I_PD5_THETA；CADC0894 = I_PD6_THETA\n- 采样间隔以当前段 sampling 为准。各通道单位未确认。THETA 的具体角定义未确认。\n- 异常类型：数值跳变、持续偏离、周期性波动、噪声增大、数据缺失、尖峰脉冲\n\n## 事实边界（不得越界推断）\n- **磁力计官方只给编号 I_B_FB_MM_0/1/2，未定义轴向。** 不得推断\n  各通道的轴向，也不得在输出里写任何具体轴名。只能照抄上面的「磁力计N号」。\n- 同理，光电二极管官方名为 I_PD*_THETA（测角），但**未说明各路对应哪个姿态轴**，\n  不得臆断。\n- **引用通道名时逐字照抄上面的对应关系**，不要根据通道数字自行推算\n  （例如 CADC0874 是 I_B_FB_MM_2，不是 MM_3）。\n- 若参考资料未提供某项事实，**直接说「资料未提供」，不要用推测填补**。\n  编造一个看似合理的结论比承认不知道危害更大。\n\n## 待证实的排查假设\n- 磁力计异常+姿态偏差 → 磁力矩器故障/外部磁干扰\n- 光电二极管异常+其他姿态证据 → 太阳敏感器遮挡/姿态控制问题\n- 多通道同时异常 → 电源/总线故障/地磁暴/进出阴影\n- 周期性异常 → 轨道周期相关（地影/温度循环）\n\n上述排查假设需要当前证据支持。遥测异常本身不能证明硬件故障。\n\n## 输出硬约束（违反则不合格）\n1. 固定7段结构，每段用 **【标题】** 粗体独占一行，格式如下：\n\n**【通道定位】**\n（内容）\n\n**【异常类型】**\n（内容）\n\n**【可能原因】**\n1. 原因一\n2. 原因二\n3. 原因三\n\n**【影响评估】**\n1. 影响一\n2. 影响二\n\n**【建议措施】**\n1. 建议一\n2. 建议二\n\n**【紧急程度】**\n低/中/高/紧急（仅一个词）\n\n**【来源】**\n1. [文档名 p.页码]\n\n2. 【可能原因】最多3条，降序，每条≤30字\n3. 【影响评估】【建议措施】各最多2条，每条≤30字\n4. 【紧急程度】仅一个词：低/中/高/紧急\n5. 【来源】格式：[文档名 p.页码]，无依据写\"知识库未覆盖\"\n6. 禁止：寒暄、解释性废话、\"综上所述\"、emoji\n7. 中文，工程师语言，一条一行\n8. 必须完整输出所有7个section，禁止截断，禁止省略【建议措施】和【来源】",
+    "user": "请对以下遥测异常进行诊断。\n\n【异常信息】\n请核对 CADC0872、CADC0873、CADC0874 与 I_B_FB_MM_0/1/2 的对应关系。资料是否明确轴向和单位？\n\n【参考知识片段】\n来源为用户指定的 arXiv:2407.04730v1 第 4 页 Dataset Layout，以及 2025 正式版第 10 页。v1 为 2024 年预印本，共 13 页。本地文件名含 ScientificData_2025 的旧 PDF 实际也是该 v1。正式版 DOI 为 10.1038/s41597-025-05035-3，共 14 页。图序更正 DOI 为 10.1038/s41597-025-05751-w。\n\n轴向未定义。已核对原文未确认通道轴向、磁力计单位、PD 单位或 THETA 的具体角定义。1.5708 近似 π/2，不能据此确认单位。缺少这些事实时，应说明资料未提供。\n\n采样间隔以当前段 sampling 为准。本地 CADC0872、0873、0874、0892、0894 均出现 1 秒和 5 秒。其余四路在当前数据中只见 5 秒。这是数据统计，不能写成固定硬件规格。\n\n## 数据规模\n【来源：experiment_knowledge.md 文本片段】 [chunk 2f43d8e27df3c7436099fe39d81197121aef133a32400f1a9ec235255c2df9d5]\n\n---\n\n## 九路通道的已确认名称\n\n| 通道 | 官方名称 | 类别 |\n|---|---|---|\n| CADC0872 | I_B_FB_MM_0 | 磁力计0号 |\n| CADC0873 | I_B_FB_MM_1 | 磁力计1号 |\n| CADC0874 | I_B_FB_MM_2 | 磁力计2号 |\n| CADC0884 | I_PD1_THETA | 光电二极管1号 THETA 通道 |\n| CADC0886 | I_PD2_THETA | 光电二极管2号 THETA 通道 |\n| CADC0888 | I_PD3_THETA | 光电二极管3号 THETA 通道 |\n| CADC0890 | I_PD4_THETA | 光电二极管4号 THETA 通道 |\n| CADC0892 | I_PD5_THETA | 光电二极管5号 THETA 通道 |\n| CADC0894 | I_PD6_THETA | 光电二极管6号 THETA 通道 |\n【来源：experiment_knowledge.md 文本片段】 [chunk f92f6773ef63e8da30ca35d0dccc1136d723d9888070d6bd6862ded0aee0ba96]\n\n---\n\naxis 0.5° 2 200 7-\n9 \nSpace Micro \nCSS-01, CSS-\n02 Cosine 0.010 0 Analog 120° full \ncone 5° 1 100 7-\n9 \nMSS-01 Quadrant 0.036 0 Analog 48° full \ncone 1° 2 100 7-\n9\n【来源：NASA_SOA_2024.pdf 第 176 页】 [chunk 018de9daf1b18accd1b0c1e4b65dc8bf9b2b95cb19197a37118ba28d45931193]\n\n---\n\nFigure 11.39: Cailabs Tilba Atmo equipment and schematic of TILBA-IBC. Credit: Cailabs.\n【来源：NASA_SOA_2024.pdf 第 406 页】 [chunk 1c5a92ecf2d711753c147790bedfb1e315d1e7a7336af9d71ddfedc244ba8071]\n\n---\n\nCBLOF 0.493 0.642 0.756 0.427 0.429 0.425 0.272\nDIF 0.465 0.797 0.790 0.035 1.000 0.018 0.118\nV AE 0.450 0.680 0.796 0.349 0.547 0.257 0.272\nGMM 0.426 0.713 0.737 0.393 0.388 0.398 0.225\nDeepSVDD 0.375 0.610 0.775 0.279 0.442 0.204 0.184\nPCA 0.373 0.612 0.728 0.357 0.360 0.354 0.185\nIForest 0.347 0.635 0.701 0.295 0.297 0.292 0.105\nECOD 0.340 0.637 0.720 0.345 0.345 0.345 0.167\nCOPOD 0.328 0.627 0.703 0.270 0.284 0.257 0.084\nSOS 0.308 0.524 0.705 0.264 0.283 0.248 0.081\n【来源：！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf 第 7 页】 [chunk 23cd752bca6833bbceaf99a9b7261b49440e2e08d97fcb86616a0fb8a2a18354]\n\n请严格按照系统提示中的7段结构输出诊断结论。"
+  },
+  "sources": [
+    {
+      "content": "来源为用户指定的 arXiv:2407.04730v1 第 4 页 Dataset Layout，以及 2025 正式版第 10 页。v1 为 2024 年预印本，共 13 页。本地文件名含 ScientificData_2025 的旧 PDF 实际也是该 v1。正式版 DOI 为 10.1038/s41597-025-05035-3，共 14 页。图序更正 DOI 为 10.1038/s41597-025-05751-w。\n\n轴向未定义。已核对原文未确认通道轴向、磁力计单位、PD 单位或 THETA 的具体角定义。1.5708 近似 π/2，不能据此确认单位。缺少这些事实时，应说明资料未提供。\n\n采样间隔以当前段 sampling 为准。本地 CADC0872、0873、0874、0892、0894 均出现 1 秒和 5 秒。其余四路在当前数据中只见 5 秒。这是数据统计，不能写成固定硬件规格。\n\n## 数据规模",
+      "score": 0.6290553402900696,
+      "metadata": {
+        "source": "F:\\F盘\\微小卫星项目\\microsat-anomaly-analysis\\docs\\knowledge_base\\experiment_knowledge.md",
+        "source_name": "Experiment Knowledge Base",
+        "filename": "experiment_knowledge.md",
+        "priority": 0,
+        "language": "zh",
+        "source_sha256": "7a15a259d234b1448b7f0dbb621f7aafb44d20868c2a7b3d3b16203ce2f74a32",
+        "source_id": "docs/knowledge_base/experiment_knowledge.md",
+        "chunk_id": "2f43d8e27df3c7436099fe39d81197121aef133a32400f1a9ec235255c2df9d5",
+        "page_index": null,
+        "page_label": null
+      },
+      "keyword_match": 43.8246955871582,
+      "low_confidence": false,
+      "excerpt": "来源为用户指定的 arXiv:2407.04730v1 第 4 页 Dataset Layout，以及 2025 正式版第 10 页。v1 为 2024 年预印本，共 13 页。本地文件名含 ScientificData_2025 的旧 PDF 实际也是该 v1。正式版 DOI 为 10.1038/s41597-025-05035-3，共 14 页。图序更正 DOI 为 10.1038/s41597-025-05751-w。\n\n轴向未定义。已核对原文未确认通道轴向、磁力计单位、PD 单位或 THETA 的具体角定义。1.5708 近似 π/2，不能据此确认单位。缺少这些事实时，应说明资料未提供。\n\n采样间隔以当前段 sampling 为准。本地 CADC0872、0873、0874、0892、0894 均出现 1 秒和 5 秒。其余四路在当前数据中只见 5 秒。这是数据统计，不能写成固定硬件规格。\n\n## 数据规模",
+      "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d"
+    },
+    {
+      "content": "## 九路通道的已确认名称\n\n| 通道 | 官方名称 | 类别 |\n|---|---|---|\n| CADC0872 | I_B_FB_MM_0 | 磁力计0号 |\n| CADC0873 | I_B_FB_MM_1 | 磁力计1号 |\n| CADC0874 | I_B_FB_MM_2 | 磁力计2号 |\n| CADC0884 | I_PD1_THETA | 光电二极管1号 THETA 通道 |\n| CADC0886 | I_PD2_THETA | 光电二极管2号 THETA 通道 |\n| CADC0888 | I_PD3_THETA | 光电二极管3号 THETA 通道 |\n| CADC0890 | I_PD4_THETA | 光电二极管4号 THETA 通道 |\n| CADC0892 | I_PD5_THETA | 光电二极管5号 THETA 通道 |\n| CADC0894 | I_PD6_THETA | 光电二极管6号 THETA 通道 |",
+      "score": 0.5473145053864601,
+      "metadata": {
+        "source": "F:\\F盘\\微小卫星项目\\microsat-anomaly-analysis\\docs\\knowledge_base\\experiment_knowledge.md",
+        "source_name": "Experiment Knowledge Base",
+        "filename": "experiment_knowledge.md",
+        "priority": 0,
+        "language": "zh",
+        "source_sha256": "7a15a259d234b1448b7f0dbb621f7aafb44d20868c2a7b3d3b16203ce2f74a32",
+        "source_id": "docs/knowledge_base/experiment_knowledge.md",
+        "chunk_id": "f92f6773ef63e8da30ca35d0dccc1136d723d9888070d6bd6862ded0aee0ba96",
+        "page_index": null,
+        "page_label": null
+      },
+      "keyword_match": 32.36560821533203,
+      "low_confidence": false,
+      "excerpt": "## 九路通道的已确认名称\n\n| 通道 | 官方名称 | 类别 |\n|---|---|---|\n| CADC0872 | I_B_FB_MM_0 | 磁力计0号 |\n| CADC0873 | I_B_FB_MM_1 | 磁力计1号 |\n| CADC0874 | I_B_FB_MM_2 | 磁力计2号 |\n| CADC0884 | I_PD1_THETA | 光电二极管1号 THETA 通道 |\n| CADC0886 | I_PD2_THETA | 光电二极管2号 THETA 通道 |\n| CADC0888 | I_PD3_THETA | 光电二极管3号 THETA 通道 |\n| CADC0890 | I_PD4_THETA | 光电二极管4号 THETA 通道 |\n| CADC0892 | I_PD5_THETA | 光电二极管5号 THETA 通道 |\n| CADC0894 | I_PD6_THETA | 光电二极管6号 THETA 通道 |",
+      "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d"
+    },
+    {
+      "content": "axis 0.5° 2 200 7-\n9 \nSpace Micro \nCSS-01, CSS-\n02 Cosine 0.010 0 Analog 120° full \ncone 5° 1 100 7-\n9 \nMSS-01 Quadrant 0.036 0 Analog 48° full \ncone 1° 2 100 7-\n9",
+      "score": 0.5463307499885559,
+      "metadata": {
+        "producer": "Adobe Acrobat Pro (64-bit) 24.5.20399",
+        "creator": "Adobe Acrobat Pro (64-bit) 24.5.20399",
+        "creationdate": "2025-02-13T11:04:30-08:00",
+        "author": "WESTON, SASHA VICTORIA. (ARC-PX)[Millennium Engineering & Integration Co.]",
+        "moddate": "2025-12-10T21:07:46-08:00",
+        "title": "Small Spacecraft Technology State of the Art 2024 report",
+        "source": "F:\\F盘\\微小卫星项目\\microsat-anomaly-analysis\\docs\\knowledge_base\\NASA_SOA_2024.pdf",
+        "total_pages": 461,
+        "page": 175,
+        "page_label": "176",
+        "source_name": "NASA SOA 2024",
+        "filename": "NASA_SOA_2024.pdf",
+        "priority": 1,
+        "language": "en",
+        "source_sha256": "7471ed49b8cce48c0d0da7662e979017a6a6720d9fecb0adc52f120a123adeae",
+        "source_id": "docs/knowledge_base/NASA_SOA_2024.pdf",
+        "chunk_id": "018de9daf1b18accd1b0c1e4b65dc8bf9b2b95cb19197a37118ba28d45931193",
+        "page_index": 175
+      },
+      "low_confidence": false,
+      "excerpt": "axis 0.5° 2 200 7-\n9 \nSpace Micro \nCSS-01, CSS-\n02 Cosine 0.010 0 Analog 120° full \ncone 5° 1 100 7-\n9 \nMSS-01 Quadrant 0.036 0 Analog 48° full \ncone 1° 2 100 7-\n9",
+      "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d"
+    },
+    {
+      "content": "Figure 11.39: Cailabs Tilba Atmo equipment and schematic of TILBA-IBC. Credit: Cailabs.",
+      "score": 0.5315818786621094,
+      "metadata": {
+        "producer": "Adobe Acrobat Pro (64-bit) 24.5.20399",
+        "creator": "Adobe Acrobat Pro (64-bit) 24.5.20399",
+        "creationdate": "2025-02-13T11:04:30-08:00",
+        "author": "WESTON, SASHA VICTORIA. (ARC-PX)[Millennium Engineering & Integration Co.]",
+        "moddate": "2025-12-10T21:07:46-08:00",
+        "title": "Small Spacecraft Technology State of the Art 2024 report",
+        "source": "F:\\F盘\\微小卫星项目\\microsat-anomaly-analysis\\docs\\knowledge_base\\NASA_SOA_2024.pdf",
+        "total_pages": 461,
+        "page": 405,
+        "page_label": "406",
+        "source_name": "NASA SOA 2024",
+        "filename": "NASA_SOA_2024.pdf",
+        "priority": 1,
+        "language": "en",
+        "source_sha256": "7471ed49b8cce48c0d0da7662e979017a6a6720d9fecb0adc52f120a123adeae",
+        "source_id": "docs/knowledge_base/NASA_SOA_2024.pdf",
+        "chunk_id": "1c5a92ecf2d711753c147790bedfb1e315d1e7a7336af9d71ddfedc244ba8071",
+        "page_index": 405
+      },
+      "low_confidence": false,
+      "excerpt": "Figure 11.39: Cailabs Tilba Atmo equipment and schematic of TILBA-IBC. Credit: Cailabs.",
+      "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d"
+    },
+    {
+      "content": "CBLOF 0.493 0.642 0.756 0.427 0.429 0.425 0.272\nDIF 0.465 0.797 0.790 0.035 1.000 0.018 0.118\nV AE 0.450 0.680 0.796 0.349 0.547 0.257 0.272\nGMM 0.426 0.713 0.737 0.393 0.388 0.398 0.225\nDeepSVDD 0.375 0.610 0.775 0.279 0.442 0.204 0.184\nPCA 0.373 0.612 0.728 0.357 0.360 0.354 0.185\nIForest 0.347 0.635 0.701 0.295 0.297 0.292 0.105\nECOD 0.340 0.637 0.720 0.345 0.345 0.345 0.167\nCOPOD 0.328 0.627 0.703 0.270 0.284 0.257 0.084\nSOS 0.308 0.524 0.705 0.264 0.283 0.248 0.081",
+      "score": 0.5271409749984741,
+      "metadata": {
+        "producer": "pdfTeX-1.40.25",
+        "creator": "LaTeX with hyperref",
+        "creationdate": "2024-07-09T00:01:01+00:00",
+        "author": "",
+        "keywords": "",
+        "moddate": "2024-07-09T00:01:01+00:00",
+        "ptex.fullbanner": "This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) kpathsea version 6.3.5",
+        "subject": "",
+        "title": "",
+        "trapped": "/False",
+        "source": "F:\\F盘\\微小卫星项目\\microsat-anomaly-analysis\\docs\\papers\\！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf",
+        "total_pages": 13,
+        "page": 6,
+        "page_label": "7",
+        "source_name": "OPS-SAT-AD arXiv 2407.04730v1 (2024)",
+        "filename": "！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf",
+        "priority": 2,
+        "language": "en",
+        "source_sha256": "6cb37abbbeadefa22f18f771af8f460cf09aa3236fc7d541660e4183cfe6fb3d",
+        "source_id": "docs/papers/！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf",
+        "chunk_id": "23cd752bca6833bbceaf99a9b7261b49440e2e08d97fcb86616a0fb8a2a18354",
+        "page_index": 6
+      },
+      "low_confidence": false,
+      "excerpt": "CBLOF 0.493 0.642 0.756 0.427 0.429 0.425 0.272\nDIF 0.465 0.797 0.790 0.035 1.000 0.018 0.118\nV AE 0.450 0.680 0.796 0.349 0.547 0.257 0.272\nGMM 0.426 0.713 0.737 0.393 0.388 0.398 0.225\nDeepSVDD 0.375 0.610 0.775 0.279 0.442 0.204 0.184\nPCA 0.373 0.612 0.728 0.357 0.360 0.354 0.185\nIForest 0.347 0.635 0.701 0.295 0.297 0.292 0.105\nECOD 0.340 0.637 0.720 0.345 0.345 0.345 0.167\nCOPOD 0.328 0.627 0.703 0.270 0.284 0.257 0.084\nSOS 0.308 0.524 0.705 0.264 0.283 0.248 0.081",
+      "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d"
+    }
+  ],
+  "context": "来源为用户指定的 arXiv:2407.04730v1 第 4 页 Dataset Layout，以及 2025 正式版第 10 页。v1 为 2024 年预印本，共 13 页。本地文件名含 ScientificData_2025 的旧 PDF 实际也是该 v1。正式版 DOI 为 10.1038/s41597-025-05035-3，共 14 页。图序更正 DOI 为 10.1038/s41597-025-05751-w。\n\n轴向未定义。已核对原文未确认通道轴向、磁力计单位、PD 单位或 THETA 的具体角定义。1.5708 近似 π/2，不能据此确认单位。缺少这些事实时，应说明资料未提供。\n\n采样间隔以当前段 sampling 为准。本地 CADC0872、0873、0874、0892、0894 均出现 1 秒和 5 秒。其余四路在当前数据中只见 5 秒。这是数据统计，不能写成固定硬件规格。\n\n## 数据规模\n【来源：experiment_knowledge.md 文本片段】 [chunk 2f43d8e27df3c7436099fe39d81197121aef133a32400f1a9ec235255c2df9d5]\n\n---\n\n## 九路通道的已确认名称\n\n| 通道 | 官方名称 | 类别 |\n|---|---|---|\n| CADC0872 | I_B_FB_MM_0 | 磁力计0号 |\n| CADC0873 | I_B_FB_MM_1 | 磁力计1号 |\n| CADC0874 | I_B_FB_MM_2 | 磁力计2号 |\n| CADC0884 | I_PD1_THETA | 光电二极管1号 THETA 通道 |\n| CADC0886 | I_PD2_THETA | 光电二极管2号 THETA 通道 |\n| CADC0888 | I_PD3_THETA | 光电二极管3号 THETA 通道 |\n| CADC0890 | I_PD4_THETA | 光电二极管4号 THETA 通道 |\n| CADC0892 | I_PD5_THETA | 光电二极管5号 THETA 通道 |\n| CADC0894 | I_PD6_THETA | 光电二极管6号 THETA 通道 |\n【来源：experiment_knowledge.md 文本片段】 [chunk f92f6773ef63e8da30ca35d0dccc1136d723d9888070d6bd6862ded0aee0ba96]\n\n---\n\naxis 0.5° 2 200 7-\n9 \nSpace Micro \nCSS-01, CSS-\n02 Cosine 0.010 0 Analog 120° full \ncone 5° 1 100 7-\n9 \nMSS-01 Quadrant 0.036 0 Analog 48° full \ncone 1° 2 100 7-\n9\n【来源：NASA_SOA_2024.pdf 第 176 页】 [chunk 018de9daf1b18accd1b0c1e4b65dc8bf9b2b95cb19197a37118ba28d45931193]\n\n---\n\nFigure 11.39: Cailabs Tilba Atmo equipment and schematic of TILBA-IBC. Credit: Cailabs.\n【来源：NASA_SOA_2024.pdf 第 406 页】 [chunk 1c5a92ecf2d711753c147790bedfb1e315d1e7a7336af9d71ddfedc244ba8071]\n\n---\n\nCBLOF 0.493 0.642 0.756 0.427 0.429 0.425 0.272\nDIF 0.465 0.797 0.790 0.035 1.000 0.018 0.118\nV AE 0.450 0.680 0.796 0.349 0.547 0.257 0.272\nGMM 0.426 0.713 0.737 0.393 0.388 0.398 0.225\nDeepSVDD 0.375 0.610 0.775 0.279 0.442 0.204 0.184\nPCA 0.373 0.612 0.728 0.357 0.360 0.354 0.185\nIForest 0.347 0.635 0.701 0.295 0.297 0.292 0.105\nECOD 0.340 0.637 0.720 0.345 0.345 0.345 0.167\nCOPOD 0.328 0.627 0.703 0.270 0.284 0.257 0.084\nSOS 0.308 0.524 0.705 0.264 0.283 0.248 0.081\n【来源：！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf 第 7 页】 [chunk 23cd752bca6833bbceaf99a9b7261b49440e2e08d97fcb86616a0fb8a2a18354]",
+  "metadata": {
+    "query": "请核对 CADC0872、CADC0873、CADC0874 与 I_B_FB_MM_0/1/2 的对应关系。资料是否明确轴向和单位？",
+    "query_type": "general",
+    "retrieval_time": 0.02346,
+    "generation_time": 2.735412,
+    "total_time": 2.759093,
+    "sources_count": 5,
+    "index_bundle_id": "4d7b5695758d953c1f08fc9659d0ac51f6789fc7024e5f9a8928f3e83301b80d",
+    "llm_model": "deepseek-chat"
+  }
+}

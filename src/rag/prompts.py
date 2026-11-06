@@ -9,6 +9,7 @@ Prompt 模板模块 — 卫星异常诊断专用
 from typing import Dict, Any, Optional
 import yaml
 import logging
+import threading
 from pathlib import Path
 
 # 配置日志（由应用入口统一配置 basicConfig）
@@ -28,29 +29,34 @@ class PromptTemplates:
 ## 专业知识
 - OPS-SAT：ESA立方星实验平台，搭载磁力计、光电二极管、温度/电流电压传感器
 - 磁力计 3 路（各通道与官方名一一对应，**不要自行编号**）：
-  CADC0872 = 磁力计0号 = I_B_FB_MM_0（1s 采样，量级 ~1e-5）
-  CADC0873 = 磁力计1号 = I_B_FB_MM_1（1s 采样，量级 ~1e-5）
-  CADC0874 = 磁力计2号 = I_B_FB_MM_2（1s 采样，量级 ~1e-5）
-- 光电二极管 6 路测角（太阳敏感器，5s 采样，值域 [0, π/2] 弧度）：
+  CADC0872 = 磁力计0号 = I_B_FB_MM_0
+  CADC0873 = 磁力计1号 = I_B_FB_MM_1
+  CADC0874 = 磁力计2号 = I_B_FB_MM_2
+- 光电二极管 6 路 THETA 通道：
   CADC0884 = I_PD1_THETA；CADC0886 = I_PD2_THETA；CADC0888 = I_PD3_THETA
   CADC0890 = I_PD4_THETA；CADC0892 = I_PD5_THETA；CADC0894 = I_PD6_THETA
+- 采样间隔以当前段 sampling 为准。各通道单位未确认。THETA 的具体角定义未确认。
 - 异常类型：数值跳变、持续偏离、周期性波动、噪声增大、数据缺失、尖峰脉冲
 
 ## 事实边界（不得越界推断）
 - **磁力计官方只给编号 I_B_FB_MM_0/1/2，未定义轴向。** 不得推断
   各通道的轴向，也不得在输出里写任何具体轴名。只能照抄上面的「磁力计N号」。
-- 同理，光电二极管官方名为 I_PD*_THETA（测角），但**未说明各路对应哪个姿态轴**，
+- 同理，光电二极管官方名为 I_PD*_THETA，但**未说明各路对应哪个姿态轴**，
   不得臆断。
 - **引用通道名时逐字照抄上面的对应关系**，不要根据通道数字自行推算
   （例如 CADC0874 是 I_B_FB_MM_2，不是 MM_3）。
 - 若参考资料未提供某项事实，**直接说「资料未提供」，不要用推测填补**。
   编造一个看似合理的结论比承认不知道危害更大。
 
-## 常见模式
+gaps_squared 来自段内时间差平方和，受点数和 sampling 影响。不能只凭此量认定缺失。三点段可计算特征，单独支持硬件故障判断的证据较少。THETA 的具体物理角定义未确认。
+
+## 待证实的排查假设
 - 磁力计异常+姿态偏差 → 磁力矩器故障/外部磁干扰
-- 光电二极管异常+单轴偏离 → 太阳敏感器遮挡/姿态控制问题
+- 光电二极管异常+其他姿态证据 → 太阳敏感器遮挡/姿态控制问题
 - 多通道同时异常 → 电源/总线故障/地磁暴/进出阴影
 - 周期性异常 → 轨道周期相关（地影/温度循环）
+
+上述排查假设需要当前证据支持。遥测异常本身不能证明硬件故障。
 
 ## 输出硬约束（违反则不合格）
 1. 固定7段结构，每段用 **【标题】** 粗体独占一行，格式如下：
@@ -259,12 +265,18 @@ class PromptTemplates:
 
 # 全局实例（单例模式）
 _global_templates = None
+_global_templates_key = None
+_global_templates_lock = threading.RLock()
 
 def get_prompt_templates(config_path: Optional[str] = None) -> PromptTemplates:
-    global _global_templates
-    if _global_templates is None:
-        _global_templates = PromptTemplates(config_path)
-    return _global_templates
+    global _global_templates, _global_templates_key
+    from .index_bundle import configuration_key
+    signature = configuration_key(config_path)
+    with _global_templates_lock:
+        if _global_templates is None or signature != _global_templates_key:
+            _global_templates = PromptTemplates(config_path)
+            _global_templates_key = signature
+        return _global_templates
 
 
 def get_system_prompt() -> str:
