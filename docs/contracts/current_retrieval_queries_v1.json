@@ -1,0 +1,24 @@
+{
+  "version": "current-facts-retrieval-v1",
+  "scope": "公开开发题。仅检查当前项目事实的检索覆盖，不作为独立盲测或30题解释质量评价。",
+  "index_build_filter": "各组共用已做建库质量过滤的4863块索引。运行时过滤对照不能估计建库过滤的收益。",
+  "top_k": 5,
+  "context_budget": 1600,
+  "keyword_boost": 0.02,
+  "queries": [
+    {"id": "q01", "q": "CADC0872的官方通道名称是什么", "answers": [["I_B_FB_MM_0"]]},
+    {"id": "q02", "q": "CADC0873的官方通道名称是什么", "answers": [["I_B_FB_MM_1"]]},
+    {"id": "q03", "q": "CADC0874的官方通道名称是什么", "answers": [["I_B_FB_MM_2"]]},
+    {"id": "q04", "q": "CADC0884对应哪个光电二极管通道", "answers": [["I_PD1_THETA"]]},
+    {"id": "q05", "q": "CADC0894对应哪个光电二极管通道", "answers": [["I_PD6_THETA"]]},
+    {"id": "q06", "q": "原文是否定义了磁力计通道轴向", "answers": [["轴向未定义", "未确认通道轴向"]]},
+    {"id": "q07", "q": "PD单位是否已确认是弧度", "answers": [["PD 单位"], ["未确认", "未提供"]]},
+    {"id": "q08", "q": "项目当前工程冻结门控的F1是多少", "answers": [["0.6204"]]},
+    {"id": "q09", "q": "本轮统一配置纯规则的F1是多少", "answers": [["0.5859"]]},
+    {"id": "q10", "q": "本轮拟合、验证和测试基准分别多少段", "answers": [["1275"], ["319"], ["529"]]},
+    {"id": "q11", "q": "当前CSV有多少点和多少段", "answers": [["303493"], ["2123"]]},
+    {"id": "q12", "q": "官方训练与测试各有多少段", "answers": [["1594"], ["529"]]}
+  ],
+  "expected_source_ids": ["docs/knowledge_base/experiment_knowledge.md", "docs/papers/！Ruszczak_OPS-SAT_AD_ScientificData_2025.pdf"],
+  "evaluation": "来源命中、候选文本事实覆盖、实际上下文事实覆盖分别统计。答案组之间为AND，组内为OR。所有组须出现在同一块中。MRR包含全部题，未命中为0。四组均使用固定参数并报告全部结果。"
+}
