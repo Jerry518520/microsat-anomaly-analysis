@@ -15,8 +15,8 @@ Built for weakly-labeled, high-reliability spacecraft telemetry diagnostics usin
 | Dimension | Measured Result | Notes |
 |---|---|---|
 | **Strict Segment-level CV F1** | **0.35 → 0.57** | 3-fold nested leak-free CV without Point-Adjustment inflation; frozen benchmark (`a02-engineering-gate-v1`) **0.6204** |
-| **Local Hybrid Retrieval (BM25 + FAISS)** | **MRR 0.885** / ~**20ms** | **4,863** handbook chunks preserving full telemetry IDs; 24-query ablation dropped 494ms Rerank & rank-hurting RRF |
-| **300k-Point Stream Replay** | Alert Push **P95 494ms** | FastAPI + WebSocket replay skipping empty gaps; **SQLite WAL lease lock** prevents concurrent duplicate LLM calls |
+| **Local Hybrid Retrieval (BM25 + FAISS)** | **MRR 0.885** / ~**20ms** | **4,863** handbook chunks preserving full telemetry IDs; 24-query ablation dropped ~0.5s Cross-Encoder reranking & rank-hurting RRF |
+| **300k-Point Stream Replay** | Synthetic Alert Push **P95 494ms** | FastAPI + WebSocket replay skipping empty gaps; **SQLite transactional lease lock (WAL)** prevents concurrent duplicate LLM calls |
 | **Fact Audit & Hallucination Guard** | **10/10 Refusal** (Factuality **1.90/2.0**) | Audited source papers, quarantined **200 legacy cached records**, and verified 30 real answers via LLM-as-a-Judge |
 | **Verification & Delivery** | **445 pytest** + **35 Browser E2E** | Paired with 20 frontend unit tests, Windows launcher script, and **SHA-256** delivery integrity manifest |
 
